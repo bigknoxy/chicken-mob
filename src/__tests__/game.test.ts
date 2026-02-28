@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { CHICKENS, getChicken } from '../data/chickens';
 import { FOXES, getFox } from '../data/foxes';
 import { CANNONS, getCannon } from '../data/cannons';
-import { LEVELS, getLevel, TOTAL_LEVELS } from '../data/levels';
+import { getLevel, TOTAL_LEVELS } from '../data/levels';
 import { UPGRADES, getUpgradeCost, getUpgradeValue } from '../data/upgrades';
 import { resolveCombat } from '../systems/CombatSystem';
 import { applyGateMultiplier } from '../systems/GateSystem';

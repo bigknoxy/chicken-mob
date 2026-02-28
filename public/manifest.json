@@ -1,0 +1,11 @@
+{
+    "name": "Chicken Mob",
+    "short_name": "ChickenMob",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#1a1a2e",
+    "theme_color": "#f4a261",
+    "description": "Launch chickens, multiply your flock, and trample the fox fort!",
+    "icons": []
+}

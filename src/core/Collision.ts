@@ -1,15 +1,17 @@
 /**
  * Collision — Overlap detection between game entities.
  *
- * Since mobs are aggregate objects at a single position, collisions
- * are detected by checking whether two entities on the same lane
- * are close enough in position space (0..1).
+ * Uses X-based collision detection: checks if entities overlap in both
+ * X (horizontal position) and Y (position along lane) dimensions.
  */
 
-import type { Flock, FoxPack, LiveObstacle, LiveFort } from '@/data/types';
+import type { Flock, FoxPack, LiveObstacle, LiveFort, GateDefinition } from '@/data/types';
 
-/** How close (in position units) two mobs must be to collide */
+/** How close (in position units) two mobs must be to collide on Y axis */
 const COLLISION_THRESHOLD = 0.03;
+
+/** Default width for collision when not specified */
+const DEFAULT_WIDTH = 0.06;
 
 /** Fort collision zone — flock must be within this range of position 1.0 */
 const FORT_ZONE = 0.02;
@@ -24,21 +26,35 @@ export interface FlockVsObstacleCollision {
     obstacle: LiveObstacle;
 }
 
+export interface FlockVsGateCollision {
+    flock: Flock;
+    gate: GateDefinition;
+}
+
 export interface FlockVsFortCollision {
     flock: Flock;
 }
 
-/** Detect all flock-vs-fox overlaps on the same lane */
+/** Check X overlap between two positions using width */
+function isXOverlap(a: number, b: number, width: number): boolean {
+    return Math.abs(a - b) < width / 2;
+}
+
+/** Detect all flock-vs-fox overlaps using X-based collision */
 export function detectFlockVsFox(
     flocks: Flock[],
     foxPacks: FoxPack[],
 ): FlockVsFoxCollision[] {
     const results: FlockVsFoxCollision[] = [];
     for (const flock of flocks) {
-        if (!flock.alive || flock.count <= 0) continue;
+        if (!flock.alive || flock.count <= 0 || flock.x === undefined) continue;
         for (const fox of foxPacks) {
-            if (!fox.alive || fox.count <= 0) continue;
-            if (flock.lane !== fox.lane) continue;
+            if (!fox.alive || fox.count <= 0 || fox.x === undefined) continue;
+
+            // X overlap check (using flock.x and fox.x)
+            if (!isXOverlap(flock.x, fox.x, DEFAULT_WIDTH)) continue;
+
+            // Y overlap check (position along lane)
             if (Math.abs(flock.position - fox.position) < COLLISION_THRESHOLD) {
                 results.push({ flock, foxPack: fox });
             }
@@ -47,17 +63,22 @@ export function detectFlockVsFox(
     return results;
 }
 
-/** Detect all flock-vs-obstacle overlaps */
+/** Detect all flock-vs-obstacle overlaps using X-based collision */
 export function detectFlockVsObstacle(
     flocks: Flock[],
     obstacles: LiveObstacle[],
 ): FlockVsObstacleCollision[] {
     const results: FlockVsObstacleCollision[] = [];
     for (const flock of flocks) {
-        if (!flock.alive || flock.count <= 0) continue;
+        if (!flock.alive || flock.count <= 0 || flock.x === undefined) continue;
         for (const obs of obstacles) {
-            if (!obs.alive) continue;
-            if (flock.lane !== obs.definition.lane) continue;
+            if (!obs.alive || obs.definition.x === undefined) continue;
+
+            // X overlap check (using flock.x and obstacle.definition.x)
+            const obsWidth = obs.definition.width ?? DEFAULT_WIDTH;
+            if (!isXOverlap(flock.x, obs.definition.x, obsWidth)) continue;
+
+            // Y overlap check (position along lane)
             if (Math.abs(flock.position - obs.definition.position) < COLLISION_THRESHOLD) {
                 results.push({ flock, obstacle: obs });
             }

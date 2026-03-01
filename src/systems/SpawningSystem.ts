@@ -33,11 +33,11 @@ export function getEffectiveChickenSpeed(playerState: PlayerState): number {
     );
 }
 
-/** Fire a flock from the cannon into the specified lane */
+/** Fire a flock from the cannon toward targetX (0-1 normalized horizontal position) */
 export function fireChickens(
     state: GameState,
     playerState: PlayerState,
-    targetLane: number,
+    targetX: number,
 ): void {
     const cannon = getCannon(playerState.equippedCannonId);
     const chickenType = getChicken(cannon.unitTypeId);
@@ -48,14 +48,16 @@ export function fireChickens(
 
     if (state.cannonCooldown > 0) return;
 
-    // Clamp lane
-    const lane = Math.max(0, Math.min(targetLane, state.level.laneCount - 1));
+    // Clamp targetX to valid range and derive lane for visual purposes
+    const clampedX = Math.max(0, Math.min(targetX, 1));
+    const lane = Math.floor(clampedX * state.level.laneCount);
 
     const flock: Flock = {
         id: state.nextEntityId++,
         chickenTypeId: chickenType.id,
         count: burstSize,
         lane,
+        x: clampedX,
         position: 0.0, // start at cannon
         speed,
         alive: true,
@@ -63,12 +65,4 @@ export function fireChickens(
 
     state.flocks.push(flock);
     state.cannonCooldown = 1.0 / fireRate;
-}
-
-/** Determine which lane the player is aiming at based on cannon angle */
-export function angleToLane(angle: number, laneCount: number): number {
-    // angle is -PI/4 to PI/4 (left to right)
-    // Map to 0..laneCount-1
-    const normalized = (angle + Math.PI / 4) / (Math.PI / 2); // 0..1
-    return Math.floor(normalized * laneCount);
 }

@@ -40,6 +40,7 @@ export interface GateDefinition {
     id: string;
     position: number;        // 0..1 along lane length
     lane: number;            // lane index (0-based)
+    x?: number;              // 0..1 normalized horizontal position (optional for backwards compat)
     width: number;           // visual width in game units
     multiplier: number;      // e.g. 2, 3, 5, 10; < 1 for traps; 0 = kill
     isPositive: boolean;     // true = multiply up, false = trap
@@ -53,6 +54,8 @@ export interface ObstacleDefinition {
     id: string;
     type: ObstacleType;
     lane: number;
+    x?: number;               // 0..1 normalized horizontal position (optional for backwards compat)
+    width?: number;           // 0..1 collision width (optional for backwards compat)
     position: number;        // 0..1 along lane
     hp: number;              // 0 or Infinity for invincible (scarecrow)
     movementPattern: MovementPattern;
@@ -153,6 +156,7 @@ export interface Flock {
     chickenTypeId: string;
     count: number;
     lane: number;
+    x?: number;             // 0..1 normalized horizontal position (optional for backwards compat)
     position: number;        // 0..1 along lane (0 = cannon, 1 = fort)
     speed: number;           // effective speed after upgrades
     alive: boolean;
@@ -164,6 +168,7 @@ export interface FoxPack {
     foxTypeId: string;
     count: number;
     lane: number;
+    x?: number;             // 0..1 normalized horizontal position (optional for backwards compat)
     position: number;        // 0..1 along lane (1 = fort end, moving toward 0)
     speed: number;
     alive: boolean;
@@ -201,6 +206,7 @@ export interface GameState {
     gates: LiveGate[];
     fort: LiveFort;
     elapsedTime: number;      // seconds since level start
+    cannonX?: number;        // 0..1 normalized horizontal position (optional for backwards compat)
     cannonAngle: number;       // current aim angle in radians
     cannonCooldown: number;    // seconds until next shot allowed
     isFiring: boolean;         // is the player holding fire?

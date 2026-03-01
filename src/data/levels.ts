@@ -7,6 +7,8 @@ import type { LevelDefinition } from './types';
  *   1–5   Tutorial (single lane, positive gates, no foxes) ~90% win rate
  *   6–10  Introduce foxes, traps, obstacles              ~75% win rate
  *   11–15 Multi-lane, complex layouts, boss waves         ~60% win rate
+ *
+ * Note: Gate and obstacle widths are normalized (0-1) for collision detection.
  */
 export const LEVELS: LevelDefinition[] = [
     // ─── TUTORIAL ARC (1–5) ──────────────────────────────────────
@@ -16,7 +18,7 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 800,
         gates: [
-            { id: 'g1', position: 0.5, lane: 0, width: 60, multiplier: 2, isPositive: true },
+            { id: 'g1', position: 0.5, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [],
@@ -30,8 +32,8 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 800,
         gates: [
-            { id: 'g1', position: 0.35, lane: 0, width: 60, multiplier: 2, isPositive: true },
-            { id: 'g2', position: 0.65, lane: 0, width: 60, multiplier: 2, isPositive: true },
+            { id: 'g1', position: 0.35, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.65, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [],
@@ -45,7 +47,7 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 800,
         gates: [
-            { id: 'g1', position: 0.5, lane: 0, width: 60, multiplier: 3, isPositive: true },
+            { id: 'g1', position: 0.5, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [],
@@ -59,8 +61,8 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 800,
         gates: [
-            { id: 'g1', position: 0.45, lane: 0, width: 60, multiplier: 2, isPositive: true },
-            { id: 'g2', position: 0.45, lane: 1, width: 60, multiplier: 3, isPositive: true },
+            { id: 'g1', position: 0.45, lane: 0, x: 0.25, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.45, lane: 1, x: 0.75, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [],
@@ -74,10 +76,10 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 800,
         gates: [
-            { id: 'g1', position: 0.35, lane: 0, width: 60, multiplier: 3, isPositive: true },
+            { id: 'g1', position: 0.35, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [
-            { id: 'o1', type: 'fence', lane: 0, position: 0.6, hp: 10, movementPattern: 'static' },
+            { id: 'o1', type: 'fence', lane: 0, x: 0.5, width: 0.08, position: 0.6, hp: 10, movementPattern: 'static' },
         ],
         enemySpawns: [],
         fort: { hp: 30, armorMultiplier: 1, rewardMultiplier: 1 },
@@ -92,8 +94,8 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.3, lane: 0, width: 60, multiplier: 2, isPositive: true },
-            { id: 'g2', position: 0.55, lane: 0, width: 60, multiplier: 3, isPositive: true },
+            { id: 'g1', position: 0.3, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.55, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [
@@ -109,11 +111,11 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.4, lane: 0, width: 60, multiplier: 3, isPositive: true },
-            { id: 'g2', position: 0.4, lane: 1, width: 60, multiplier: 0.5, isPositive: false },
+            { id: 'g1', position: 0.4, lane: 0, x: 0.25, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g2', position: 0.4, lane: 1, x: 0.75, width: 0.08, multiplier: 0.5, isPositive: false },
         ],
         obstacles: [
-            { id: 'o1', type: 'fence', lane: 0, position: 0.65, hp: 15, movementPattern: 'static' },
+            { id: 'o1', type: 'fence', lane: 0, x: 0.25, width: 0.08, position: 0.65, hp: 15, movementPattern: 'static' },
         ],
         enemySpawns: [
             { time: 4, lane: 0, foxTypeId: 'fox_scout', count: 3 },
@@ -128,12 +130,12 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.25, lane: 0, width: 60, multiplier: 2, isPositive: true },
-            { id: 'g2', position: 0.55, lane: 0, width: 60, multiplier: 5, isPositive: true },
+            { id: 'g1', position: 0.25, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.55, lane: 0, x: 0.5, width: 0.08, multiplier: 5, isPositive: true },
         ],
         obstacles: [
-            { id: 'o1', type: 'hay_bale', lane: 0, position: 0.4, hp: 8, movementPattern: 'static' },
-            { id: 'o2', type: 'hay_bale', lane: 0, position: 0.7, hp: 12, movementPattern: 'static' },
+            { id: 'o1', type: 'hay_bale', lane: 0, x: 0.5, width: 0.08, position: 0.4, hp: 8, movementPattern: 'static' },
+            { id: 'o2', type: 'hay_bale', lane: 0, x: 0.5, width: 0.08, position: 0.7, hp: 12, movementPattern: 'static' },
         ],
         enemySpawns: [
             { time: 5, lane: 0, foxTypeId: 'fox_scout', count: 4 },
@@ -148,10 +150,10 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.35, lane: 0, width: 60, multiplier: 3, isPositive: true },
+            { id: 'g1', position: 0.35, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [
-            { id: 'o1', type: 'scarecrow', lane: 0, position: 0.55, hp: Infinity, movementPattern: 'rotate' },
+            { id: 'o1', type: 'scarecrow', lane: 0, x: 0.5, width: 0.08, position: 0.55, hp: Infinity, movementPattern: 'rotate' },
         ],
         enemySpawns: [
             { time: 4, lane: 0, foxTypeId: 'fox_scout', count: 6 },
@@ -166,11 +168,11 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 1000,
         gates: [
-            { id: 'g1', position: 0.3, lane: 0, width: 60, multiplier: 3, isPositive: true },
-            { id: 'g2', position: 0.6, lane: 0, width: 60, multiplier: 2, isPositive: true },
+            { id: 'g1', position: 0.3, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g2', position: 0.6, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [
-            { id: 'o1', type: 'fence', lane: 0, position: 0.75, hp: 25, movementPattern: 'static' },
+            { id: 'o1', type: 'fence', lane: 0, x: 0.5, width: 0.08, position: 0.75, hp: 25, movementPattern: 'static' },
         ],
         enemySpawns: [
             { time: 8, lane: 0, foxTypeId: 'fox_brute', count: 3 },
@@ -187,9 +189,9 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 3,
         length: 1000,
         gates: [
-            { id: 'g1', position: 0.4, lane: 0, width: 60, multiplier: 2, isPositive: true },
-            { id: 'g2', position: 0.4, lane: 1, width: 60, multiplier: 5, isPositive: true },
-            { id: 'g3', position: 0.4, lane: 2, width: 60, multiplier: 0.3, isPositive: false },
+            { id: 'g1', position: 0.4, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.4, lane: 1, x: 0.5, width: 0.08, multiplier: 5, isPositive: true },
+            { id: 'g3', position: 0.4, lane: 2, x: 5/6, width: 0.08, multiplier: 0.3, isPositive: false },
         ],
         obstacles: [],
         enemySpawns: [
@@ -205,14 +207,14 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 1100,
         gates: [
-            { id: 'g1', position: 0.2, lane: 0, width: 60, multiplier: 2, isPositive: true },
-            { id: 'g2', position: 0.45, lane: 0, width: 60, multiplier: 3, isPositive: true },
-            { id: 'g3', position: 0.7, lane: 0, width: 60, multiplier: 2, isPositive: true },
+            { id: 'g1', position: 0.2, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.45, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g3', position: 0.7, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [
-            { id: 'o1', type: 'fence', lane: 0, position: 0.35, hp: 20, movementPattern: 'static' },
-            { id: 'o2', type: 'fence', lane: 0, position: 0.6, hp: 25, movementPattern: 'static' },
-            { id: 'o3', type: 'scarecrow', lane: 0, position: 0.8, hp: Infinity, movementPattern: 'back_and_forth' },
+            { id: 'o1', type: 'fence', lane: 0, x: 0.5, width: 0.08, position: 0.35, hp: 20, movementPattern: 'static' },
+            { id: 'o2', type: 'fence', lane: 0, x: 0.5, width: 0.08, position: 0.6, hp: 25, movementPattern: 'static' },
+            { id: 'o3', type: 'scarecrow', lane: 0, x: 0.5, width: 0.08, position: 0.8, hp: Infinity, movementPattern: 'back_and_forth' },
         ],
         enemySpawns: [
             { time: 6, lane: 0, foxTypeId: 'fox_brute', count: 4 },
@@ -227,11 +229,11 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 1100,
         gates: [
-            { id: 'g1', position: 0.35, lane: 0, width: 60, multiplier: 5, isPositive: true },
-            { id: 'g2', position: 0.35, lane: 1, width: 60, multiplier: 2, isPositive: true },
+            { id: 'g1', position: 0.35, lane: 0, x: 0.25, width: 0.08, multiplier: 5, isPositive: true },
+            { id: 'g2', position: 0.35, lane: 1, x: 0.75, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [
-            { id: 'o1', type: 'hay_bale', lane: 0, position: 0.55, hp: 15, movementPattern: 'static' },
+            { id: 'o1', type: 'hay_bale', lane: 0, x: 0.25, width: 0.08, position: 0.55, hp: 15, movementPattern: 'static' },
         ],
         enemySpawns: [
             { time: 7, lane: 0, foxTypeId: 'fox_sniper', count: 3 },
@@ -246,14 +248,14 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 1200,
         gates: [
-            { id: 'g1', position: 0.25, lane: 0, width: 60, multiplier: 3, isPositive: true },
-            { id: 'g2', position: 0.5, lane: 0, width: 60, multiplier: 3, isPositive: true },
-            { id: 'g3', position: 0.5, lane: 1, width: 60, multiplier: 0.5, isPositive: false },
+            { id: 'g1', position: 0.25, lane: 0, x: 0.25, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g2', position: 0.5, lane: 0, x: 0.25, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g3', position: 0.5, lane: 1, x: 0.75, width: 0.08, multiplier: 0.5, isPositive: false },
         ],
         obstacles: [
-            { id: 'o1', type: 'fence', lane: 0, position: 0.38, hp: 20, movementPattern: 'static' },
-            { id: 'o2', type: 'fence', lane: 0, position: 0.65, hp: 25, movementPattern: 'static' },
-            { id: 'o3', type: 'fence', lane: 1, position: 0.7, hp: 30, movementPattern: 'static' },
+            { id: 'o1', type: 'fence', lane: 0, x: 0.25, width: 0.08, position: 0.38, hp: 20, movementPattern: 'static' },
+            { id: 'o2', type: 'fence', lane: 0, x: 0.25, width: 0.08, position: 0.65, hp: 25, movementPattern: 'static' },
+            { id: 'o3', type: 'fence', lane: 1, x: 0.75, width: 0.08, position: 0.7, hp: 30, movementPattern: 'static' },
         ],
         enemySpawns: [
             { time: 5, lane: 0, foxTypeId: 'fox_brute', count: 5 },
@@ -269,16 +271,16 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 3,
         length: 1300,
         gates: [
-            { id: 'g1', position: 0.2, lane: 0, width: 60, multiplier: 2, isPositive: true },
-            { id: 'g2', position: 0.2, lane: 1, width: 60, multiplier: 5, isPositive: true },
-            { id: 'g3', position: 0.45, lane: 1, width: 60, multiplier: 10, isPositive: true },
-            { id: 'g4', position: 0.45, lane: 0, width: 60, multiplier: 0.3, isPositive: false },
-            { id: 'g5', position: 0.45, lane: 2, width: 60, multiplier: 0.5, isPositive: false },
+            { id: 'g1', position: 0.2, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.2, lane: 1, x: 0.5, width: 0.08, multiplier: 5, isPositive: true },
+            { id: 'g3', position: 0.45, lane: 1, x: 0.5, width: 0.08, multiplier: 10, isPositive: true },
+            { id: 'g4', position: 0.45, lane: 0, x: 1/6, width: 0.08, multiplier: 0.3, isPositive: false },
+            { id: 'g5', position: 0.45, lane: 2, x: 5/6, width: 0.08, multiplier: 0.5, isPositive: false },
         ],
         obstacles: [
-            { id: 'o1', type: 'scarecrow', lane: 0, position: 0.35, hp: Infinity, movementPattern: 'rotate' },
-            { id: 'o2', type: 'scarecrow', lane: 2, position: 0.55, hp: Infinity, movementPattern: 'back_and_forth' },
-            { id: 'o3', type: 'fence', lane: 1, position: 0.65, hp: 30, movementPattern: 'static' },
+            { id: 'o1', type: 'scarecrow', lane: 0, x: 1/6, width: 0.08, position: 0.35, hp: Infinity, movementPattern: 'rotate' },
+            { id: 'o2', type: 'scarecrow', lane: 2, x: 5/6, width: 0.08, position: 0.55, hp: Infinity, movementPattern: 'back_and_forth' },
+            { id: 'o3', type: 'fence', lane: 1, x: 0.5, width: 0.08, position: 0.65, hp: 30, movementPattern: 'static' },
         ],
         enemySpawns: [
             { time: 4, lane: 0, foxTypeId: 'fox_brute', count: 5 },

@@ -10,7 +10,7 @@ import { getLevel, TOTAL_LEVELS } from '@/data/levels';
 import { GameLoop } from '@/core/GameLoop';
 import { simulationTick } from '@/core/Simulation';
 import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
-import { fireChickens, angleToLane } from '@/systems/SpawningSystem';
+import { fireChickens } from '@/systems/SpawningSystem';
 import { calculateOfflineEarnings, claimOfflineEarnings } from '@/systems/OfflineSystem';
 import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
 import { InputManager } from '@/platform/Input';
@@ -76,17 +76,14 @@ const loop = new GameLoop(
         const inputState = input.getState();
 
         if (inputState.isDown) {
-            // Map touch X to cannon angle (-PI/4 to PI/4)
-            const centerX = renderer.getWidth() / 2;
-            const dx = inputState.x - centerX;
-            const maxAngle = Math.PI / 4;
-            gameState.cannonAngle = Math.max(-maxAngle, Math.min(maxAngle, dx / centerX * maxAngle));
+            // Map touch X to cannon horizontal position (0-1 normalized)
+            const canvasWidth = renderer.getWidth();
+            gameState.cannonX = Math.max(0, Math.min(1, inputState.x / canvasWidth));
             gameState.isFiring = true;
 
             // Auto-fire while holding
             if (gameState.cannonCooldown <= 0) {
-                const targetLane = angleToLane(gameState.cannonAngle, gameState.level.laneCount);
-                fireChickens(gameState, playerState, targetLane);
+                fireChickens(gameState, playerState, gameState.cannonX);
                 audio.playFire();
             }
         } else {
@@ -158,6 +155,7 @@ function createGameState(level: LevelDefinition): GameState {
             armorMultiplier: level.fort.armorMultiplier,
         },
         elapsedTime: 0,
+        cannonX: 0.5,     // default to center (0.5)
         cannonAngle: 0,
         cannonCooldown: 0,
         isFiring: false,

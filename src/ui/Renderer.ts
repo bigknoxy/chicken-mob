@@ -149,7 +149,8 @@ export class Renderer {
     private drawGate(gate: LiveGate, geo: LaneGeometry): void {
         const ctx = this.ctx;
         const def = gate.definition;
-        const x = laneX(geo, def.lane);
+        // Use x property for horizontal position, fallback to lane center
+        const x = def.x !== undefined ? def.x * this.width : laneX(geo, def.lane);
         const y = positionToY(geo, def.position);
         const w = laneWidth(geo) * 0.8;
         const h = 28;
@@ -201,7 +202,9 @@ export class Renderer {
 
     private drawFlock(flock: Flock, geo: LaneGeometry): void {
         const ctx = this.ctx;
-        const cx = laneX(geo, flock.lane);
+        // Use x property for horizontal position, fallback to lane center
+        const x = flock.x !== undefined ? flock.x * this.width : laneX(geo, flock.lane);
+        const cx = x;
         const cy = positionToY(geo, flock.position);
         const count = Math.min(flock.count, MAX_VISIBLE_PER_FLOCK);
         const r = 5;
@@ -243,7 +246,9 @@ export class Renderer {
 
     private drawFoxPack(fox: FoxPack, geo: LaneGeometry): void {
         const ctx = this.ctx;
-        const cx = laneX(geo, fox.lane);
+        // Use x property for horizontal position, fallback to lane center
+        const x = fox.x !== undefined ? fox.x * this.width : laneX(geo, fox.lane);
+        const cx = x;
         const cy = positionToY(geo, fox.position);
         const count = Math.min(fox.count, MAX_VISIBLE_PER_FLOCK);
         const r = 6;
@@ -288,7 +293,9 @@ export class Renderer {
     private drawObstacle(obs: LiveObstacle, geo: LaneGeometry): void {
         const ctx = this.ctx;
         const def = obs.definition;
-        const cx = laneX(geo, def.lane);
+        // Use x property for horizontal position, fallback to lane center
+        const x = def.x !== undefined ? def.x * this.width : laneX(geo, def.lane);
+        const cx = x;
         const cy = positionToY(geo, def.position);
 
         if (def.type === 'fence') {
@@ -376,7 +383,7 @@ export class Renderer {
 
     private drawCannon(state: GameState, geo: LaneGeometry): void {
         const ctx = this.ctx;
-        const cx = this.width / 2;
+        const cx = (state.cannonX ?? 0.5) * this.width;
         const cy = this.height - geo.bottomMargin / 2;
         const r = 22;
 
@@ -392,16 +399,15 @@ export class Renderer {
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fill();
 
-        // Aim line
-        if (state.isFiring || state.cannonAngle !== 0) {
+        // Aim line (vertical, straight up)
+        if (state.isFiring) {
             const aimLen = 120;
-            const angle = -Math.PI / 2 + state.cannonAngle; // -PI/2 is straight up
             ctx.strokeStyle = COLORS.aimLine;
             ctx.lineWidth = 3;
             ctx.setLineDash([6, 4]);
             ctx.beginPath();
             ctx.moveTo(cx, cy);
-            ctx.lineTo(cx + Math.cos(angle) * aimLen, cy + Math.sin(angle) * aimLen);
+            ctx.lineTo(cx, cy - aimLen);
             ctx.stroke();
             ctx.setLineDash([]);
         }

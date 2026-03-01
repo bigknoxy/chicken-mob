@@ -52,8 +52,11 @@ export function simulationTick(state: GameState, dt: number): void {
     // ── 3. Gate pass-through ──
     for (const gate of state.gates) {
         for (const flock of state.flocks) {
-            if (!flock.alive || flock.count <= 0) continue;
-            if (flock.lane !== gate.definition.lane) continue;
+            if (!flock.alive || flock.count <= 0 || flock.x === undefined || gate.definition.x === undefined) continue;
+
+            // X overlap check: flock.x overlaps with gate.x (using gate width)
+            const gateWidth = gate.definition.width ?? 0.06;
+            if (Math.abs(flock.x - gate.definition.x) >= gateWidth / 2) continue;
 
             const gatePos = gate.definition.position;
             // Check if flock just crossed through the gate this tick
@@ -139,6 +142,7 @@ export function simulationTick(state: GameState, dt: number): void {
             foxTypeId: spawn.foxTypeId,
             count: spawn.count,
             lane: spawn.lane,
+            x: (spawn.lane + 0.5) / state.level.laneCount, // center of lane in 0-1 space
             position: 1.0, // spawn from fort end
             speed: foxType.moveSpeed,
             alive: true,

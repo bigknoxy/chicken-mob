@@ -127,6 +127,11 @@ export class Renderer {
         this.drawHUD(state, geo);
 
         ctx.restore();
+
+        // ── End-of-level summary (drawn AFTER ctx.restore to avoid screen shake) ──
+        if (state.levelComplete && state.levelSummary) {
+            this.drawLevelSummary(state);
+        }
     }
 
     private drawLanes(geo: LaneGeometry): void {
@@ -471,12 +476,6 @@ export class Renderer {
         ctx.fillStyle = '#9ca3af';
         ctx.font = '11px monospace';
         ctx.fillText(`Field: ${formatNumber(state.currentChickensOnField)}`, this.width - 10, 40);
-
-        // ── End-of-level summary overlay ──
-        if (state.levelComplete && state.levelSummary) {
-            this.drawLevelSummary(state);
-            return;
-        }
     }
 
     private drawLevelSummary(state: GameState): void {

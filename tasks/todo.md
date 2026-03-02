@@ -34,30 +34,34 @@
 
 ---
 
-## P1 - Should Fix (Major Impact)
+## P1 - Should Fix (Major Impact) ✅ COMPLETED
 
 | # | Issue | Location | Fix |
 |---|-------|----------|-----|
-| 1 | No star system | `Simulation.ts` | Track chickens remaining, show 1-3 stars |
-| 2 | 0.3x multiplier too harsh | `levels.ts:194,277` | Change to 0.5x |
-| 3 | Aggressive upgrade costs | `upgrades.ts:121` | Reduce growth factors to 1.3-1.5 |
-| 4 | No 4x gate option | `levels.ts` | Add 4x multiplier gates |
+| 1 | No star system | `types.ts`, `Simulation.ts`, `main.ts` | Added levelStars tracking, calculateStars() |
+| 2 | 0.3x multiplier too harsh | `levels.ts:195,279` | Already fixed in P0 (→0.5x) |
+| 3 | Aggressive upgrade costs | `upgrades.ts` | Reduced growth factors 1.5-2.0 → 1.3-1.5 |
+| 4 | No 4x gate option | `levels.ts` | Added 4x gate to level 6 |
 
-### P1.1: Star System
-- Track chickens remaining at level end
-- 1 star: Complete level
-- 2 stars: 50%+ remaining
-- 3 stars: 80%+ remaining
+### P1.1: Star System ✅
+- Added `StarRating` type (1|2|3) to PlayerState
+- Track `totalChickensFired` and `totalChickensReachedFort`
+- Calculate stars: 3★ (80%+), 2★ (50%+), 1★ (complete)
+- Persisted per level in Persistence.ts
 
-### P1.2: Gate Multipliers
-- Current: 0.3x, 0.5x, 2x, 3x, 5x, 10x
-- Missing: 4x (gap between 3x and 5x)
-- 0.3x is 70% loss - too punishing
+### P1.2: Upgrade Costs ✅
+- Fire Rate: 1.6 → 1.4
+- Burst Size: 1.7 → 1.45
+- Launch Speed: 1.5 → 1.35
+- Chicken HP: 1.6 → 1.4
+- Chicken Damage: 1.7 → 1.45
+- Chicken Speed: 1.5 → 1.35
+- Corn Multiplier: 1.8 → 1.5
+- Coop Income: 1.8 → 1.5
+- Offline Cap: 2.0 → 1.5
 
-### P1.3: Upgrade Costs
-- Current growth: 1.5-2.0x per level
-- Too aggressive, players hit wall quickly
-- Reduce to 1.3-1.5x
+### P1.3: 4x Gate ✅
+- Added 4x multiplier gate to level 6
 
 ---
 
@@ -93,7 +97,7 @@
 | Power-ups during run | ❌ | ✅ |
 | Combo multipliers | ❌ | ✅ |
 | Running total score | ❌ | ✅ |
-| Star ratings | ❌ | ✅ |
+| Star ratings | ✅ | ✅ |
 | Real-time score display | ❌ | ✅ |
 
 ---

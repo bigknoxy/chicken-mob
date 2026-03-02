@@ -201,6 +201,18 @@ export interface LiveFort {
     armorMultiplier: number;
 }
 
+/** End-of-level summary statistics */
+export interface LevelSummary {
+    deployed: number;           // total chickens fired
+    reachedFort: number;         // chickens that damaged fort
+    currentlyOnField: number;    // chickens still in lanes
+    destroyed: number;          // chickens lost to foxes/traps/obstacles
+    efficiency: number;         // 0-1 ratio
+    timeElapsed: number;        // seconds to complete
+    stars: 1 | 2 | 3;
+    won: boolean;
+}
+
 /** Full runtime game state for a level in progress */
 export interface GameState {
     level: LevelDefinition;
@@ -222,6 +234,8 @@ export interface GameState {
     screenShake: number;       // remaining shake duration
     totalChickensFired: number;    // total chickens fired this level
     totalChickensReachedFort: number; // chickens that successfully reached fort
+    currentChickensOnField: number;  // chickens currently alive in lanes
+    levelSummary?: LevelSummary;      // end-of-level statistics
 }
 
 /** Simple particle for juice effects */

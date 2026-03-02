@@ -8,7 +8,7 @@
 import type { GameState, LiveObstacle, LiveGate, LevelDefinition, StarRating } from '@/data/types';
 import { getLevel, TOTAL_LEVELS } from '@/data/levels';
 import { GameLoop } from '@/core/GameLoop';
-import { simulationTick, calculateStars } from '@/core/Simulation';
+import { simulationTick, calculateStars, generateLevelSummary } from '@/core/Simulation';
 import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
 import { fireChickens } from '@/systems/SpawningSystem';
 import { calculateOfflineEarnings, claimOfflineEarnings } from '@/systems/OfflineSystem';
@@ -167,11 +167,15 @@ function createGameState(level: LevelDefinition): GameState {
         screenShake: 0,
         totalChickensFired: 0,
         totalChickensReachedFort: 0,
+        currentChickensOnField: 0,
     };
 }
 
 function onLevelEnd(): void {
     if (!gameState) return;
+
+    // Generate summary before clearing game state (show on both win and loss)
+    gameState.levelSummary = generateLevelSummary(gameState);
 
     if (gameState.levelWon) {
         // Award rewards

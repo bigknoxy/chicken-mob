@@ -12,7 +12,7 @@
  * 8. Check win/loss conditions
  */
 
-import type { GameState, Flock, FoxPack, Particle } from '@/data/types';
+import type { GameState, Flock, FoxPack, Particle, LevelSummary } from '@/data/types';
 import { getChicken } from '@/data/chickens';
 import { getFox } from '@/data/foxes';
 import {
@@ -172,6 +172,9 @@ export function simulationTick(state: GameState, dt: number): void {
     state.foxPacks = state.foxPacks.filter(f => f.alive && f.count > 0);
     state.obstacles = state.obstacles.filter(o => o.alive);
 
+    // Update current chickens on field count
+    state.currentChickensOnField = state.flocks.reduce((sum, f) => sum + (f.alive ? f.count : 0), 0);
+
     // ── 10. Win/Loss check ──
     if (state.fort.currentHp <= 0) {
         state.levelComplete = true;
@@ -273,4 +276,28 @@ export function calculateStars(state: GameState): 1 | 2 | 3 {
         return 2;
     }
     return 1;
+}
+
+/**
+ * Generate end-of-level summary with detailed statistics.
+ */
+export function generateLevelSummary(state: GameState): LevelSummary {
+    const deployed = state.totalChickensFired;
+    const reachedFort = state.totalChickensReachedFort;
+    const currentlyOnField = state.currentChickensOnField;
+    const destroyed = Math.max(0, deployed - reachedFort - currentlyOnField);
+    // Efficiency based on deployed chickens (accounts for timeout - chickens on field still count as not destroyed)
+    const totalAccounted = reachedFort + currentlyOnField + destroyed;
+    const efficiency = totalAccounted > 0 ? reachedFort / totalAccounted : 0;
+
+    return {
+        deployed,
+        reachedFort,
+        currentlyOnField,
+        destroyed,
+        efficiency,
+        timeElapsed: state.elapsedTime,
+        stars: calculateStars(state),
+        won: state.levelWon,
+    };
 }

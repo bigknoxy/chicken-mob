@@ -436,42 +436,125 @@ export class Renderer {
     private drawHUD(state: GameState, _geo: LaneGeometry): void {
         const ctx = this.ctx;
 
-        // Level name
+        // ── Left side: Level name ──
         ctx.fillStyle = COLORS.hud;
         ctx.font = 'bold 14px monospace';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
         ctx.fillText(`Lv. ${state.level.name}`, 10, 8);
 
-        // Win/loss overlay
-        if (state.levelComplete) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-            ctx.fillRect(0, 0, this.width, this.height);
-
-            ctx.fillStyle = state.levelWon ? '#22c55e' : '#ef4444';
-            ctx.font = 'bold 36px monospace';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(
-                state.levelWon ? '🎉 VICTORY!' : '💀 DEFEAT',
-                this.width / 2,
-                this.height / 2 - 20,
-            );
-
-            if (state.levelWon) {
-                ctx.fillStyle = COLORS.corn;
-                ctx.font = '18px monospace';
-                ctx.fillText(
-                    `+${state.level.rewardCorn} 🌽`,
-                    this.width / 2,
-                    this.height / 2 + 25,
-                );
+        // ── Right side: Score display ──
+        ctx.textAlign = 'right';
+        
+        // Format large numbers with k suffix
+        const formatNumber = (n: number): string => {
+            if (n >= 1000) {
+                return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
             }
+            return n.toString();
+        };
 
-            ctx.fillStyle = '#9ca3af';
-            ctx.font = '14px monospace';
-            ctx.fillText('Tap to continue', this.width / 2, this.height / 2 + 60);
+        // Chickens reached fort (converted to corn)
+        ctx.fillStyle = COLORS.corn;
+        ctx.font = 'bold 14px monospace';
+        ctx.fillText(`🐔 ${formatNumber(state.totalChickensReachedFort)}`, this.width - 10, 8);
+
+        // Efficiency percentage
+        const efficiency = state.totalChickensFired > 0 
+            ? Math.round((state.totalChickensReachedFort / state.totalChickensFired) * 100)
+            : 0;
+        ctx.fillStyle = efficiency >= 50 ? '#22c55e' : '#ef4444';
+        ctx.font = '12px monospace';
+        ctx.fillText(`${efficiency}%`, this.width - 10, 24);
+
+        // Chickens on field
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '11px monospace';
+        ctx.fillText(`Field: ${formatNumber(state.currentChickensOnField)}`, this.width - 10, 40);
+
+        // ── End-of-level summary overlay ──
+        if (state.levelComplete && state.levelSummary) {
+            this.drawLevelSummary(state);
+            return;
         }
+    }
+
+    private drawLevelSummary(state: GameState): void {
+        const ctx = this.ctx;
+        const s = state.levelSummary!;
+        
+        const boxW = Math.min(280, this.width - 20);
+        const boxH = 220;
+        const boxX = (this.width - boxW) / 2;
+        const boxY = (this.height - boxH) / 2 - 30;
+        
+        // Semi-transparent background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(boxX, boxY, boxW, boxH);
+        
+        // Border
+        ctx.strokeStyle = s.won ? '#22c55e' : '#ef4444';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(boxX, boxY, boxW, boxH);
+        
+        // Title
+        ctx.fillStyle = s.won ? '#22c55e' : '#ef4444';
+        ctx.font = 'bold 20px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(s.won ? 'LEVEL COMPLETE' : 'LEVEL FAILED', this.width / 2, boxY + 30);
+        
+        // Stars
+        if (s.won) {
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = '24px monospace';
+            ctx.fillText('★'.repeat(s.stars), this.width / 2, boxY + 60);
+        }
+        
+        // Stats
+        ctx.fillStyle = '#e5e7eb';
+        ctx.font = '14px monospace';
+        ctx.textAlign = 'left';
+        const statsX = boxX + 20;
+        let statsY = boxY + 90;
+        
+        const formatNum = (n: number): string => {
+            if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+            return n.toString();
+        };
+        
+        ctx.fillText(`Deployed:  ${formatNum(s.deployed)}`, statsX, statsY);
+        ctx.fillText(`Reached:   ${formatNum(s.reachedFort)}`, statsX, statsY + 22);
+        ctx.fillText(`On Field:  ${formatNum(s.currentlyOnField)}`, statsX, statsY + 44);
+        ctx.fillText(`Lost:      ${formatNum(s.destroyed)}`, statsX, statsY + 66);
+        
+        // Efficiency bar
+        const barW = boxW - 40;
+        const barH = 16;
+        const barX = statsX;
+        const barY = statsY + 90;
+        
+        ctx.fillStyle = '#374151';
+        ctx.fillRect(barX, barY, barW, barH);
+        
+        const effPercent = Math.round(s.efficiency * 100);
+        const effColor = effPercent >= 80 ? '#22c55e' : effPercent >= 50 ? '#fbbf24' : '#ef4444';
+        ctx.fillStyle = effColor;
+        ctx.fillRect(barX, barY, barW * s.efficiency, barH);
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${effPercent}% Efficiency`, boxX + boxW / 2, barY + 12);
+        
+        // Time
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '12px monospace';
+        ctx.fillText(`Time: ${s.timeElapsed.toFixed(1)}s`, boxX + boxW / 2, boxY + boxH - 15);
+        
+        // Continue prompt
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '12px monospace';
+        ctx.fillText('Tap to continue', boxX + boxW / 2, boxY + boxH - 2);
     }
 
     private drawParticles(particles: Particle[]): void {

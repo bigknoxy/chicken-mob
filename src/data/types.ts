@@ -96,6 +96,7 @@ export interface LevelDefinition {
     fort: FoxFortDefinition;
     rewardCorn: number;
     rewardFeathers: number;
+    timeout?: number;        // seconds before level fails (optional, defaults to 60)
 }
 
 // ----- Upgrades -----

@@ -153,7 +153,8 @@ export const LEVELS: LevelDefinition[] = [
             { id: 'g1', position: 0.35, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [
-            { id: 'o1', type: 'scarecrow', lane: 0, x: 0.5, width: 0.08, position: 0.55, hp: Infinity, movementPattern: 'rotate' },
+            // Scarecrow moved to edge (0.2) so skilled players can avoid it
+            { id: 'o1', type: 'scarecrow', lane: 0, x: 0.2, width: 0.08, position: 0.55, hp: Infinity, movementPattern: 'rotate' },
         ],
         enemySpawns: [
             { time: 4, lane: 0, foxTypeId: 'fox_scout', count: 6 },
@@ -191,7 +192,7 @@ export const LEVELS: LevelDefinition[] = [
         gates: [
             { id: 'g1', position: 0.4, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true },
             { id: 'g2', position: 0.4, lane: 1, x: 0.5, width: 0.08, multiplier: 5, isPositive: true },
-            { id: 'g3', position: 0.4, lane: 2, x: 5/6, width: 0.08, multiplier: 0.3, isPositive: false },
+            { id: 'g3', position: 0.4, lane: 2, x: 5/6, width: 0.08, multiplier: 0.5, isPositive: false },
         ],
         obstacles: [],
         enemySpawns: [
@@ -212,12 +213,13 @@ export const LEVELS: LevelDefinition[] = [
             { id: 'g3', position: 0.7, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [
-            { id: 'o1', type: 'fence', lane: 0, x: 0.5, width: 0.08, position: 0.35, hp: 20, movementPattern: 'static' },
-            { id: 'o2', type: 'fence', lane: 0, x: 0.5, width: 0.08, position: 0.6, hp: 25, movementPattern: 'static' },
-            { id: 'o3', type: 'scarecrow', lane: 0, x: 0.5, width: 0.08, position: 0.8, hp: Infinity, movementPattern: 'back_and_forth' },
+            // Reduced HP from 20/25 to make level completable
+            { id: 'o1', type: 'fence', lane: 0, x: 0.5, width: 0.08, position: 0.35, hp: 12, movementPattern: 'static' },
+            { id: 'o2', type: 'fence', lane: 0, x: 0.5, width: 0.08, position: 0.6, hp: 15, movementPattern: 'static' },
+            // Removed back_and_forth scarecrow - was too punishing
         ],
         enemySpawns: [
-            { time: 6, lane: 0, foxTypeId: 'fox_brute', count: 4 },
+            { time: 6, lane: 0, foxTypeId: 'fox_brute', count: 3 },
         ],
         fort: { hp: 100, armorMultiplier: 1.3, rewardMultiplier: 1.5 },
         rewardCorn: 270,
@@ -274,7 +276,7 @@ export const LEVELS: LevelDefinition[] = [
             { id: 'g1', position: 0.2, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true },
             { id: 'g2', position: 0.2, lane: 1, x: 0.5, width: 0.08, multiplier: 5, isPositive: true },
             { id: 'g3', position: 0.45, lane: 1, x: 0.5, width: 0.08, multiplier: 10, isPositive: true },
-            { id: 'g4', position: 0.45, lane: 0, x: 1/6, width: 0.08, multiplier: 0.3, isPositive: false },
+            { id: 'g4', position: 0.45, lane: 0, x: 1/6, width: 0.08, multiplier: 0.5, isPositive: false },
             { id: 'g5', position: 0.45, lane: 2, x: 5/6, width: 0.08, multiplier: 0.5, isPositive: false },
         ],
         obstacles: [

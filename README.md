@@ -10,7 +10,7 @@ A fast-paced, single-player, lane-based crowd game where you launch chicken mobs
 
 ## Features
 
-- **Lane-based crowd gameplay** — Aim your barn cannon and fire chicken flocks through multiplier gates
+- **Lane-based crowd gameplay** — Slide your barn cannon horizontally to aim across lanes, then fire chicken flocks through multiplier gates
 - **15 hand-authored levels** — Progressive difficulty from tutorial to multi-lane boss battles
 - **5 chicken types** — Clucky, Hen Tank, Rooster Bomber, Speed Chick, Golden Goose
 - **3 fox enemy types** — Scout, Brute, Sniper with escalating difficulty

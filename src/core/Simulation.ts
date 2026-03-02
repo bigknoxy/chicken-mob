@@ -174,17 +174,13 @@ export function simulationTick(state: GameState, dt: number): void {
         state.levelComplete = true;
         state.levelWon = true;
         state.screenShake = 0.4;
-    } else if (
-        state.flocks.length === 0 &&
-        state.pendingSpawns.length === 0 &&
-        !state.isFiring &&
-        state.cannonCooldown <= 0
-    ) {
-        // No flocks on field, nothing to fire — check if player already used all shots
-        // For simplicity: auto-fire means ammo is "infinite", so loss = no chickens on field for 3+ seconds
-        // We'll use a softer approach: the player can always fire more
-        // Loss only if fort has spawned all foxes and they've all been resolved and no flocks
-        // In v1, we'll just let the player keep firing — no hard loss condition for now
+    } else {
+        // Check timeout loss condition
+        const levelTimeout = state.level.timeout ?? 60;
+        if (state.elapsedTime >= levelTimeout) {
+            state.levelComplete = true;
+            state.levelWon = false;
+        }
     }
 }
 

@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-03-02
+
+### Fixed
+- Gate visual/collision mismatch — gates now render at actual collision width instead of hardcoded 80%
+- DPR coordinate bug — fixed cannon offset on high-DPR devices by removing DPR scaling
+- Cumulative ctx.scale bug — added setTransform before scale to prevent exponential scaling on resize
+
+### Changed
+- Level 9 scarecrow moved from center (x:0.5) to edge (x:0.2) so skilled players can avoid it
+- Level 12 difficulty reduced: fence HP 20/25→12/15, removed scarecrow, reduced brutes 4→3
+- Gate multipliers changed from 0.3x to 0.5x (less punishing)
+
+### Added
+- Loss condition — added 60-second timeout to levels
+
+## [0.2.0] - 2026-03-01
+
+### Added
+- Horizontal cannon positioning — slide cannons left/right along X-axis to aim at different lanes
+- Replaced angle-based aiming with horizontal position-based aiming for more intuitive controls
+
+### Changed
+- Cannon collision detection now uses X-axis range instead of angle-based cone
+- Lane geometry updated to support X-based positioning with adjustable lane widths
+- Level designs adjusted to leverage new horizontal aiming mechanic
+
+### Fixed
+- Cannon aim preview now correctly shows trajectory based on horizontal position
+
 ## [1.0.1] - 2026-02-28
 
 ### Fixed

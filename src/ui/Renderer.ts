@@ -54,6 +54,9 @@ export class Renderer {
         const dpr = window.devicePixelRatio || 1;
         const rect = this.canvas.getBoundingClientRect();
 
+        // Reset transform to prevent cumulative scaling
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+
         this.width = rect.width * dpr;
         this.height = rect.height * dpr;
         this.canvas.width = this.width;
@@ -152,7 +155,8 @@ export class Renderer {
         // Use x property for horizontal position, fallback to lane center
         const x = def.x !== undefined ? def.x * this.width : laneX(geo, def.lane);
         const y = positionToY(geo, def.position);
-        const w = laneWidth(geo) * 0.8;
+        // Use actual collision width from gate definition
+        const w = (def.width ?? 0.08) * this.width;
         const h = 28;
 
         // Gate body

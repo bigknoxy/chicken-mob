@@ -57,11 +57,10 @@ export class InputManager {
 
     private getCanvasPos(clientX: number, clientY: number): { x: number; y: number } {
         const rect = this.canvas.getBoundingClientRect();
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
+        // Return logical coordinates (CSS pixels) - Renderer handles DPR via ctx.scale()
         return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY,
+            x: clientX - rect.left,
+            y: clientY - rect.top,
         };
     }
 

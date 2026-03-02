@@ -165,6 +165,7 @@ function createGameState(level: LevelDefinition): GameState {
         pendingSpawns: [...level.enemySpawns],
         particles: [],
         screenShake: 0,
+        victoryFlash: 0,
         totalChickensFired: 0,
         totalChickensReachedFort: 0,
         currentChickensOnField: 0,

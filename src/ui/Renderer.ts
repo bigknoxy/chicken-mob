@@ -128,6 +128,19 @@ export class Renderer {
 
         ctx.restore();
 
+        // ── Victory flash overlay ──
+        if (state.victoryFlash > 0) {
+            const gradient = ctx.createRadialGradient(
+                this.width / 2, this.height / 2, 0,
+                this.width / 2, this.height / 2, this.width
+            );
+            gradient.addColorStop(0, `rgba(251, 191, 36, ${state.victoryFlash * 0.4})`);
+            gradient.addColorStop(0.5, `rgba(251, 191, 36, ${state.victoryFlash * 0.2})`);
+            gradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, this.width, this.height);
+        }
+
         // ── End-of-level summary (drawn AFTER ctx.restore to avoid screen shake) ──
         if (state.levelComplete && state.levelSummary) {
             this.drawLevelSummary(state);
@@ -561,10 +574,20 @@ export class Renderer {
         for (const p of particles) {
             const alpha = p.life / p.maxLife;
             ctx.globalAlpha = alpha;
-            ctx.fillStyle = p.color;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-            ctx.fill();
+            
+            if (p.type === 'confetti') {
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation ?? 0);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+                ctx.restore();
+            } else {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
         ctx.globalAlpha = 1.0;
     }

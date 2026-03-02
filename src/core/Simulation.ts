@@ -180,12 +180,14 @@ export function simulationTick(state: GameState, dt: number): void {
         state.levelComplete = true;
         state.levelWon = true;
         state.screenShake = 0.4;
+        state.levelSummary = generateLevelSummary(state);
     } else {
         // Check timeout loss condition
         const levelTimeout = state.level.timeout ?? 60;
         if (state.elapsedTime >= levelTimeout) {
             state.levelComplete = true;
             state.levelWon = false;
+            state.levelSummary = generateLevelSummary(state);
         }
     }
 }

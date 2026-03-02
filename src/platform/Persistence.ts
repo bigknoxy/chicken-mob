@@ -24,6 +24,7 @@ export function createDefaultPlayerState(): PlayerState {
         lastSessionTimestamp: Date.now(),
         totalCornEarned: 0,
         totalLevelsCompleted: 0,
+        levelStars: {},
     };
 }
 

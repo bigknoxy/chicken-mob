@@ -94,8 +94,8 @@ export const LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.3, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
-            { id: 'g2', position: 0.55, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g1', position: 0.25, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.5, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [

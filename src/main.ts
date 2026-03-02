@@ -5,10 +5,10 @@
  * and UI screens into a cohesive game application.
  */
 
-import type { GameState, LiveObstacle, LiveGate, LevelDefinition } from '@/data/types';
+import type { GameState, LiveObstacle, LiveGate, LevelDefinition, StarRating } from '@/data/types';
 import { getLevel, TOTAL_LEVELS } from '@/data/levels';
 import { GameLoop } from '@/core/GameLoop';
-import { simulationTick } from '@/core/Simulation';
+import { simulationTick, calculateStars } from '@/core/Simulation';
 import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
 import { fireChickens } from '@/systems/SpawningSystem';
 import { calculateOfflineEarnings, claimOfflineEarnings } from '@/systems/OfflineSystem';
@@ -165,6 +165,8 @@ function createGameState(level: LevelDefinition): GameState {
         pendingSpawns: [...level.enemySpawns],
         particles: [],
         screenShake: 0,
+        totalChickensFired: 0,
+        totalChickensReachedFort: 0,
     };
 }
 
@@ -181,6 +183,12 @@ function onLevelEnd(): void {
         playerState.currencies.golden_feather += gameState.level.rewardFeathers;
         playerState.totalCornEarned += corn;
         playerState.totalLevelsCompleted++;
+
+        // Calculate and save stars
+        const stars = calculateStars(gameState) as StarRating;
+        const levelIndex = playerState.currentLevel;
+        const existingStars = playerState.levelStars[levelIndex] ?? 1;
+        playerState.levelStars[levelIndex] = Math.max(existingStars, stars) as StarRating;
 
         // Unlock next level
         const currentIndex = playerState.currentLevel;

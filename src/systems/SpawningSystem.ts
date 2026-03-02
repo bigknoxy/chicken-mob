@@ -65,4 +65,7 @@ export function fireChickens(
 
     state.flocks.push(flock);
     state.cannonCooldown = 1.0 / fireRate;
+
+    // Track total chickens fired for star calculation
+    state.totalChickensFired += burstSize;
 }

@@ -132,6 +132,8 @@ export interface CoopState {
 }
 
 // ----- Player State -----
+export type StarRating = 1 | 2 | 3;
+
 export interface PlayerState {
     currencies: Record<CurrencyId, number>;
     ownedChickens: string[];
@@ -145,6 +147,7 @@ export interface PlayerState {
     lastSessionTimestamp: number;     // epoch ms
     totalCornEarned: number;
     totalLevelsCompleted: number;
+    levelStars: Record<number, StarRating>; // level index → star rating
 }
 
 // ============================================================
@@ -217,6 +220,8 @@ export interface GameState {
     pendingSpawns: EnemySpawn[]; // spawns that haven't triggered yet
     particles: Particle[];     // visual-only effects
     screenShake: number;       // remaining shake duration
+    totalChickensFired: number;    // total chickens fired this level
+    totalChickensReachedFort: number; // chickens that successfully reached fort
 }
 
 /** Simple particle for juice effects */

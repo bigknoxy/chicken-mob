@@ -125,6 +125,9 @@ export function simulationTick(state: GameState, dt: number): void {
         const effectiveDamage = rawDamage / state.fort.armorMultiplier;
         state.fort.currentHp -= effectiveDamage;
 
+        // Track chickens that reached the fort (for star calculation)
+        state.totalChickensReachedFort += flock.count;
+
         // All chickens are consumed on fort impact
         flock.count = 0;
         flock.alive = false;
@@ -248,4 +251,26 @@ function updateParticles(particles: Particle[], dt: number): void {
             particles.splice(i, 1);
         }
     }
+}
+
+/**
+ * Calculate star rating based on chicken efficiency.
+ * Stars are awarded as follows:
+ * - 1 star: Complete level (minimum)
+ * - 2 stars: 50%+ chickens reached the fort
+ * - 3 stars: 80%+ chickens reached the fort
+ */
+export function calculateStars(state: GameState): 1 | 2 | 3 {
+    if (state.totalChickensFired === 0) {
+        return 1; // No chickens fired = just 1 star
+    }
+
+    const efficiency = state.totalChickensReachedFort / state.totalChickensFired;
+
+    if (efficiency >= 0.8) {
+        return 3;
+    } else if (efficiency >= 0.5) {
+        return 2;
+    }
+    return 1;
 }

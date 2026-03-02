@@ -173,6 +173,7 @@ describe('Offline System', () => {
             lastSessionTimestamp: Date.now() - 1800_000, // 30 minutes ago
             totalCornEarned: 0,
             totalLevelsCompleted: 0,
+            levelStars: {},
         };
 
         const earnings = calculateOfflineEarnings(playerState);
@@ -194,6 +195,7 @@ describe('Offline System', () => {
             lastSessionTimestamp: Date.now() - 86400_000, // 24 hours ago
             totalCornEarned: 0,
             totalLevelsCompleted: 0,
+            levelStars: {},
         };
 
         const earnings = calculateOfflineEarnings(playerState);
@@ -215,6 +217,7 @@ describe('Offline System', () => {
             lastSessionTimestamp: Date.now(),
             totalCornEarned: 0,
             totalLevelsCompleted: 0,
+            levelStars: {},
         };
 
         const earnings = calculateOfflineEarnings(playerState);

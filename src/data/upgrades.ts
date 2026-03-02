@@ -11,7 +11,7 @@ export const UPGRADES: UpgradeDefinition[] = [
         baseValue: 1.0,
         incrementPerLevel: 0.15,
         baseCost: 50,
-        costGrowthFactor: 1.6,
+        costGrowthFactor: 1.4,
         maxLevel: 20,
     },
     {
@@ -23,7 +23,7 @@ export const UPGRADES: UpgradeDefinition[] = [
         baseValue: 5,
         incrementPerLevel: 1,
         baseCost: 80,
-        costGrowthFactor: 1.7,
+        costGrowthFactor: 1.45,
         maxLevel: 15,
     },
     {
@@ -35,7 +35,7 @@ export const UPGRADES: UpgradeDefinition[] = [
         baseValue: 300,
         incrementPerLevel: 20,
         baseCost: 40,
-        costGrowthFactor: 1.5,
+        costGrowthFactor: 1.35,
         maxLevel: 20,
     },
 
@@ -49,7 +49,7 @@ export const UPGRADES: UpgradeDefinition[] = [
         baseValue: 2,
         incrementPerLevel: 1,
         baseCost: 60,
-        costGrowthFactor: 1.6,
+        costGrowthFactor: 1.4,
         maxLevel: 25,
     },
     {
@@ -61,7 +61,7 @@ export const UPGRADES: UpgradeDefinition[] = [
         baseValue: 1,
         incrementPerLevel: 0.5,
         baseCost: 70,
-        costGrowthFactor: 1.7,
+        costGrowthFactor: 1.45,
         maxLevel: 20,
     },
     {
@@ -73,7 +73,7 @@ export const UPGRADES: UpgradeDefinition[] = [
         baseValue: 200,
         incrementPerLevel: 15,
         baseCost: 50,
-        costGrowthFactor: 1.5,
+        costGrowthFactor: 1.35,
         maxLevel: 15,
     },
 
@@ -87,7 +87,7 @@ export const UPGRADES: UpgradeDefinition[] = [
         baseValue: 1.0,
         incrementPerLevel: 0.1,
         baseCost: 100,
-        costGrowthFactor: 1.8,
+        costGrowthFactor: 1.5,
         maxLevel: 30,
     },
     {
@@ -99,7 +99,7 @@ export const UPGRADES: UpgradeDefinition[] = [
         baseValue: 1.0,
         incrementPerLevel: 0.5,
         baseCost: 120,
-        costGrowthFactor: 1.8,
+        costGrowthFactor: 1.5,
         maxLevel: 25,
     },
     {
@@ -111,7 +111,7 @@ export const UPGRADES: UpgradeDefinition[] = [
         baseValue: 4,
         incrementPerLevel: 0.5,
         baseCost: 150,
-        costGrowthFactor: 2.0,
+        costGrowthFactor: 1.5,
         maxLevel: 8,
     },
 ];

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.1] - 2026-03-02
 
+### Added
+- Star rating system — 1-3 stars based on chicken efficiency (chickens reaching fort / fired)
+  - 3 stars: 80%+ efficiency
+  - 2 stars: 50%+ efficiency
+  - 1 star: complete level
+- 4x gate multiplier — added to level 6
+
+### Changed
+- Reduced upgrade costs — growth factors changed from 1.5-2.0 to 1.3-1.5
+
 ### Fixed
 - Gate visual/collision mismatch — gates now render at actual collision width instead of hardcoded 80%
 - DPR coordinate bug — fixed cannon offset on high-DPR devices by removing DPR scaling

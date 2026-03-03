@@ -1,0 +1,30 @@
+
+> chicken-mob@0.2.1 test
+> vitest run
+
+
+ RUN  v3.2.4 /root/code/chicken-mob
+
+ ❯ src/__tests__/game.test.ts (9 tests | 7 failed) 537ms
+   ✓ Cannon Lookup > getCannon returns valid cannon 2ms
+   ✓ Cannon Lookup > getCannon throws on invalid id 1ms
+   × Procedural Level Playtest > variant #0 (Gauntlet) can be played and won/lost 169ms
+     → expected false to be true // Object.is equality
+   × Procedural Level Playtest > variant #1 (Multiplication Mayhem) can be played and won/lost 18ms
+     → expected false to be true // Object.is equality
+   × Procedural Level Playtest > variant #2 (Trap Alley) can be played and won/lost 19ms
+     → expected false to be true // Object.is equality
+   × Procedural Level Playtest > variant #3 (Fox Swarm) can be played and won/lost 92ms
+     → expected false to be true // Object.is equality
+   × Procedural Level Playtest > variant #4 (Maze Gates) can be played and won/lost 153ms
+     → expected false to be true // Object.is equality
+   × Procedural Level Playtest > variant #5 (Obstacle Overload) can be played and won/lost 25ms
+     → expected false to be true // Object.is equality
+   × Procedural Level Playtest > variant #6 (Timed Blitz) can be played and won/lost 56ms
+     → expected false to be true // Object.is equality
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 2 passed (9)
+   Start at  04:27:46
+   Duration  1.04s (transform 149ms, setup 0ms, collect 176ms, tests 537ms, environment 0ms, prepare 90ms)
+

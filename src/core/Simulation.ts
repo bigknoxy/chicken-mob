@@ -167,6 +167,11 @@ export function simulationTick(state: GameState, dt: number): void {
         state.screenShake = Math.max(0, state.screenShake - dt);
     }
 
+    // Victory flash decay
+    if (state.victoryFlash > 0) {
+        state.victoryFlash = Math.max(0, state.victoryFlash - dt * 2);
+    }
+
     // ── 9. Clean up dead entities ──
     state.flocks = state.flocks.filter(f => f.alive && f.count > 0);
     state.foxPacks = state.foxPacks.filter(f => f.alive && f.count > 0);
@@ -179,7 +184,9 @@ export function simulationTick(state: GameState, dt: number): void {
     if (state.fort.currentHp <= 0) {
         state.levelComplete = true;
         state.levelWon = true;
-        state.screenShake = 0.4;
+        state.screenShake = 0.2;
+        state.victoryFlash = 1.0;
+        spawnConfetti(state);
         state.levelSummary = generateLevelSummary(state);
     } else {
         // Check timeout loss condition
@@ -244,13 +251,44 @@ function spawnGateParticles(
     }
 }
 
+/** Spawn confetti explosion on level win */
+function spawnConfetti(state: GameState): void {
+    const colors = ['#fbbf24', '#22c55e', '#3b82f6', '#ec4899', '#a855f7', '#ffffff'];
+    const count = 150;
+    for (let i = 0; i < count; i++) {
+        // Spawn from center with random horizontal offset to cover screen
+        const spawnX = 200 + Math.random() * 200; // center-ish position
+        state.particles.push({
+            x: spawnX,
+            y: Math.random() * 50, // start near top
+            vx: (Math.random() - 0.5) * 800, // wider spread
+            vy: Math.random() * 400 + 150, // upward burst
+            life: 2 + Math.random() * 2,
+            maxLife: 4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: 4 + Math.random() * 6,
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: (Math.random() - 0.5) * 10,
+            type: 'confetti',
+        });
+    }
+}
+
 /** Update particle lifetimes and positions */
 function updateParticles(particles: Particle[], dt: number): void {
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx * dt;
         p.y += p.vy * dt;
-        p.vy += 300 * dt; // gravity
+        
+        if (p.type === 'confetti') {
+            p.vx *= 0.99;
+            p.vy += 200 * dt;
+            p.rotation = (p.rotation ?? 0) + (p.rotationSpeed ?? 0) * dt;
+        } else {
+            p.vy += 300 * dt;
+        }
+        
         p.life -= dt;
         if (p.life <= 0) {
             particles.splice(i, 1);

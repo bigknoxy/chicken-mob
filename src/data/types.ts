@@ -232,6 +232,7 @@ export interface GameState {
     pendingSpawns: EnemySpawn[]; // spawns that haven't triggered yet
     particles: Particle[];     // visual-only effects
     screenShake: number;       // remaining shake duration
+    victoryFlash: number;      // victory flash intensity (0-1, decays over time)
     totalChickensFired: number;    // total chickens fired this level
     totalChickensReachedFort: number; // chickens that successfully reached fort
     currentChickensOnField: number;  // chickens currently alive in lanes
@@ -248,4 +249,7 @@ export interface Particle {
     maxLife: number;
     color: string;
     size: number;
+    rotation?: number;        // for confetti rotation
+    rotationSpeed?: number;    // for confetti rotation speed
+    type?: 'confetti';       // particle type for special rendering
 }

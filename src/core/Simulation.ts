@@ -256,11 +256,13 @@ function spawnConfetti(state: GameState): void {
     const colors = ['#fbbf24', '#22c55e', '#3b82f6', '#ec4899', '#a855f7', '#ffffff'];
     const count = 150;
     for (let i = 0; i < count; i++) {
+        // Spawn from center with random horizontal offset to cover screen
+        const spawnX = 200 + Math.random() * 200; // center-ish position
         state.particles.push({
-            x: state.level.length / 2,
-            y: 0,
-            vx: (Math.random() - 0.5) * 600,
-            vy: Math.random() * 300 + 100,
+            x: spawnX,
+            y: Math.random() * 50, // start near top
+            vx: (Math.random() - 0.5) * 800, // wider spread
+            vy: Math.random() * 400 + 150, // upward burst
             life: 2 + Math.random() * 2,
             maxLife: 4,
             color: colors[Math.floor(Math.random() * colors.length)],

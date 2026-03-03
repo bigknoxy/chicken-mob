@@ -5,6 +5,7 @@
  */
 
 import type { PlayerState } from '@/data/types';
+import { formatNumber } from '@/utils/format';
 
 export class HUD {
     private container: HTMLDivElement;
@@ -21,7 +22,7 @@ export class HUD {
       padding: 8px 14px;
       display: flex;
       gap: 16px;
-      font-family: monospace;
+      font-family: 'Nunito', sans-serif;
       font-size: 14px;
       font-weight: bold;
       color: #e5e7eb;
@@ -40,15 +41,11 @@ export class HUD {
     }
 
     update(playerState: PlayerState): void {
-        this.cornEl.textContent = `🌽 ${this.format(playerState.currencies.corn)}`;
+        this.cornEl.textContent = `🌽 ${formatNumber(playerState.currencies.corn)}`;
         this.featherEl.textContent = `🪶 ${playerState.currencies.golden_feather}`;
     }
 
-    private format(n: number): string {
-        if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-        if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-        return Math.floor(n).toString();
-    }
+    // NOTE: formatting uses shared `formatNumber` helper
 
     destroy(): void {
         this.container.remove();

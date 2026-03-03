@@ -8,8 +8,7 @@
 
 import type { GameState, Flock, FoxPack, LiveObstacle, LiveGate, Particle } from '@/data/types';
 import { LaneGeometry, laneX, positionToY, laneWidth } from '@/core/Lane';
-
-const MAX_VISIBLE_PER_FLOCK = 50;
+import { MAX_VISIBLE_PER_FLOCK } from '@/constants/game';
 
 // ── Colors ──
 const COLORS = {
@@ -45,7 +44,11 @@ export class Renderer {
     private height = 0;
 
     constructor(private readonly canvas: HTMLCanvasElement) {
-        this.ctx = canvas.getContext('2d')!;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            throw new Error('Canvas 2D context not supported. Please use a modern browser.');
+        }
+        this.ctx = ctx;
         this.resize();
         window.addEventListener('resize', () => this.resize());
     }

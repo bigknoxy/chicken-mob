@@ -12,9 +12,11 @@
  * 8. Check win/loss conditions
  */
 
-import type { GameState, Flock, FoxPack, Particle, LevelSummary } from '@/data/types';
+import type { GameState, FoxPack, Particle, LevelSummary } from '@/data/types';
 import { getChicken } from '@/data/chickens';
 import { getFox } from '@/data/foxes';
+import { resolveCombat } from '@/systems/CombatSystem';
+import { DEFAULT_ENTITY_WIDTH } from '@/constants/game';
 import {
     detectFlockVsFox,
     detectFlockVsFort,
@@ -55,7 +57,7 @@ export function simulationTick(state: GameState, dt: number): void {
             if (!flock.alive || flock.count <= 0 || flock.x === undefined || gate.definition.x === undefined) continue;
 
             // X overlap check: flock.x overlaps with gate.x (using gate width)
-            const gateWidth = gate.definition.width ?? 0.06;
+            const gateWidth = gate.definition.width ?? DEFAULT_ENTITY_WIDTH;
             if (Math.abs(flock.x - gate.definition.x) >= gateWidth / 2) continue;
 
             const gatePos = gate.definition.position;
@@ -85,7 +87,20 @@ export function simulationTick(state: GameState, dt: number): void {
     // ── 4a. Flock vs Fox combat ──
     const foxCollisions = detectFlockVsFox(state.flocks, state.foxPacks);
     for (const { flock, foxPack } of foxCollisions) {
-        resolveMobCombat(flock, foxPack);
+        // Use shared combat resolver from CombatSystem
+        const chickenType = getChicken(flock.chickenTypeId);
+        const foxType = getFox(foxPack.foxTypeId);
+        const result = resolveCombat(flock.count, chickenType, foxPack.count, foxType);
+
+        flock.count = result.chickensSurviving;
+        if (flock.count <= 0) {
+            flock.alive = false;
+        }
+
+        foxPack.count = result.foxesSurviving;
+        if (foxPack.count <= 0) {
+            foxPack.alive = false;
+        }
     }
 
     // ── 4b. Flock vs Obstacle ──
@@ -200,33 +215,7 @@ export function simulationTick(state: GameState, dt: number): void {
 }
 
 /** Resolve combat between a chicken flock and a fox pack */
-function resolveMobCombat(flock: Flock, foxPack: FoxPack): void {
-    const chickenType = getChicken(flock.chickenTypeId);
-    const foxType = getFox(foxPack.foxTypeId);
-
-    const chickenPower = flock.count * chickenType.damagePerChicken;
-    const foxPower = foxPack.count * foxType.damagePerFox;
-
-    if (chickenPower > foxPower) {
-        // Chickens win — some survive
-        const surviving = Math.max(1, Math.floor((chickenPower - foxPower) / chickenType.damagePerChicken));
-        flock.count = surviving;
-        foxPack.count = 0;
-        foxPack.alive = false;
-    } else if (foxPower > chickenPower) {
-        // Foxes win
-        const surviving = Math.max(1, Math.floor((foxPower - chickenPower) / foxType.damagePerFox));
-        foxPack.count = surviving;
-        flock.count = 0;
-        flock.alive = false;
-    } else {
-        // Tie — both eliminated
-        flock.count = 0;
-        flock.alive = false;
-        foxPack.count = 0;
-        foxPack.alive = false;
-    }
-}
+// resolveMobCombat removed — using CombatSystem.resolveCombat
 
 /** Spawn particles at a gate position */
 function spawnGateParticles(

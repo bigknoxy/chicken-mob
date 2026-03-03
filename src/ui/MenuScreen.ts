@@ -32,10 +32,11 @@ export class MenuScreen {
       align-items: center;
       background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       color: #e5e7eb;
-      font-family: monospace;
+      font-family: 'Nunito', sans-serif;
       overflow-y: auto;
       padding: 20px;
       z-index: 100;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     `;
         overlay.appendChild(this.container);
     }

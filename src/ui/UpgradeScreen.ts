@@ -23,10 +23,11 @@ export class UpgradeScreen {
       flex-direction: column;
       background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
       color: #e5e7eb;
-      font-family: monospace;
+      font-family: 'Nunito', sans-serif;
       overflow-y: auto;
       padding: 16px;
       z-index: 200;
+      transition: opacity 0.25s ease, transform 0.25s ease;
     `;
         overlay.appendChild(this.container);
     }

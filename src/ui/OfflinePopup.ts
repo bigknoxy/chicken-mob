@@ -20,6 +20,7 @@ export class OfflinePopup {
       align-items: center;
       background: rgba(0,0,0,0.7);
       z-index: 300;
+      transition: opacity 0.2s ease;
     `;
         overlay.appendChild(this.container);
     }
@@ -40,7 +41,7 @@ export class OfflinePopup {
       border-radius: 16px;
       padding: 28px 32px;
       text-align: center;
-      font-family: monospace;
+      font-family: 'Nunito', sans-serif;
       color: #e5e7eb;
       max-width: 280px;
       animation: popIn 0.3s ease-out;

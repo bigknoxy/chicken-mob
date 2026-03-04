@@ -12,9 +12,11 @@
  * 8. Check win/loss conditions
  */
 
-import type { GameState, Flock, FoxPack, Particle, LevelSummary } from '@/data/types';
+import type { GameState, FoxPack, Particle, LevelSummary } from '@/data/types';
 import { getChicken } from '@/data/chickens';
 import { getFox } from '@/data/foxes';
+import { resolveCombat } from '@/systems/CombatSystem';
+import { DEFAULT_ENTITY_WIDTH, DEFAULT_TIMEOUT } from '@/constants/game';
 import {
     detectFlockVsFox,
     detectFlockVsFort,
@@ -55,7 +57,7 @@ export function simulationTick(state: GameState, dt: number): void {
             if (!flock.alive || flock.count <= 0 || flock.x === undefined || gate.definition.x === undefined) continue;
 
             // X overlap check: flock.x overlaps with gate.x (using gate width)
-            const gateWidth = gate.definition.width ?? 0.06;
+            const gateWidth = gate.definition.width ?? DEFAULT_ENTITY_WIDTH;
             if (Math.abs(flock.x - gate.definition.x) >= gateWidth / 2) continue;
 
             const gatePos = gate.definition.position;
@@ -85,7 +87,20 @@ export function simulationTick(state: GameState, dt: number): void {
     // ── 4a. Flock vs Fox combat ──
     const foxCollisions = detectFlockVsFox(state.flocks, state.foxPacks);
     for (const { flock, foxPack } of foxCollisions) {
-        resolveMobCombat(flock, foxPack);
+        // Use shared combat resolver from CombatSystem
+        const chickenType = getChicken(flock.chickenTypeId);
+        const foxType = getFox(foxPack.foxTypeId);
+        const result = resolveCombat(flock.count, chickenType, foxPack.count, foxType);
+
+        flock.count = result.chickensSurviving;
+        if (flock.count <= 0) {
+            flock.alive = false;
+        }
+
+        foxPack.count = result.foxesSurviving;
+        if (foxPack.count <= 0) {
+            foxPack.alive = false;
+        }
     }
 
     // ── 4b. Flock vs Obstacle ──
@@ -190,41 +205,12 @@ export function simulationTick(state: GameState, dt: number): void {
         state.levelSummary = generateLevelSummary(state);
     } else {
         // Check timeout loss condition
-        const levelTimeout = state.level.timeout ?? 60;
+        const levelTimeout = state.level.timeout ?? DEFAULT_TIMEOUT;
         if (state.elapsedTime >= levelTimeout) {
             state.levelComplete = true;
             state.levelWon = false;
             state.levelSummary = generateLevelSummary(state);
         }
-    }
-}
-
-/** Resolve combat between a chicken flock and a fox pack */
-function resolveMobCombat(flock: Flock, foxPack: FoxPack): void {
-    const chickenType = getChicken(flock.chickenTypeId);
-    const foxType = getFox(foxPack.foxTypeId);
-
-    const chickenPower = flock.count * chickenType.damagePerChicken;
-    const foxPower = foxPack.count * foxType.damagePerFox;
-
-    if (chickenPower > foxPower) {
-        // Chickens win — some survive
-        const surviving = Math.max(1, Math.floor((chickenPower - foxPower) / chickenType.damagePerChicken));
-        flock.count = surviving;
-        foxPack.count = 0;
-        foxPack.alive = false;
-    } else if (foxPower > chickenPower) {
-        // Foxes win
-        const surviving = Math.max(1, Math.floor((foxPower - chickenPower) / foxType.damagePerFox));
-        foxPack.count = surviving;
-        flock.count = 0;
-        flock.alive = false;
-    } else {
-        // Tie — both eliminated
-        flock.count = 0;
-        flock.alive = false;
-        foxPack.count = 0;
-        foxPack.alive = false;
     }
 }
 
@@ -251,24 +237,33 @@ function spawnGateParticles(
     }
 }
 
-/** Spawn confetti explosion on level win */
+/** Spawn confetti explosion on level win - enhanced with vibrant colors */
 function spawnConfetti(state: GameState): void {
-    const colors = ['#fbbf24', '#22c55e', '#3b82f6', '#ec4899', '#a855f7', '#ffffff'];
-    const count = 150;
+    const colors = [
+        '#fbbf24', // golden yellow
+        '#22c55e', // vibrant green
+        '#3b82f6', // bright blue
+        '#ec4899', // hot pink
+        '#a855f7', // purple
+        '#ffffff', // white
+        '#f97316', // orange
+        '#06b6d4', // cyan
+    ];
+    const count = 200; // more particles
     for (let i = 0; i < count; i++) {
-        // Spawn from center with random horizontal offset to cover screen
-        const spawnX = 200 + Math.random() * 200; // center-ish position
+        // Spawn from random positions across screen width
+        const spawnX = Math.random() * state.level.laneCount * 100 + 50;
         state.particles.push({
             x: spawnX,
-            y: Math.random() * 50, // start near top
-            vx: (Math.random() - 0.5) * 800, // wider spread
-            vy: Math.random() * 400 + 150, // upward burst
-            life: 2 + Math.random() * 2,
-            maxLife: 4,
+            y: -20 - Math.random() * 50, // start above screen
+            vx: (Math.random() - 0.5) * 900, // wider spread
+            vy: Math.random() * 300 + 200, // varied upward burst
+            life: 2.5 + Math.random() * 2.5,
+            maxLife: 5,
             color: colors[Math.floor(Math.random() * colors.length)],
-            size: 4 + Math.random() * 6,
+            size: 3 + Math.random() * 8, // varied sizes
             rotation: Math.random() * Math.PI * 2,
-            rotationSpeed: (Math.random() - 0.5) * 10,
+            rotationSpeed: (Math.random() - 0.5) * 12,
             type: 'confetti',
         });
     }

@@ -2,35 +2,37 @@
  * SpawningSystem — Handles firing chicken flocks from the barn cannon.
  */
 
-import type { GameState, Flock } from '@/data/types';
+import type { GameState, Flock, PlayerState } from '@/data/types';
 import { getChicken } from '@/data/chickens';
 import { getCannon } from '@/data/cannons';
-import { getUpgradeValue } from '@/data/upgrades';
-import type { PlayerState } from '@/data/types';
+import { getUpgrade, getUpgradeValue } from '@/data/upgrades';
+
+function fireRateValue(level: number): number {
+    return getUpgradeValue(getUpgrade('cannon_fire_rate'), level);
+}
+
+function burstSizeValue(level: number): number {
+    return Math.floor(getUpgradeValue(getUpgrade('cannon_burst_size'), level));
+}
+
+function chickenSpeedValue(level: number): number {
+    return getUpgradeValue(getUpgrade('chicken_speed'), level);
+}
 
 /** Compute effective stats after upgrades */
 export function getEffectiveFireRate(playerState: PlayerState): number {
     const level = playerState.upgrades['cannon_fire_rate'] ?? 0;
-    return getUpgradeValue(
-        { baseValue: 1.0, incrementPerLevel: 0.15 } as any, // inline for speed
-        level,
-    );
+    return fireRateValue(level);
 }
 
 export function getEffectiveBurstSize(playerState: PlayerState): number {
     const level = playerState.upgrades['cannon_burst_size'] ?? 0;
-    return Math.floor(getUpgradeValue(
-        { baseValue: 5, incrementPerLevel: 1 } as any,
-        level,
-    ));
+    return burstSizeValue(level);
 }
 
 export function getEffectiveChickenSpeed(playerState: PlayerState): number {
     const level = playerState.upgrades['chicken_speed'] ?? 0;
-    return getUpgradeValue(
-        { baseValue: 200, incrementPerLevel: 15 } as any,
-        level,
-    );
+    return chickenSpeedValue(level);
 }
 
 /** Fire a flock from the cannon toward targetX (0-1 normalized horizontal position) */

@@ -168,13 +168,21 @@ src/
 │   ├── HUD.ts            # In-game HUD overlay
 │   ├── MenuScreen.ts     # Main menu
 │   ├── UpgradeScreen.ts  # Upgrade shop UI
-│   └── OfflinePopup.ts   # Offline earnings popup
+│   ├── OfflinePopup.ts   # Offline earnings popup
+│   ├── Modal.ts          # Reusable modal component
+│   └── styles.ts         # Design tokens (COLORS, SPACING, etc.)
 ├── platform/             # Platform abstractions
-│   ├── Input.ts          # Touch/mouse input handling
+│   ├── Input.ts          # Touch/mouse input, haptic feedback
 │   ├── Audio.ts          # Web Audio API wrapper
 │   └── Persistence.ts    # localStorage save/load
-└── __tests__/            # Test files
+├── constants/            # Centralized game constants
+│   └── game.ts           # COLLISION_THRESHOLD, MAX_VISIBLE, etc.
+├── utils/                # Shared utilities
+│   └── format.ts         # Number formatting helpers
+└── __tests__/            # Unit test files (Vitest)
     └── game.test.ts      # Core game tests
+tests/                    # E2E tests (Playwright)
+└── app.spec.ts           # Menu and gameplay tests
 ```
 
 ---
@@ -211,6 +219,58 @@ describe('System or Module Name', () => {
 - Test descriptions should read as statements of behavior
 - Use `it('does X when Y')` format
 - Group related tests in `describe` blocks
+
+---
+
+## Design Tokens
+
+UI components use centralized design tokens from `src/ui/styles.ts`:
+
+```typescript
+import { COLORS, SPACING, RADIUS, SHADOWS, TRANSITIONS } from '@/ui/styles';
+
+// Example usage
+element.style.cssText = `
+  color: ${COLORS.uiText};
+  padding: ${SPACING.md}px;
+  border-radius: ${RADIUS.md}px;
+  box-shadow: ${SHADOWS.md};
+  transition: transform ${TRANSITIONS.fast};
+`;
+```
+
+Available tokens:
+- `COLORS` — Primary, secondary, background, UI colors
+- `SPACING` — `xs: 4`, `sm: 8`, `md: 12`, `lg: 16`, `xl: 24`
+- `RADIUS` — `sm: 6`, `md: 10`, `lg: 16`
+- `SHADOWS` — `sm`, `md`, `glow` (pre-defined shadow strings)
+- `TRANSITIONS` — `fast`, `normal`, `smooth` (timing strings)
+
+---
+
+## Platform Utilities
+
+### Haptic Feedback
+
+Mobile devices support vibration for tactile feedback:
+
+```typescript
+import { hapticFeedback, HAPTIC } from '@/platform/Input';
+
+// Single vibration
+hapticFeedback(HAPTIC.medium);
+
+// Pattern: vibrate, pause, vibrate
+hapticFeedback(HAPTIC.fire);  // [10, 30, 10]
+```
+
+Available patterns:
+- `HAPTIC.light` — 10ms
+- `HAPTIC.medium` — 25ms
+- `HAPTIC.heavy` — 50ms
+- `HAPTIC.fire` — Pattern for cannon fire
+- `HAPTIC.win` — Celebratory pattern
+- `HAPTIC.lose` — Defeat pattern
 
 ---
 
@@ -283,7 +343,8 @@ Before submitting changes, run:
 
 ```bash
 npm run build    # Must succeed with no errors
-npm test         # All tests must pass
+npm test         # All unit tests must pass
+npx playwright test  # E2E tests (optional, requires dev server)
 ```
 
 TypeScript strict mode catches most issues at compile time. Fix all warnings before committing.

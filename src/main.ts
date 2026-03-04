@@ -13,8 +13,10 @@ import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
 import { fireChickens } from '@/systems/SpawningSystem';
 import { calculateOfflineEarnings, claimOfflineEarnings } from '@/systems/OfflineSystem';
 import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
-import { InputManager } from '@/platform/Input';
+import { InputManager, hapticFeedback, HAPTIC } from '@/platform/Input';
 import { audio } from '@/platform/Audio';
+import { AUTOSAVE_INTERVAL_MS } from '@/constants/game';
+import { Modal } from '@/ui/Modal';
 import { Renderer } from '@/ui/Renderer';
 import { HUD } from '@/ui/HUD';
 import { MenuScreen } from '@/ui/MenuScreen';
@@ -38,6 +40,7 @@ const renderer = new Renderer(canvas);
 const input = new InputManager(canvas);
 const hud = new HUD(overlay);
 const offlinePopup = new OfflinePopup(overlay);
+const modal = new Modal();
 
 const menuScreen = new MenuScreen(overlay, (action) => {
     switch (action.type) {
@@ -64,7 +67,6 @@ const upgradeScreen = new UpgradeScreen(overlay, () => {
 
 // ── Autosave Timer ──
 let lastSaveTime = 0;
-const AUTOSAVE_INTERVAL = 25000; // 25 seconds
 
 // ── Game Loop ──
 const loop = new GameLoop(
@@ -85,6 +87,7 @@ const loop = new GameLoop(
             if (gameState.cannonCooldown <= 0) {
                 fireChickens(gameState, playerState, gameState.cannonX);
                 audio.playFire();
+                hapticFeedback(HAPTIC.fire);
             }
         } else {
             gameState.isFiring = false;
@@ -100,7 +103,7 @@ const loop = new GameLoop(
 
         // Autosave
         const now = performance.now();
-        if (now - lastSaveTime > AUTOSAVE_INTERVAL) {
+        if (now - lastSaveTime > AUTOSAVE_INTERVAL_MS) {
             playerState.lastSessionTimestamp = Date.now();
             savePlayerState(playerState);
             lastSaveTime = now;
@@ -203,8 +206,10 @@ function onLevelEnd(): void {
         }
 
         audio.playWin();
+        hapticFeedback(HAPTIC.win);
     } else {
         audio.playLose();
+        hapticFeedback(HAPTIC.lose);
     }
 
     // Save and return to menu
@@ -218,11 +223,12 @@ function onLevelEnd(): void {
 
 function showCoopInfo(): void {
     const coop = playerState.coop;
-    alert(
-        `🐓 Chicken Coop\n\n` +
+    modal.show(
+        'Chicken Coop',
         `Corn/sec: ${coop.cornPerSecond.toFixed(1)}\n` +
         `Offline Cap: ${(coop.offlineCapSeconds / 3600).toFixed(1)} hours\n\n` +
-        `Upgrade in the Farm tab to earn more while away!`
+        'Upgrade in the Farm tab to earn more while away!',
+        [{ text: 'Close', onClick: () => {} }],
     );
 }
 

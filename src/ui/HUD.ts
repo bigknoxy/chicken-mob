@@ -5,6 +5,8 @@
  */
 
 import type { PlayerState } from '@/data/types';
+import { formatNumber } from '@/utils/format';
+import { COLORS, RADIUS } from './styles';
 
 export class HUD {
     private container: HTMLDivElement;
@@ -21,12 +23,12 @@ export class HUD {
       padding: 8px 14px;
       display: flex;
       gap: 16px;
-      font-family: monospace;
+      font-family: 'Nunito', sans-serif;
       font-size: 14px;
       font-weight: bold;
-      color: #e5e7eb;
+      color: ${COLORS.uiText};
       background: rgba(0,0,0,0.4);
-      border-radius: 0 0 0 12px;
+      border-radius: 0 0 0 ${RADIUS.md}px;
       pointer-events: none;
       z-index: 10;
     `;
@@ -40,14 +42,8 @@ export class HUD {
     }
 
     update(playerState: PlayerState): void {
-        this.cornEl.textContent = `🌽 ${this.format(playerState.currencies.corn)}`;
+        this.cornEl.textContent = `🌽 ${formatNumber(playerState.currencies.corn)}`;
         this.featherEl.textContent = `🪶 ${playerState.currencies.golden_feather}`;
-    }
-
-    private format(n: number): string {
-        if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-        if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-        return Math.floor(n).toString();
     }
 
     destroy(): void {

@@ -70,18 +70,9 @@ export class MenuScreen {
         sub.style.cssText = `color: ${COLORS.uiMuted}; margin-bottom: ${SPACING.xl}; font-size: 12px;`;
         this.container.appendChild(sub);
 
-        // Currency display
-        const currencyRow = document.createElement('div');
-        currencyRow.style.cssText = `display: flex; gap: 20px; margin-bottom: ${SPACING.lg}; font-size: 14px;`;
-        currencyRow.innerHTML = `
-      <span>${'🌽'} ${Math.floor(playerState.currencies.corn)}</span>
-      <span>${'🪶'} ${playerState.currencies.golden_feather}</span>
-    `;
-        this.container.appendChild(currencyRow);
-
         // Action buttons
         const btnRow = document.createElement('div');
-        btnRow.style.cssText = `display: flex; gap: ${SPACING.md}; margin-bottom: ${SPACING.xl};`;
+        btnRow.style.cssText = `display: flex; gap: ${SPACING.md}; margin-bottom: 40px;`;
 
         const upgradeBtn = this.createButton('Upgrades', () => {
             audio.playClick();
@@ -122,7 +113,7 @@ export class MenuScreen {
         border-radius: ${RADIUS.md}px;
         background: ${bgColor};
         color: ${textColor};
-        font-family: monospace;
+        font-family: 'Nunito', sans-serif;
         font-size: 12px;
         cursor: ${unlocked ? 'pointer' : 'default'};
         opacity: ${unlocked ? '1' : '0.5'};
@@ -162,6 +153,17 @@ export class MenuScreen {
         }
 
         this.container.appendChild(levelGrid);
+
+        // Version display
+        const versionEl = document.createElement('div');
+        versionEl.textContent = `v${__APP_VERSION__}`;
+        versionEl.style.cssText = `
+            margin-top: ${SPACING.xl};
+            font-size: 11px;
+            color: ${COLORS.uiMuted};
+            opacity: 0.6;
+        `;
+        this.container.appendChild(versionEl);
     }
 
     hide(): void {
@@ -191,7 +193,7 @@ export class MenuScreen {
       border-radius: ${RADIUS.md}px;
       background: rgba(99,102,241,0.2);
       color: ${COLORS.uiText};
-      font-family: monospace;
+      font-family: 'Nunito', sans-serif;
       font-size: 13px;
       font-weight: bold;
       cursor: pointer;

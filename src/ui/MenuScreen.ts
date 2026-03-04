@@ -7,6 +7,7 @@
 import type { PlayerState } from '@/data/types';
 import { LEVELS } from '@/data/levels';
 import { audio } from '@/platform/Audio';
+import { COLORS, SPACING, RADIUS, SHADOWS, TRANSITIONS } from './styles';
 
 export type MenuAction =
     | { type: 'play_level'; levelIndex: number }
@@ -27,16 +28,15 @@ export class MenuScreen {
         this.container.style.cssText = `
       position: absolute;
       inset: 0;
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
-      background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      color: #e5e7eb;
+      background: linear-gradient(180deg, ${COLORS.bgDark} 0%, ${COLORS.bgMid} 50%, ${COLORS.bgLight} 100%);
+      color: ${COLORS.uiText};
       font-family: 'Nunito', sans-serif;
       overflow-y: auto;
-      padding: 20px;
+      padding: ${SPACING.lg};
       z-index: 100;
-      transition: opacity 0.3s ease, transform 0.3s ease;
     `;
         overlay.appendChild(this.container);
     }
@@ -45,14 +45,19 @@ export class MenuScreen {
         this.container.innerHTML = '';
         this.container.style.display = 'flex';
 
+        // Apply transition class
+        requestAnimationFrame(() => {
+            this.container.classList.add('screen-enter');
+        });
+
         // Title
         const title = document.createElement('h1');
-        title.textContent = '🐔 CHICKEN MOB';
+        title.textContent = 'CHICKEN MOB';
         title.style.cssText = `
       font-size: 28px;
       margin: 20px 0 8px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-      background: linear-gradient(135deg, #fbbf24, #f97316);
+      text-shadow: ${SHADOWS.md};
+      background: linear-gradient(135deg, ${COLORS.primary}, #f97316);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -62,27 +67,27 @@ export class MenuScreen {
         // Subtitle
         const sub = document.createElement('p');
         sub.textContent = 'Launch your flock. Trample the fox fort!';
-        sub.style.cssText = 'color: #9ca3af; margin-bottom: 24px; font-size: 12px;';
+        sub.style.cssText = `color: ${COLORS.uiMuted}; margin-bottom: ${SPACING.xl}; font-size: 12px;`;
         this.container.appendChild(sub);
 
         // Currency display
         const currencyRow = document.createElement('div');
-        currencyRow.style.cssText = 'display: flex; gap: 20px; margin-bottom: 20px; font-size: 14px;';
+        currencyRow.style.cssText = `display: flex; gap: 20px; margin-bottom: ${SPACING.lg}; font-size: 14px;`;
         currencyRow.innerHTML = `
-      <span>🌽 ${Math.floor(playerState.currencies.corn)}</span>
-      <span>🪶 ${playerState.currencies.golden_feather}</span>
+      <span>${'🌽'} ${Math.floor(playerState.currencies.corn)}</span>
+      <span>${'🪶'} ${playerState.currencies.golden_feather}</span>
     `;
         this.container.appendChild(currencyRow);
 
         // Action buttons
         const btnRow = document.createElement('div');
-        btnRow.style.cssText = 'display: flex; gap: 12px; margin-bottom: 24px;';
+        btnRow.style.cssText = `display: flex; gap: ${SPACING.md}; margin-bottom: ${SPACING.xl};`;
 
-        const upgradeBtn = this.createButton('🔧 Upgrades', () => {
+        const upgradeBtn = this.createButton('Upgrades', () => {
             audio.playClick();
             this.onAction({ type: 'open_upgrades' });
         });
-        const coopBtn = this.createButton('🐓 Coop', () => {
+        const coopBtn = this.createButton('Coop', () => {
             audio.playClick();
             this.onAction({ type: 'open_coop' });
         });
@@ -106,28 +111,44 @@ export class MenuScreen {
             const completed = i < playerState.currentLevel;
 
             const btn = document.createElement('button');
+            const borderColor = completed ? COLORS.success : unlocked ? COLORS.secondary : '#374151';
+            const bgColor = completed ? 'rgba(34,197,94,0.15)' : unlocked ? 'rgba(99,102,241,0.15)' : 'rgba(55,65,81,0.3)';
+            const textColor = unlocked ? COLORS.uiText : '#6b7280';
             btn.style.cssText = `
+        min-width: 44px;
+        min-height: 44px;
         padding: 12px 8px;
-        border: 2px solid ${completed ? '#22c55e' : unlocked ? '#6366f1' : '#374151'};
-        border-radius: 10px;
-        background: ${completed ? 'rgba(34,197,94,0.15)' : unlocked ? 'rgba(99,102,241,0.15)' : 'rgba(55,65,81,0.3)'};
-        color: ${unlocked ? '#e5e7eb' : '#6b7280'};
+        border: 2px solid ${borderColor};
+        border-radius: ${RADIUS.md}px;
+        background: ${bgColor};
+        color: ${textColor};
         font-family: monospace;
         font-size: 12px;
         cursor: ${unlocked ? 'pointer' : 'default'};
         opacity: ${unlocked ? '1' : '0.5'};
-        transition: transform 0.1s;
+        transition: transform ${TRANSITIONS.fast};
       `;
             btn.innerHTML = `
         <div style="font-size: 18px; margin-bottom: 4px;">${completed ? '⭐' : unlocked ? '🐔' : '🔒'}</div>
         <div>${i + 1}</div>
-        <div style="font-size: 10px; color: #9ca3af;">${level.name}</div>
+        <div style="font-size: 10px; color: ${COLORS.uiMuted};">${level.name}</div>
       `;
 
             if (unlocked) {
                 btn.addEventListener('click', () => {
+                    // Scale feedback
+                    btn.style.transform = 'scale(1.03)';
+                    setTimeout(() => {
+                        btn.style.transform = 'scale(1)';
+                    }, 100);
                     audio.playClick();
                     this.onAction({ type: 'play_level', levelIndex: i });
+                });
+                btn.addEventListener('mouseenter', () => {
+                    btn.style.transform = 'scale(1.05)';
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.transform = 'scale(1)';
                 });
                 btn.addEventListener('touchstart', () => {
                     btn.style.transform = 'scale(0.95)';
@@ -144,30 +165,53 @@ export class MenuScreen {
     }
 
     hide(): void {
-        this.container.style.display = 'none';
+        this.container.classList.remove('screen-enter');
+        this.container.style.cssText += `
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    `;
+        setTimeout(() => {
+            this.container.style.display = 'none';
+            this.container.style.cssText = this.container.style.cssText.replace(
+                /opacity: 0;.*?transition.*?;/,
+                ''
+            );
+        }, 250);
     }
 
     private createButton(text: string, onClick: () => void): HTMLButtonElement {
         const btn = document.createElement('button');
         btn.textContent = text;
         btn.style.cssText = `
+      min-width: 44px;
+      min-height: 44px;
       padding: 10px 20px;
-      border: 2px solid #6366f1;
-      border-radius: 10px;
+      border: 2px solid ${COLORS.secondary};
+      border-radius: ${RADIUS.md}px;
       background: rgba(99,102,241,0.2);
-      color: #e5e7eb;
+      color: ${COLORS.uiText};
       font-family: monospace;
       font-size: 13px;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
+      transition: background ${TRANSITIONS.fast}, transform ${TRANSITIONS.fast};
     `;
-        btn.addEventListener('click', onClick);
+        btn.addEventListener('click', () => {
+            // Scale feedback
+            btn.style.transform = 'scale(1.03)';
+            setTimeout(() => {
+                btn.style.transform = 'scale(1)';
+            }, 100);
+            onClick();
+        });
         btn.addEventListener('mouseenter', () => {
             btn.style.background = 'rgba(99,102,241,0.4)';
+            btn.style.transform = 'scale(1.05)';
         });
         btn.addEventListener('mouseleave', () => {
             btn.style.background = 'rgba(99,102,241,0.2)';
+            btn.style.transform = 'scale(1)';
         });
         return btn;
     }

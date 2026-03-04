@@ -18,6 +18,23 @@ export interface InputState {
     justReleased: boolean;
 }
 
+/** Haptic feedback utility - safe guard if not supported */
+export function hapticFeedback(pattern: number | readonly number[]): void {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate(pattern as number | number[]);
+    }
+}
+
+/** Predefined haptic patterns */
+export const HAPTIC = {
+    light: 10,
+    medium: 25,
+    heavy: 50,
+    fire: [10, 30, 10],
+    win: [50, 100, 50, 100, 100],
+    lose: [100, 50, 100],
+} as const;
+
 export class InputManager {
     private state: InputState = {
         isDown: false,

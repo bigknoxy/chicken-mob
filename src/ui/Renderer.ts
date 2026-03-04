@@ -8,7 +8,8 @@
 
 import type { GameState, Flock, FoxPack, LiveObstacle, LiveGate, Particle } from '@/data/types';
 import { LaneGeometry, laneX, positionToY, laneWidth } from '@/core/Lane';
-import { MAX_VISIBLE_PER_FLOCK } from '@/constants/game';
+import { MAX_VISIBLE_PER_FLOCK, SCREEN_SHAKE_MULTIPLIER, MUZZLE_FLASH_COOLDOWN } from '@/constants/game';
+import { formatNumber } from '@/utils/format';
 
 // ── Colors ──
 const COLORS = {
@@ -75,11 +76,12 @@ export class Renderer {
 
     render(state: GameState, geo: LaneGeometry): void {
         const ctx = this.ctx;
+        const now = Date.now();
 
         // Apply screen shake
         ctx.save();
         if (state.screenShake > 0) {
-            const intensity = state.screenShake * 12;
+            const intensity = state.screenShake * SCREEN_SHAKE_MULTIPLIER;
             ctx.translate(
                 (Math.random() - 0.5) * intensity,
                 (Math.random() - 0.5) * intensity,
@@ -95,7 +97,7 @@ export class Renderer {
 
         // ── Gates ──
         for (const gate of state.gates) {
-            this.drawGate(gate, geo);
+            this.drawGate(gate, geo, now);
         }
 
         // ── Obstacles ──
@@ -170,7 +172,7 @@ export class Renderer {
         }
     }
 
-    private drawGate(gate: LiveGate, geo: LaneGeometry): void {
+    private drawGate(gate: LiveGate, geo: LaneGeometry, now: number): void {
         const ctx = this.ctx;
         const def = gate.definition;
         // Use x property for horizontal position, fallback to lane center
@@ -179,6 +181,24 @@ export class Renderer {
         // Use actual collision width from gate definition
         const w = (def.width ?? 0.08) * this.width;
         const h = 28;
+
+        // Check if gate is visible (within canvas bounds)
+        const isVisible = y > -h && y < this.height + h && x > -w && x < this.width + w;
+        if (!isVisible) return;
+
+        // Pulsing glow effect for untriggered gates
+        if (!gate.triggered) {
+            const pulse = Math.sin(now / 300) * 0.3 + 0.7; // 0.4-1.0 range
+            const glowRadius = w * 1.5;
+
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
+            gradient.addColorStop(0, `rgba(${def.isPositive ? '34,197,94' : '239,68,68'}, ${pulse * 0.4})`);
+            gradient.addColorStop(0.5, `rgba(${def.isPositive ? '34,197,94' : '239,68,68'}, ${pulse * 0.15})`);
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x - glowRadius, y - glowRadius, glowRadius * 2, glowRadius * 2);
+        }
 
         // Gate body
         ctx.fillStyle = def.isPositive ? COLORS.gatePositive : COLORS.gateNegative;
@@ -424,6 +444,26 @@ export class Renderer {
         ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fill();
 
+        // Muzzle flash / shockwave effect when firing
+        if (state.isFiring && state.cannonCooldown > MUZZLE_FLASH_COOLDOWN) {
+            // Outer shockwave ring
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r + 15, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Inner flash burst
+            const flashGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r + 8);
+            flashGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+            flashGradient.addColorStop(0.3, 'rgba(251, 191, 36, 0.7)');
+            flashGradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
+            ctx.fillStyle = flashGradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r + 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
         // Aim line (vertical, straight up)
         if (state.isFiring) {
             const aimLen = 120;
@@ -467,13 +507,8 @@ export class Renderer {
         // ── Right side: Score display ──
         ctx.textAlign = 'right';
         
-        // Format large numbers with k suffix
-        const formatNumber = (n: number): string => {
-            if (n >= 1000) {
-                return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-            }
-            return n.toString();
-        };
+        // Use shared formatter
+        // (Keep small inline helper for legacy if needed)
 
         // Chickens reached fort (converted to corn)
         ctx.fillStyle = COLORS.corn;
@@ -531,16 +566,11 @@ export class Renderer {
         ctx.textAlign = 'left';
         const statsX = boxX + 20;
         let statsY = boxY + 90;
-        
-        const formatNum = (n: number): string => {
-            if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-            return n.toString();
-        };
-        
-        ctx.fillText(`Deployed:  ${formatNum(s.deployed)}`, statsX, statsY);
-        ctx.fillText(`Reached:   ${formatNum(s.reachedFort)}`, statsX, statsY + 22);
-        ctx.fillText(`On Field:  ${formatNum(s.currentlyOnField)}`, statsX, statsY + 44);
-        ctx.fillText(`Lost:      ${formatNum(s.destroyed)}`, statsX, statsY + 66);
+
+        ctx.fillText(`Deployed:  ${formatNumber(s.deployed)}`, statsX, statsY);
+        ctx.fillText(`Reached:   ${formatNumber(s.reachedFort)}`, statsX, statsY + 22);
+        ctx.fillText(`On Field:  ${formatNumber(s.currentlyOnField)}`, statsX, statsY + 44);
+        ctx.fillText(`Lost:      ${formatNumber(s.destroyed)}`, statsX, statsY + 66);
         
         // Efficiency bar
         const barW = boxW - 40;

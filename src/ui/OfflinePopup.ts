@@ -5,6 +5,7 @@
 import type { OfflineEarnings } from '@/systems/OfflineSystem';
 import { formatElapsedTime } from '@/systems/OfflineSystem';
 import { audio } from '@/platform/Audio';
+import { COLORS, RADIUS } from './styles';
 
 export class OfflinePopup {
     private container: HTMLDivElement;
@@ -20,7 +21,6 @@ export class OfflinePopup {
       align-items: center;
       background: rgba(0,0,0,0.7);
       z-index: 300;
-      transition: opacity 0.2s ease;
     `;
         overlay.appendChild(this.container);
     }
@@ -36,13 +36,13 @@ export class OfflinePopup {
 
         const card = document.createElement('div');
         card.style.cssText = `
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border: 2px solid #6366f1;
-      border-radius: 16px;
+      background: linear-gradient(135deg, ${COLORS.uiSurface}, #0f172a);
+      border: 2px solid ${COLORS.secondary};
+      border-radius: ${RADIUS.lg}px;
       padding: 28px 32px;
       text-align: center;
       font-family: 'Nunito', sans-serif;
-      color: #e5e7eb;
+      color: ${COLORS.uiText};
       max-width: 280px;
       animation: popIn 0.3s ease-out;
     `;
@@ -50,10 +50,10 @@ export class OfflinePopup {
         card.innerHTML = `
       <div style="font-size: 32px; margin-bottom: 8px;">🐓</div>
       <h2 style="font-size: 18px; margin: 0 0 8px;">Welcome Back!</h2>
-      <p style="font-size: 12px; color: #9ca3af; margin-bottom: 16px;">
+      <p style="font-size: 12px; color: ${COLORS.uiMuted}; margin-bottom: 16px;">
         Your coop worked hard for ${formatElapsedTime(earnings.cappedSeconds)}
       </p>
-      <div style="font-size: 28px; color: #fbbf24; font-weight: bold; margin-bottom: 4px;">
+      <div style="font-size: 28px; color: ${COLORS.primary}; font-weight: bold; margin-bottom: 4px;">
         +${earnings.corn} 🌽
       </div>
       <p style="font-size: 10px; color: #6b7280; margin-bottom: 20px;">
@@ -62,18 +62,19 @@ export class OfflinePopup {
     `;
 
         const claimBtn = document.createElement('button');
-        claimBtn.textContent = '🌽 Claim!';
+        claimBtn.textContent = 'Claim!';
         claimBtn.style.cssText = `
+      min-width: 44px;
+      min-height: 44px;
       padding: 12px 32px;
-      border: 2px solid #22c55e;
-      border-radius: 10px;
+      border: 2px solid ${COLORS.success};
+      border-radius: ${RADIUS.md}px;
       background: rgba(34,197,94,0.3);
-      color: #22c55e;
+      color: ${COLORS.success};
       font-family: monospace;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;
-      transition: background 0.15s;
     `;
         claimBtn.addEventListener('click', () => {
             audio.playUpgrade();
@@ -83,19 +84,6 @@ export class OfflinePopup {
 
         card.appendChild(claimBtn);
         this.container.appendChild(card);
-
-        // Inject animation keyframes
-        if (!document.getElementById('popup-animations')) {
-            const style = document.createElement('style');
-            style.id = 'popup-animations';
-            style.textContent = `
-        @keyframes popIn {
-          from { transform: scale(0.8); opacity: 0; }
-          to { transform: scale(1); opacity: 1; }
-        }
-      `;
-            document.head.appendChild(style);
-        }
     }
 
     hide(): void {

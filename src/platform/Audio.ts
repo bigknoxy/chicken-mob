@@ -46,18 +46,22 @@ export class AudioManager {
         this.playTone(110, 0.2, 'triangle', 0.25);
     }
 
-    /** Level win */
+    /** Level win - celebratory ascending arpeggio */
     playWin(): void {
-        const notes = [523, 659, 784, 1047]; // C-E-G-C
+        // Ascending C major arpeggio with slight delay
+        const notes = [523, 659, 784, 1047, 1319]; // C-E-G-C-G
         notes.forEach((freq, i) => {
-            setTimeout(() => this.playTone(freq, 0.15, 'sine', 0.2), i * 100);
+            setTimeout(() => this.playTone(freq, 0.2, 'sine', 0.22), i * 80);
         });
     }
 
-    /** Level lose */
+    /** Level lose - descending melancholy tone */
     playLose(): void {
-        this.playTone(200, 0.3, 'sawtooth', 0.15);
-        setTimeout(() => this.playTone(150, 0.4, 'sawtooth', 0.12), 200);
+        // Descending minor sequence with reverb-like effect
+        this.playTone(300, 0.15, 'sine', 0.2);
+        setTimeout(() => this.playTone(250, 0.2, 'sine', 0.18), 100);
+        setTimeout(() => this.playTone(200, 0.25, 'sine', 0.15), 250);
+        setTimeout(() => this.playTone(150, 0.35, 'triangle', 0.12), 450);
     }
 
     /** Button click */

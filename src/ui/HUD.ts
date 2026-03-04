@@ -6,6 +6,7 @@
 
 import type { PlayerState } from '@/data/types';
 import { formatNumber } from '@/utils/format';
+import { COLORS, RADIUS } from './styles';
 
 export class HUD {
     private container: HTMLDivElement;
@@ -25,9 +26,9 @@ export class HUD {
       font-family: 'Nunito', sans-serif;
       font-size: 14px;
       font-weight: bold;
-      color: #e5e7eb;
+      color: ${COLORS.uiText};
       background: rgba(0,0,0,0.4);
-      border-radius: 0 0 0 12px;
+      border-radius: 0 0 0 ${RADIUS.md}px;
       pointer-events: none;
       z-index: 10;
     `;
@@ -44,8 +45,6 @@ export class HUD {
         this.cornEl.textContent = `🌽 ${formatNumber(playerState.currencies.corn)}`;
         this.featherEl.textContent = `🪶 ${playerState.currencies.golden_feather}`;
     }
-
-    // NOTE: formatting uses shared `formatNumber` helper
 
     destroy(): void {
         this.container.remove();

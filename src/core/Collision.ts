@@ -6,15 +6,7 @@
  */
 
 import type { Flock, FoxPack, LiveObstacle, LiveFort, GateDefinition } from '@/data/types';
-
-/** How close (in position units) two mobs must be to collide on Y axis */
-const COLLISION_THRESHOLD = 0.03;
-
-/** Default width for collision when not specified */
-const DEFAULT_WIDTH = 0.06;
-
-/** Fort collision zone — flock must be within this range of position 1.0 */
-const FORT_ZONE = 0.02;
+import { COLLISION_THRESHOLD, DEFAULT_ENTITY_WIDTH, FORT_ZONE } from '@/constants/game';
 
 export interface FlockVsFoxCollision {
     flock: Flock;
@@ -52,7 +44,7 @@ export function detectFlockVsFox(
             if (!fox.alive || fox.count <= 0 || fox.x === undefined) continue;
 
             // X overlap check (using flock.x and fox.x)
-            if (!isXOverlap(flock.x, fox.x, DEFAULT_WIDTH)) continue;
+            if (!isXOverlap(flock.x, fox.x, DEFAULT_ENTITY_WIDTH)) continue;
 
             // Y overlap check (position along lane)
             if (Math.abs(flock.position - fox.position) < COLLISION_THRESHOLD) {
@@ -75,7 +67,7 @@ export function detectFlockVsObstacle(
             if (!obs.alive || obs.definition.x === undefined) continue;
 
             // X overlap check (using flock.x and obstacle.definition.x)
-            const obsWidth = obs.definition.width ?? DEFAULT_WIDTH;
+            const obsWidth = obs.definition.width ?? DEFAULT_ENTITY_WIDTH;
             if (!isXOverlap(flock.x, obs.definition.x, obsWidth)) continue;
 
             // Y overlap check (position along lane)

@@ -8,3 +8,4 @@ export const DEFAULT_TIMEOUT = 60;
 export const SCARECROW_DAMAGE_RATE = 0.2;
 export const OBSTACLE_DAMAGE_MULTIPLIER = 10;
 export const AUTOSAVE_INTERVAL_MS = 25000;
+export const MUZZLE_FLASH_COOLDOWN = 0.3;

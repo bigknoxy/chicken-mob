@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.1] - 2026-03-02
+## [0.2.1] - 2026-03-04
 
 ### Added
 - Star rating system — 1-3 stars based on chicken efficiency (chickens reaching fort / fired)
@@ -13,19 +13,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 2 stars: 50%+ efficiency
   - 1 star: complete level
 - 4x gate multiplier — added to level 6
+- Playwright E2E tests — coverage for menu navigation, level start, and modal interactions
+
+### UI Polish
+- **Nunito font** — Consistent typography across all screens (HUD, menus, modals)
+- **Design tokens** — Centralized `COLORS`, `SPACING`, `RADIUS`, `SHADOWS`, `TRANSITIONS` in `src/ui/styles.ts`
+- **Screen transitions** — Smooth fade transitions between menu, gameplay, and popups
+- **Button feedback** — Hover and click states with scale transforms
+
+### Visual Effects
+- **Gate glow** — Pulsing radial gradient effect on multiplier gates
+- **Muzzle flash** — Cannon firing visual feedback with cooldown
+- **Button hover/click** — Scale transforms for interactive feedback
+
+### Audio
+- **Enhanced win/lose sounds** — Win: ascending C major arpeggio; Lose: descending minor sequence
+- **Haptic feedback** — Vibration patterns for fire, win, and lose events on supported devices
+
+### Code Quality
+- **Centralized constants** — Game constants moved to `src/constants/game.ts` (`COLLISION_THRESHOLD`, `MAX_VISIBLE_PER_FLOCK`, `MUZZLE_FLASH_COOLDOWN`, etc.)
+- **Combat system consolidation** — All combat resolution uses `resolveCombat` from `CombatSystem.ts`
+- **Type safety** — Strict TypeScript with `noUnusedLocals`, `noUnusedParameters`
 
 ### Changed
 - Reduced upgrade costs — growth factors changed from 1.5-2.0 to 1.3-1.5
+- Level 9 scarecrow moved from center (x:0.5) to edge (x:0.2) so skilled players can avoid it
+- Level 12 difficulty reduced: fence HP 20/25→12/15, removed scarecrow, reduced brutes 4→3
+- Gate multipliers changed from 0.3x to 0.5x (less punishing)
 
 ### Fixed
 - Gate visual/collision mismatch — gates now render at actual collision width instead of hardcoded 80%
 - DPR coordinate bug — fixed cannon offset on high-DPR devices by removing DPR scaling
 - Cumulative ctx.scale bug — added setTransform before scale to prevent exponential scaling on resize
-
-### Changed
-- Level 9 scarecrow moved from center (x:0.5) to edge (x:0.2) so skilled players can avoid it
-- Level 12 difficulty reduced: fence HP 20/25→12/15, removed scarecrow, reduced brutes 4→3
-- Gate multipliers changed from 0.3x to 0.5x (less punishing)
 
 ### Added
 - Loss condition — added 60-second timeout to levels

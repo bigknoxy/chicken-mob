@@ -17,6 +17,7 @@ A fast-paced, single-player, lane-based crowd game where you launch chicken mobs
 - **3 barn cannons** — Old Barn, Haystorm, Sniper Nest with unique firing patterns
 - **Meta progression** — Upgrade cannons, chickens, and farm stats between levels
 - **Offline income** — Chicken Coop generates corn while you're away
+- **Polished visuals** — Gate glow effects, muzzle flash, screen transitions, and button feedback
 - **Efficient mob rendering** — Count-based aggregate mobs handle hundreds of units at 60 fps
 - **PWA support** — Install as a mobile web app with portrait orientation lock
 
@@ -28,7 +29,8 @@ A fast-paced, single-player, lane-based crowd game where you launch chicken mobs
 | Build Tool | Vite |
 | Renderer | Canvas 2D (custom) |
 | Audio | Web Audio API (procedural) |
-| Tests | Vitest |
+| Unit Tests | Vitest |
+| E2E Tests | Playwright |
 | CI/CD | GitHub Actions |
 | Hosting | GitHub Pages |
 
@@ -41,8 +43,11 @@ npm install
 # Start dev server
 npm run dev
 
-# Run tests
+# Run unit tests
 npm test
+
+# Run e2e tests (requires dev server running)
+npx playwright test
 
 # Build for production
 npm run build
@@ -60,7 +65,10 @@ src/
 ├── systems/               # Spawning, gates, combat, upgrades, offline
 ├── data/                  # Type definitions, chicken/fox/cannon/level data
 ├── ui/                    # Canvas renderer, HUD, menus, popups
-└── platform/              # Persistence, input handling, audio
+├── platform/              # Persistence, input handling, audio
+├── constants/             # Centralized game constants
+└── utils/                 # Shared utilities (formatting, etc.)
+tests/                     # Playwright e2e tests
 ```
 
 ## Game Architecture

@@ -71,7 +71,7 @@ export class OfflinePopup {
       border-radius: ${RADIUS.md}px;
       background: rgba(34,197,94,0.3);
       color: ${COLORS.success};
-      font-family: monospace;
+      font-family: 'Nunito', sans-serif;
       font-size: 16px;
       font-weight: bold;
       cursor: pointer;

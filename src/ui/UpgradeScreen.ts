@@ -131,7 +131,7 @@ export class UpgradeScreen {
         border-radius: ${RADIUS.sm}px;
         background: ${tabBg};
         color: ${tabColor};
-        font-family: monospace;
+        font-family: 'Nunito', sans-serif;
         font-size: 12px;
         cursor: pointer;
         transition: background ${TRANSITIONS.fast}, transform ${TRANSITIONS.fast};
@@ -197,7 +197,7 @@ export class UpgradeScreen {
         border-radius: ${RADIUS.sm}px;
         background: rgba(34,197,94,0.2);
         color: ${COLORS.success};
-        font-family: monospace;
+        font-family: 'Nunito', sans-serif;
         font-size: 11px;
         transition: transform ${TRANSITIONS.fast};
       `;
@@ -214,7 +214,7 @@ export class UpgradeScreen {
         border-radius: ${RADIUS.sm}px;
         background: ${btnBg};
         color: ${btnColor};
-        font-family: monospace;
+        font-family: 'Nunito', sans-serif;
         font-size: 11px;
         cursor: ${affordable ? 'pointer' : 'default'};
         transition: transform ${TRANSITIONS.fast};

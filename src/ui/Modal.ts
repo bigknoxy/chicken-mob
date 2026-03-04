@@ -1,4 +1,4 @@
-import { SHADOWS } from './styles';
+import { COLORS, RADIUS, SHADOWS, SPACING } from './styles';
 
 export class Modal {
     private overlay: HTMLDivElement;
@@ -24,10 +24,10 @@ export class Modal {
         const card = document.createElement('div');
         card.style.cssText = `
         background: linear-gradient(135deg, #0f172a, #111827);
-        padding: 20px;
-        border-radius: 12px;
+        padding: ${SPACING.lg};
+        border-radius: ${RADIUS.lg}px;
         min-width: 260px;
-        color: #e5e7eb;
+        color: ${COLORS.uiText};
         font-family: 'Nunito', sans-serif;
         box-shadow: ${SHADOWS.md};
         white-space: pre-line;
@@ -40,14 +40,25 @@ export class Modal {
         const p = document.createElement('p');
         p.textContent = content;
         p.style.margin = '0 0 12px 0';
-        p.style.color = '#9ca3af';
+        p.style.color = COLORS.uiMuted;
 
         const row = document.createElement('div');
         row.style.cssText = 'display:flex; gap:8px; justify-content:flex-end;';
         for (const b of buttons) {
             const btn = document.createElement('button');
             btn.textContent = b.text;
-            btn.style.cssText = 'padding:8px 12px; border-radius:8px; cursor:pointer;';
+            btn.style.cssText = `
+                min-width: 44px;
+                min-height: 44px;
+                padding: ${SPACING.sm} ${SPACING.md};
+                border: 1px solid ${COLORS.secondary};
+                border-radius: ${RADIUS.md}px;
+                background: rgba(99,102,241,0.2);
+                color: ${COLORS.uiText};
+                font-family: 'Nunito', sans-serif;
+                font-size: 13px;
+                cursor: pointer;
+            `;
             btn.addEventListener('click', () => { b.onClick(); this.hide(); });
             row.appendChild(btn);
         }

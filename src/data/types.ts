@@ -44,6 +44,7 @@ export interface GateDefinition {
     width: number;           // visual width in game units
     multiplier: number;      // e.g. 2, 3, 5, 10; < 1 for traps; 0 = kill
     isPositive: boolean;     // true = multiply up, false = trap
+    spawnEnemy?: EnemySpawn; // optional: spawn foxes when chickens pass through
 }
 
 // ----- Obstacles -----

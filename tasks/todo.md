@@ -116,3 +116,18 @@
 ---
 
 *Last updated: 2026-03-01*
+
+---
+
+## 2026-03-04 - Next Level Plan (In Progress)
+
+- [ ] Restate goal + acceptance criteria
+- [ ] Market research: player loves/hates/wants for crowd-runner/gate games
+- [ ] Audit current difficulty curve, economy, and level pacing
+- [ ] Design: new difficulty curve + level batch plan (target 45-60 levels)
+- [ ] Implement: level content + difficulty tuning + pacing changes
+- [ ] Implement: progression hooks (stars → unlock flow, rewards)
+- [ ] Add/adjust tests for new systems
+- [ ] Run verification (build, tests, Playwright)
+- [ ] Summarize changes + verification story
+- [ ] Record decisions in docs/MEMORY.md

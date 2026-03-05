@@ -22,6 +22,7 @@ const COLORS = {
     foxOutline: '#c2410c',
     gatePositive: '#22c55e',
     gateNegative: '#ef4444',
+    gateEnemySpawn: '#ff6b35', // Red/orange for enemy spawn gates
     gateFrame: '#6b7280',
     obstacle: '#a16207',
     obstacleFence: '#92400e',
@@ -186,14 +187,29 @@ export class Renderer {
         const isVisible = y > -h && y < this.height + h && x > -w && x < this.width + w;
         if (!isVisible) return;
 
+        // Determine gate color based on type
+        const isEnemySpawn = def.type === 'enemy_spawn';
+        const baseColor = isEnemySpawn
+            ? COLORS.gateEnemySpawn
+            : def.isPositive
+                ? COLORS.gatePositive
+                : COLORS.gateNegative;
+
         // Pulsing glow effect for untriggered gates
         if (!gate.triggered) {
             const pulse = Math.sin(now / 300) * 0.3 + 0.7; // 0.4-1.0 range
             const glowRadius = w * 1.5;
 
+            // Parse color for glow (handle hex colors)
+            const colorRgb = isEnemySpawn
+                ? '255,107,53'  // Orange for enemy spawn
+                : def.isPositive
+                    ? '34,197,94'  // Green for positive
+                    : '239,68,68'; // Red for negative
+
             const gradient = ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
-            gradient.addColorStop(0, `rgba(${def.isPositive ? '34,197,94' : '239,68,68'}, ${pulse * 0.4})`);
-            gradient.addColorStop(0.5, `rgba(${def.isPositive ? '34,197,94' : '239,68,68'}, ${pulse * 0.15})`);
+            gradient.addColorStop(0, `rgba(${colorRgb}, ${pulse * 0.4})`);
+            gradient.addColorStop(0.5, `rgba(${colorRgb}, ${pulse * 0.15})`);
             gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
             ctx.fillStyle = gradient;
@@ -201,7 +217,7 @@ export class Renderer {
         }
 
         // Gate body
-        ctx.fillStyle = def.isPositive ? COLORS.gatePositive : COLORS.gateNegative;
+        ctx.fillStyle = baseColor;
         ctx.globalAlpha = 0.85;
 
         // Rounded rect
@@ -226,22 +242,36 @@ export class Renderer {
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Label
-        const label = def.isPositive
-            ? `×${def.multiplier}`
-            : def.multiplier === 0 ? '☠' : `×${def.multiplier}`;
+        // Label - different for enemy spawn gates
+        let label: string;
+        if (isEnemySpawn) {
+            // Fox icon for enemy spawn gates
+            label = '🦊';
+        } else {
+            label = def.isPositive
+                ? `×${def.multiplier}`
+                : def.multiplier === 0 ? '☠' : `×${def.multiplier}`;
+        }
 
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 14px monospace';
+        ctx.font = isEnemySpawn ? 'bold 18px sans-serif' : 'bold 14px monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(label, x, y);
+        ctx.fillText(label, x, y - 4);
 
-        // Icon indicator (colorblind-friendly)
-        if (def.isPositive) {
-            ctx.fillText('▲', x + w / 2 - 12, y);
-        } else {
-            ctx.fillText('▼', x + w / 2 - 12, y);
+        // Multiplier text below for enemy spawn gates
+        if (isEnemySpawn) {
+            ctx.font = 'bold 12px monospace';
+            ctx.fillText(`×${def.multiplier}`, x, y + 12);
+        }
+
+        // Icon indicator (colorblind-friendly) - skip for enemy spawn since it has fox icon
+        if (!isEnemySpawn) {
+            if (def.isPositive) {
+                ctx.fillText('▲', x + w / 2 - 12, y);
+            } else {
+                ctx.fillText('▼', x + w / 2 - 12, y);
+            }
         }
     }
 

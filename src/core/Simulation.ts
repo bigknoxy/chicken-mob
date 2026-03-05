@@ -64,21 +64,27 @@ export function simulationTick(state: GameState, dt: number): void {
             // Check if flock just crossed through the gate this tick
             const prevPos = flock.position - speedToPositionRate(flock.speed, state.level.length) * dt;
             if (prevPos < gatePos && flock.position >= gatePos) {
-                const mult = gate.definition.multiplier;
-                const oldCount = flock.count;
-                if (gate.definition.isPositive) {
-                    flock.count = Math.floor(oldCount * mult);
+                // Handle enemy spawn gates differently
+                if (gate.definition.type === 'enemy_spawn') {
+                    processEnemySpawnGate(flock, gate.definition, state);
                 } else {
-                    flock.count = Math.max(0, Math.floor(oldCount * mult));
-                }
-                // Spawn particles at gate position
-                if (flock.count > oldCount) {
-                    spawnGateParticles(state, gate.definition.lane, gatePos, true);
-                } else if (flock.count < oldCount) {
-                    spawnGateParticles(state, gate.definition.lane, gatePos, false);
-                }
-                if (flock.count <= 0) {
-                    flock.alive = false;
+                    // Standard multiply gate
+                    const mult = gate.definition.multiplier;
+                    const oldCount = flock.count;
+                    if (gate.definition.isPositive) {
+                        flock.count = Math.floor(oldCount * mult);
+                    } else {
+                        flock.count = Math.max(0, Math.floor(oldCount * mult));
+                    }
+                    // Spawn particles at gate position
+                    if (flock.count > oldCount) {
+                        spawnGateParticles(state, gate.definition.lane, gatePos, true);
+                    } else if (flock.count < oldCount) {
+                        spawnGateParticles(state, gate.definition.lane, gatePos, false);
+                    }
+                    if (flock.count <= 0) {
+                        flock.alive = false;
+                    }
                 }
             }
         }
@@ -233,6 +239,61 @@ function spawnGateParticles(
             maxLife: 0.8,
             color,
             size: 3 + Math.random() * 4,
+        });
+    }
+}
+
+/** Process enemy spawn gate - spawns foxes when chickens pass through */
+function processEnemySpawnGate(
+    flock: { count: number; lane: number; position: number },
+    gate: { multiplier: number; spawnEnemyType?: string; position: number; lane: number },
+    state: GameState,
+): void {
+    // Calculate fox count to spawn based on chicken count and multiplier
+    const foxCount = Math.floor(flock.count * gate.multiplier);
+
+    if (foxCount > 0) {
+        // Determine enemy type to spawn (default to fox_scout)
+        const enemyTypeId = gate.spawnEnemyType || 'fox_scout';
+        const foxType = getFox(enemyTypeId);
+
+        // Create fox pack at position just past the gate
+        const foxPack: FoxPack = {
+            id: state.nextEntityId++,
+            foxTypeId: enemyTypeId,
+            count: foxCount,
+            lane: gate.lane,
+            x: undefined, // Will be calculated based on lane
+            position: gate.position + 0.02, // Spawn just past gate (moving toward cannon)
+            speed: foxType.moveSpeed,
+            alive: true,
+        };
+        state.foxPacks.push(foxPack);
+
+        // Spawn particle effects for enemy spawn
+        spawnEnemySpawnParticles(state, gate.position, gate.lane, foxCount);
+    }
+}
+
+/** Spawn particle effects when enemy spawn gate activates */
+function spawnEnemySpawnParticles(
+    state: GameState,
+    _position: number,
+    _lane: number,
+    count: number,
+): void {
+    const particleCount = Math.min(count * 2, 30); // Cap at 30 particles
+
+    for (let i = 0; i < particleCount; i++) {
+        state.particles.push({
+            x: 0, // will be positioned by renderer using lane/position
+            y: 0,
+            vx: (Math.random() - 0.5) * 150,
+            vy: (Math.random() - 0.5) * 150,
+            life: 0.6 + Math.random() * 0.4,
+            maxLife: 1.0,
+            color: '#ff6b6b', // Light red for enemy spawn
+            size: 4 + Math.random() * 4,
         });
     }
 }

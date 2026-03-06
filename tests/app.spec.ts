@@ -11,7 +11,15 @@ test('menu renders and opens upgrades', async ({ page }) => {
 
 test('can start level and fire', async ({ page }) => {
     await page.goto('/');
-    const levelButton = page.getByRole('button', { name: '1' });
+    
+    // Dismiss offline popup if present
+    const claimBtn = page.getByRole('button', { name: 'Claim!' });
+    if (await claimBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await claimBtn.click();
+    }
+    
+    // Level 1 button: "🐔 1 First Steps"
+    const levelButton = page.getByRole('button', { name: /1 First Steps/ });
     await levelButton.click();
     await page.waitForTimeout(500);
     
@@ -23,8 +31,22 @@ test('can start level and fire', async ({ page }) => {
 
 test('all 18 levels displayed in menu', async ({ page }) => {
     await page.goto('/');
-    for (let i = 1; i <= 18; i++) {
-        const btn = page.getByRole('button', { name: String(i) });
+    
+    // Dismiss offline popup if present
+    const claimBtn = page.getByRole('button', { name: 'Claim!' });
+    if (await claimBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+        await claimBtn.click();
+    }
+    
+    // Check all 18 levels exist (buttons contain level number and name)
+    const levelNames = [
+        'First Steps', 'Double Up', 'Big Boost', 'Crossroads', 'Fox Alert', 'Trap Door',
+        'Fox Brute', 'Hay Day', 'Scarecrow Alley', 'Three Ways', 'Fork', 'Gauntlet',
+        'Sniper Den', 'Mixed Bag', 'Pressure Cooker', 'The Wall', 'Swarm', 'Henhouse Siege'
+    ];
+    
+    for (let i = 0; i < 18; i++) {
+        const btn = page.getByRole('button', { name: levelNames[i] });
         await expect(btn).toBeVisible();
     }
 });

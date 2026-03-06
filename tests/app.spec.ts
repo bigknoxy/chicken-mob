@@ -11,12 +11,22 @@ test('menu renders and opens upgrades', async ({ page }) => {
 
 test('can start level and fire', async ({ page }) => {
     await page.goto('/');
-    const levelButton = page.getByRole('button', { name: /First Flock/ });
+    const levelButton = page.getByRole('button', { name: '1' });
     await levelButton.click();
     await page.waitForTimeout(500);
-    await page.mouse.click(640, 600);
+    
+    // Click canvas to fire chickens
+    await page.locator('#game-canvas').click();
     await page.waitForTimeout(500);
     await expect(page.locator('#game-canvas')).toBeVisible();
+});
+
+test('all 18 levels displayed in menu', async ({ page }) => {
+    await page.goto('/');
+    for (let i = 1; i <= 18; i++) {
+        const btn = page.getByRole('button', { name: String(i) });
+        await expect(btn).toBeVisible();
+    }
 });
 
 test('coop modal opens', async ({ page }) => {

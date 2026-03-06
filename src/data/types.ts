@@ -41,13 +41,13 @@ export type GateType = 'multiply' | 'enemy_spawn';
 export interface GateDefinition {
     id: string;
     position: number;        // 0..1 along lane length
-    lane: number;           // lane index (0-based)
-    x?: number;             // 0..1 normalized horizontal position (optional for backwards compat)
-    width: number;          // visual width in game units
-    multiplier: number;    // e.g. 2, 3, 5, 10; < 1 for traps; 0 = kill
-    isPositive: boolean;    // true = multiply up, false = trap
-    type: GateType;         // 'multiply' = standard gate, 'enemy_spawn' = spawns foxes
-    spawnEnemyType?: string; // fox type to spawn (e.g., 'fox_scout', 'fox_brute')
+    lane: number;            // lane index (0-based)
+    x?: number;              // 0..1 normalized horizontal position (optional for backwards compat)
+    width: number;           // visual width in game units
+    multiplier: number;      // e.g. 2, 3, 5, 10; < 1 for traps; 0 = kill
+    isPositive: boolean;     // true = multiply up, false = trap
+    type?: GateType;         // 'multiply' = standard gate, 'enemy_spawn' = spawns foxes
+    spawnEnemy?: EnemySpawn; // optional: spawn foxes when chickens pass through
 }
 
 // ----- Obstacles -----

@@ -17,6 +17,7 @@ import { getChicken } from '@/data/chickens';
 import { getFox } from '@/data/foxes';
 import { resolveCombat } from '@/systems/CombatSystem';
 import { DEFAULT_ENTITY_WIDTH, DEFAULT_TIMEOUT } from '@/constants/game';
+import { audio } from '@/platform/Audio';
 import {
     detectFlockVsFox,
     detectFlockVsFort,
@@ -53,12 +54,18 @@ export function simulationTick(state: GameState, dt: number): void {
 
     // ── 3. Gate pass-through ──
     for (const gate of state.gates) {
+        // Get gate x position with fallback to lane center
+        const gateX = gate.definition.x ?? ((gate.definition.lane + 0.5) / state.level.laneCount);
+
         for (const flock of state.flocks) {
-            if (!flock.alive || flock.count <= 0 || flock.x === undefined || gate.definition.x === undefined) continue;
+            if (!flock.alive || flock.count <= 0) continue;
+
+            // Get flock x position with fallback to lane center
+            const flockX = flock.x ?? ((flock.lane + 0.5) / state.level.laneCount);
 
             // X overlap check: flock.x overlaps with gate.x (using gate width)
             const gateWidth = gate.definition.width ?? DEFAULT_ENTITY_WIDTH;
-            if (Math.abs(flock.x - gate.definition.x) >= gateWidth / 2) continue;
+            if (Math.abs(flockX - gateX) >= gateWidth / 2) continue;
 
             const gatePos = gate.definition.position;
             // Check if flock just crossed through the gate this tick
@@ -79,11 +86,40 @@ export function simulationTick(state: GameState, dt: number): void {
                     // Spawn particles at gate position
                     if (flock.count > oldCount) {
                         spawnGateParticles(state, gate.definition.lane, gatePos, true);
+                        audio.playMultiply();
                     } else if (flock.count < oldCount) {
                         spawnGateParticles(state, gate.definition.lane, gatePos, false);
+                        audio.playTrap();
                     }
                     if (flock.count <= 0) {
                         flock.alive = false;
+                    }
+                }
+
+                // Handle enemy spawn gate - spawn foxes when chickens pass through
+                if (gate.definition.spawnEnemy) {
+                    const spawn = gate.definition.spawnEnemy;
+                    let spawnFoxType;
+                    try {
+                        spawnFoxType = getFox(spawn.foxTypeId);
+                    } catch {
+                        console.warn(`Unknown fox type in spawn gate: ${spawn.foxTypeId}`);
+                    }
+
+                    if (spawnFoxType) {
+                        const spawnX = (spawn.lane + 0.5) / state.level.laneCount;
+                        const foxPack: FoxPack = {
+                            id: state.nextEntityId++,
+                            foxTypeId: spawn.foxTypeId,
+                            count: spawn.count,
+                            lane: spawn.lane,
+                            x: spawnX,
+                            position: gatePos + 0.05, // spawn slightly ahead of the gate
+                            speed: spawnFoxType.moveSpeed,
+                            alive: true,
+                        };
+                        state.foxPacks.push(foxPack);
+                        audio.playTrap(); // Use trap sound for enemy spawn
                     }
                 }
             }
@@ -107,6 +143,9 @@ export function simulationTick(state: GameState, dt: number): void {
         if (foxPack.count <= 0) {
             foxPack.alive = false;
         }
+
+        // Play combat sound effect
+        audio.playCombat();
     }
 
     // ── 4b. Flock vs Obstacle ──
@@ -160,7 +199,15 @@ export function simulationTick(state: GameState, dt: number): void {
     // ── 5. Enemy spawn schedule ──
     const readySpawns = state.pendingSpawns.filter(s => s.time <= state.elapsedTime);
     for (const spawn of readySpawns) {
-        const foxType = getFox(spawn.foxTypeId);
+        // Safe handling: skip spawn if unknown fox type
+        let foxType;
+        try {
+            foxType = getFox(spawn.foxTypeId);
+        } catch {
+            console.warn(`Unknown fox type: ${spawn.foxTypeId}, skipping spawn`);
+            continue;
+        }
+
         const pack: FoxPack = {
             id: state.nextEntityId++,
             foxTypeId: spawn.foxTypeId,
@@ -223,16 +270,19 @@ export function simulationTick(state: GameState, dt: number): void {
 /** Spawn particles at a gate position */
 function spawnGateParticles(
     state: GameState,
-    _lane: number,
-    _position: number,
+    lane: number,
+    position: number,
     positive: boolean,
 ): void {
     const count = positive ? 12 : 6;
     const color = positive ? '#4ade80' : '#ef4444';
+    // Convert lane and position to game coordinates
+    const baseX = (lane + 0.5) * 100; // center of lane in pixels (assuming 100px per lane)
+    const baseY = position * state.level.length; // position along lane length
     for (let i = 0; i < count; i++) {
         state.particles.push({
-            x: 0, // will be positioned by renderer using lane/position
-            y: 0,
+            x: baseX,
+            y: baseY,
             vx: (Math.random() - 0.5) * 200,
             vy: (Math.random() - 0.5) * 200,
             life: 0.5 + Math.random() * 0.3,

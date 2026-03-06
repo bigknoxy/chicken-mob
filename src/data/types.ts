@@ -2,6 +2,11 @@
 // Chicken Mob — Core Data Types
 // ============================================================
 
+// ----- Helper Functions -----
+export function getLaneCenter(lane: number, laneCount: number): number {
+    return (lane + 0.5) / laneCount;
+}
+
 // ----- Currencies -----
 export type CurrencyId = 'corn' | 'golden_feather';
 

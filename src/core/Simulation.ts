@@ -16,7 +16,7 @@ import type { GameState, FoxPack, Particle, LevelSummary } from '@/data/types';
 import { getChicken } from '@/data/chickens';
 import { getFox } from '@/data/foxes';
 import { resolveCombat } from '@/systems/CombatSystem';
-import { DEFAULT_ENTITY_WIDTH, DEFAULT_TIMEOUT } from '@/constants/game';
+import { DEFAULT_ENTITY_WIDTH, DEFAULT_TIMEOUT, FLOCK_DEATH_THRESHOLD, MIN_FLOCK_COUNT, SCREEN_SHAKE_INTENSITY } from '@/constants/game';
 import { audio } from '@/platform/Audio';
 import {
     detectFlockVsFox,
@@ -153,7 +153,7 @@ export function simulationTick(state: GameState, dt: number): void {
     for (const { flock, obstacle } of obsCollisions) {
         if (obstacle.definition.type === 'scarecrow') {
             // Scarecrow knocks out a portion of chickens each tick
-            const killed = Math.max(1, Math.floor(flock.count * 0.2));
+            const killed = Math.max(MIN_FLOCK_COUNT, Math.floor(flock.count * FLOCK_DEATH_THRESHOLD));
             flock.count -= killed;
             if (flock.count <= 0) {
                 flock.count = 0;
@@ -193,7 +193,7 @@ export function simulationTick(state: GameState, dt: number): void {
         flock.alive = false;
 
         // Screen shake!
-        state.screenShake = Math.max(state.screenShake, 0.15);
+        state.screenShake = Math.max(state.screenShake, SCREEN_SHAKE_INTENSITY);
     }
 
     // ── 5. Enemy spawn schedule ──

@@ -15,3 +15,6 @@ export const FLOCK_DEATH_THRESHOLD = 0.2;
 export const MIN_FLOCK_COUNT = 1;
 export const DEFAULT_GATE_WIDTH = 0.08;
 export const SCREEN_SHAKE_INTENSITY = 0.15;
+
+// Aiming constants
+export const MAX_AIM_ANGLE = Math.PI / 3; // 60 degrees left/right

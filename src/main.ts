@@ -15,7 +15,7 @@ import { calculateOfflineEarnings, claimOfflineEarnings } from '@/systems/Offlin
 import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
 import { InputManager, hapticFeedback, HAPTIC } from '@/platform/Input';
 import { audio } from '@/platform/Audio';
-import { AUTOSAVE_INTERVAL_MS } from '@/constants/game';
+import { AUTOSAVE_INTERVAL_MS, MAX_AIM_ANGLE } from '@/constants/game';
 import { Modal } from '@/ui/Modal';
 import { Renderer } from '@/ui/Renderer';
 import { HUD } from '@/ui/HUD';
@@ -78,14 +78,28 @@ const loop = new GameLoop(
         const inputState = input.getState();
 
         if (inputState.isDown) {
-            // Map touch X to cannon horizontal position (0-1 normalized)
             const canvasWidth = renderer.getWidth();
-            gameState.cannonX = Math.max(0, Math.min(1, inputState.x / canvasWidth));
+            const canvasHeight = renderer.getHeight();
+            
+            // Cannon stays at center (or last position)
+            // Touch position determines aim target
+            const cannonX = (gameState.cannonX ?? 0.5) * canvasWidth;
+            const cannonY = canvasHeight - (laneGeo?.bottomMargin ?? 60) / 2;
+            
+            // Calculate aim angle from cannon to touch position
+            // Angle: 0 = straight up, positive = right, negative = left
+            const dx = inputState.x - cannonX;
+            const dy = cannonY - inputState.y; // Positive when touching above cannon
+            const rawAngle = Math.atan2(dx, dy);
+            
+            // Clamp angle to max range
+            gameState.cannonAngle = Math.max(-MAX_AIM_ANGLE, Math.min(MAX_AIM_ANGLE, rawAngle));
+            
             gameState.isFiring = true;
 
             // Auto-fire while holding
             if (gameState.cannonCooldown <= 0) {
-                fireChickens(gameState, playerState, gameState.cannonX);
+                fireChickens(gameState, playerState, gameState.cannonAngle);
                 audio.playFire();
                 hapticFeedback(HAPTIC.fire);
             }

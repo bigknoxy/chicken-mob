@@ -494,17 +494,28 @@ export class Renderer {
             ctx.fill();
         }
 
-        // Aim line (vertical, straight up)
+        // Aim line in direction of aim angle (show when touching)
         if (state.isFiring) {
             const aimLen = 120;
+            const angle = state.cannonAngle ?? 0;
+            // Calculate end point based on angle (0 = straight up, positive = right)
+            const endX = cx + Math.sin(angle) * aimLen;
+            const endY = cy - Math.cos(angle) * aimLen;
+            
             ctx.strokeStyle = COLORS.aimLine;
             ctx.lineWidth = 3;
             ctx.setLineDash([6, 4]);
             ctx.beginPath();
             ctx.moveTo(cx, cy);
-            ctx.lineTo(cx, cy - aimLen);
+            ctx.lineTo(endX, endY);
             ctx.stroke();
             ctx.setLineDash([]);
+            
+            // Target indicator at end of aim line
+            ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
+            ctx.beginPath();
+            ctx.arc(endX, endY, 8, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         // Cannon emoji

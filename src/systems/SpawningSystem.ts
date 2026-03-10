@@ -35,11 +35,13 @@ export function getEffectiveChickenSpeed(playerState: PlayerState): number {
     return chickenSpeedValue(level);
 }
 
-/** Fire a flock from the cannon toward targetX (0-1 normalized horizontal position) */
+/** Fire a flock from the cannon at the given aim angle (radians).
+ *  Angle: 0 = straight up, positive = right, negative = left
+ */
 export function fireChickens(
     state: GameState,
     playerState: PlayerState,
-    targetX: number,
+    aimAngle: number,
 ): void {
     const cannon = getCannon(playerState.equippedCannonId);
     const chickenType = getChicken(cannon.unitTypeId);
@@ -50,16 +52,22 @@ export function fireChickens(
 
     if (state.cannonCooldown > 0) return;
 
-    // Clamp targetX to valid range and derive lane for visual purposes
-    const clampedX = Math.max(0, Math.min(targetX, 1));
-    const lane = Math.floor(clampedX * state.level.laneCount);
+    // Calculate target X position based on aim angle
+    // tan(angle) gives the X offset relative to the vertical distance
+    // We use a simplified model: X offset = sin(angle) * spread factor
+    const cannonX = state.cannonX ?? 0.5;
+    const angleSpread = Math.sin(aimAngle) * 0.4; // Max 40% horizontal spread at max angle
+    const targetX = Math.max(0, Math.min(1, cannonX + angleSpread));
+
+    // Derive lane for visual purposes
+    const lane = Math.floor(targetX * state.level.laneCount);
 
     const flock: Flock = {
         id: state.nextEntityId++,
         chickenTypeId: chickenType.id,
         count: burstSize,
         lane,
-        x: clampedX,
+        x: targetX,
         position: 0.0, // start at cannon
         speed,
         alive: true,

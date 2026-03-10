@@ -16,6 +16,8 @@ export interface InputState {
     justPressed: boolean;
     /** Was the press released this frame? */
     justReleased: boolean;
+    /** Aim angle in radians (0 = straight up, positive = right, negative = left) */
+    aimAngle: number;
 }
 
 /** Haptic feedback utility - safe guard if not supported */
@@ -42,6 +44,7 @@ export class InputManager {
         y: 0,
         justPressed: false,
         justReleased: false,
+        aimAngle: 0,
     };
 
     constructor(private readonly canvas: HTMLCanvasElement) {

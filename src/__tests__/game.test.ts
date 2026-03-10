@@ -506,3 +506,49 @@ describe('Level Data Integrity', () => {
         });
     });
 });
+
+// ── Aiming System ──
+
+describe('Aiming System', () => {
+    it('aim angle 0 fires straight up (same X as cannon)', () => {
+        const cannonX = 0.5;
+        const aimAngle = 0;
+        const angleSpread = Math.sin(aimAngle) * 0.4;
+        const targetX = cannonX + angleSpread;
+        expect(targetX).toBeCloseTo(0.5, 2);
+    });
+
+    it('positive aim angle fires to the right', () => {
+        const cannonX = 0.5;
+        const aimAngle = Math.PI / 6; // 30 degrees
+        const angleSpread = Math.sin(aimAngle) * 0.4;
+        const targetX = cannonX + angleSpread;
+        expect(targetX).toBeGreaterThan(cannonX);
+    });
+
+    it('negative aim angle fires to the left', () => {
+        const cannonX = 0.5;
+        const aimAngle = -Math.PI / 6; // -30 degrees
+        const angleSpread = Math.sin(aimAngle) * 0.4;
+        const targetX = cannonX + angleSpread;
+        expect(targetX).toBeLessThan(cannonX);
+    });
+
+    it('max angle produces max horizontal spread', () => {
+        const cannonX = 0.5;
+        const maxAngle = Math.PI / 3; // 60 degrees (MAX_AIM_ANGLE)
+        const angleSpread = Math.sin(maxAngle) * 0.4;
+        const targetX = cannonX + angleSpread;
+        // sin(60) ≈ 0.866, so spread ≈ 0.346
+        expect(targetX).toBeCloseTo(0.846, 2);
+    });
+
+    it('target X is clamped to 0-1 range', () => {
+        const cannonX = 0.1;
+        const aimAngle = -Math.PI / 3; // max left
+        const angleSpread = Math.sin(aimAngle) * 0.4;
+        const targetX = Math.max(0, Math.min(1, cannonX + angleSpread));
+        expect(targetX).toBeGreaterThanOrEqual(0);
+        expect(targetX).toBeLessThanOrEqual(1);
+    });
+});

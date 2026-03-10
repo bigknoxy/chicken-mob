@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-03-10
+
+### Added
+- **Chicken favicon** — Custom SVG favicon with cute chicken design
+- PWA icon support for mobile home screen installation
+
+### Fixed
+- 404 error for favicon.ico on production
+- Theme color mismatch in manifest.json
+
 ## [0.4.0] - 2026-03-10
 
 ### Added

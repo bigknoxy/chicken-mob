@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-10
+
+### Added
+- **Cannon aiming control** — Touch position now determines aim angle, allowing players to direct chickens left or right
+- Angled aim line visualization with target indicator
+- `MAX_AIM_ANGLE` constant (60°) for tunable aim range
+
+### Changed
+- Transformed core loop from "hold to fire" to "aim and fire" for meaningful player agency
+- Chickens now fire at target X based on `sin(angle) * spread` (max 40% horizontal spread)
+
+### Technical
+- Added `aimAngle` to `InputState` interface
+- 5 new unit tests for aiming math
+- All 60 tests passing
+
 ## [0.2.1] - 2026-03-04
 
 ### Added

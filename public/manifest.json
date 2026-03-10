@@ -5,7 +5,14 @@
     "display": "standalone",
     "orientation": "portrait",
     "background_color": "#1a1a2e",
-    "theme_color": "#f4a261",
+    "theme_color": "#fbbf24",
     "description": "Launch chickens, multiply your flock, and trample the fox fort!",
-    "icons": []
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
 }

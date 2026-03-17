@@ -93,10 +93,22 @@ export interface FoxFortDefinition {
     rewardMultiplier: number; // corn reward multiplied by this
 }
 
+// ----- Worlds -----
+export type WorldTheme = 'grassland' | 'desert' | 'snow' | 'lava';
+
+export interface WorldDefinition {
+    id: string;              // e.g., 'W1', 'W2'
+    name: string;
+    levels: string[];        // array of level IDs in this world
+    theme: WorldTheme;
+    unlocked: boolean;       // initial unlock state
+}
+
 // ----- Levels -----
 export interface LevelDefinition {
     id: string;
     name: string;
+    worldId: string;         // which world this level belongs to
     laneCount: number;
     length: number;          // visual lane length in game units
     gates: GateDefinition[];
@@ -150,10 +162,13 @@ export interface PlayerState {
     equippedCannonId: string;
     equippedChickenId: string;
     upgrades: Record<string, number>; // upgradeId → current level
-    currentLevel: number;             // 1-based index into levels array
-    unlockedLevels: number;           // how many levels unlocked
+    currentWorld: string;            // current world ID (e.g., 'W1')
+    currentLevel: number;            // 1-based index into levels array
+    unlockedLevels: number;          // how many levels unlocked
+    worldsUnlocked: string[];        // array of unlocked world IDs
+    worldsCompleted: string[];       // array of completed world IDs
     coop: CoopState;
-    lastSessionTimestamp: number;     // epoch ms
+    lastSessionTimestamp: number;    // epoch ms
     totalCornEarned: number;
     totalLevelsCompleted: number;
     levelStars: Record<number, StarRating>; // level index → star rating

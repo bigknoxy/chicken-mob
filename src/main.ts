@@ -6,7 +6,7 @@
  */
 
 import type { GameState, LiveObstacle, LiveGate, LevelDefinition, StarRating } from '@/data/types';
-import { getLevel, TOTAL_LEVELS } from '@/data/levels';
+import { getLevel, TOTAL_LEVELS, WORLDS, getLevelsForWorld, LEVELS } from '@/data/levels';
 import { GameLoop } from '@/core/GameLoop';
 import { simulationTick, calculateStars, generateLevelSummary } from '@/core/Simulation';
 import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
@@ -217,6 +217,31 @@ function onLevelEnd(): void {
         if (currentIndex < TOTAL_LEVELS - 1) {
             playerState.currentLevel = currentIndex + 1;
             playerState.unlockedLevels = Math.max(playerState.unlockedLevels, currentIndex + 2);
+        }
+
+        // Check for world completion
+        const currentLevelDef = getLevel(currentIndex);
+        const currentWorldId = currentLevelDef.worldId;
+        
+        // Check if ALL levels in the world have at least 1 star (completed)
+        const worldLevels = getLevelsForWorld(currentWorldId);
+        const allWorldLevelsCompleted = worldLevels.every((wl) => {
+            const idx = LEVELS.findIndex((l) => l.id === wl.id);
+            return playerState.levelStars[idx] !== undefined;
+        });
+
+        if (allWorldLevelsCompleted && !playerState.worldsCompleted.includes(currentWorldId)) {
+            playerState.worldsCompleted.push(currentWorldId);
+            
+            // Unlock next world
+            const currentWorldIndex = WORLDS.findIndex(w => w.id === currentWorldId);
+            if (currentWorldIndex < WORLDS.length - 1) {
+                const nextWorld = WORLDS[currentWorldIndex + 1];
+                if (!playerState.worldsUnlocked.includes(nextWorld.id)) {
+                    playerState.worldsUnlocked.push(nextWorld.id);
+                    playerState.currentWorld = nextWorld.id;
+                }
+            }
         }
 
         audio.playWin();

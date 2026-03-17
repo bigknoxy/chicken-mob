@@ -15,8 +15,11 @@ export function createDefaultPlayerState(): PlayerState {
         equippedCannonId: 'barn_basic',
         equippedChickenId: 'clucky',
         upgrades: {},
+        currentWorld: 'W1',
         currentLevel: 0,
         unlockedLevels: 1,
+        worldsUnlocked: ['W1'],
+        worldsCompleted: [],
         coop: {
             cornPerSecond: 1.0,
             offlineCapSeconds: 4 * 3600, // 4 hours

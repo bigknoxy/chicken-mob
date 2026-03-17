@@ -42,7 +42,7 @@ describe('Data Integrity', () => {
     });
 
     it('all level definitions are valid', () => {
-        expect(TOTAL_LEVELS).toBe(18);
+        expect(TOTAL_LEVELS).toBe(36);
         for (let i = 0; i < TOTAL_LEVELS; i++) {
             const level = getLevel(i);
             expect(level.id).toBeTruthy();
@@ -167,8 +167,11 @@ describe('Offline System', () => {
             equippedCannonId: 'barn_basic',
             equippedChickenId: 'clucky',
             upgrades: {},
+            currentWorld: 'W1',
             currentLevel: 0,
             unlockedLevels: 1,
+            worldsUnlocked: ['W1'],
+            worldsCompleted: [],
             coop: { cornPerSecond: 2.0, offlineCapSeconds: 3600 },
             lastSessionTimestamp: Date.now() - 1800_000, // 30 minutes ago
             totalCornEarned: 0,
@@ -189,8 +192,11 @@ describe('Offline System', () => {
             equippedCannonId: 'barn_basic',
             equippedChickenId: 'clucky',
             upgrades: {},
+            currentWorld: 'W1',
             currentLevel: 0,
             unlockedLevels: 1,
+            worldsUnlocked: ['W1'],
+            worldsCompleted: [],
             coop: { cornPerSecond: 1.0, offlineCapSeconds: 3600 }, // 1 hour cap
             lastSessionTimestamp: Date.now() - 86400_000, // 24 hours ago
             totalCornEarned: 0,
@@ -211,8 +217,11 @@ describe('Offline System', () => {
             equippedCannonId: 'barn_basic',
             equippedChickenId: 'clucky',
             upgrades: {},
+            currentWorld: 'W1',
             currentLevel: 0,
             unlockedLevels: 1,
+            worldsUnlocked: ['W1'],
+            worldsCompleted: [],
             coop: { cornPerSecond: 1.0, offlineCapSeconds: 3600 },
             lastSessionTimestamp: Date.now(),
             totalCornEarned: 0,
@@ -364,7 +373,14 @@ describe('Level Data Integrity', () => {
                 const currHp = LEVELS[i].fort.hp;
                 // Allow small dips (up to 10%) but generally expect increase
                 const minExpected = prevHp * 0.9;
-                expect(currHp).toBeGreaterThanOrEqual(minExpected);
+                // Additionally, allow a larger dip (up to 50%) every 18 levels (start of new world)
+                if (i % 18 === 0) {
+                    // This is the start of a new world (except for i=0, which we skip)
+                    // Allow a dip of up to 50%
+                    expect(currHp).toBeGreaterThanOrEqual(prevHp * 0.5);
+                } else {
+                    expect(currHp).toBeGreaterThanOrEqual(minExpected);
+                }
             }
         });
 
@@ -388,7 +404,14 @@ describe('Level Data Integrity', () => {
                 const currReward = LEVELS[i].rewardCorn;
                 // Allow small dips (up to 15%) but generally expect increase
                 const minExpected = prevReward * 0.85;
-                expect(currReward).toBeGreaterThanOrEqual(minExpected);
+                // Additionally, allow a larger dip (up to 50%) every 18 levels (start of new world)
+                if (i % 18 === 0) {
+                    // This is the start of a new world (except for i=0, which we skip)
+                    // Allow a dip of up to 50%
+                    expect(currReward).toBeGreaterThanOrEqual(prevReward * 0.5);
+                } else {
+                    expect(currReward).toBeGreaterThanOrEqual(minExpected);
+                }
             }
         });
 

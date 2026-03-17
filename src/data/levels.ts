@@ -437,7 +437,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L19: Advanced Scout Pressure ──────────────────────────────────
      {
          id: 'level_19',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Scout Swarm',
          laneCount: 2,
          length: 900,
@@ -459,7 +459,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L20: Brute Force ─────────────────────────────────────────────
      {
          id: 'level_20',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Brute Force',
          laneCount: 1,
          length: 1000,
@@ -481,7 +481,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L21: Mixed Assault ───────────────────────────────────────────
      {
          id: 'level_21',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Mixed Assault',
          laneCount: 2,
          length: 1000,
@@ -509,7 +509,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L22: Sniper Introduction ─────────────────────────────────────
      {
          id: 'level_22',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Sniper Nest',
          laneCount: 2,
          length: 1100,
@@ -530,7 +530,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L23: Sniper and Brute Combo ──────────────────────────────────
      {
          id: 'level_23',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Sniper Brigade',
          laneCount: 2,
          length: 1100,
@@ -553,7 +553,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L24: Triple Threat ───────────────────────────────────────────
      {
          id: 'level_24',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Triple Threat',
          laneCount: 2,
          length: 1200,
@@ -581,7 +581,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L25: Gate Maze ───────────────────────────────────────────────
      {
          id: 'level_25',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Gate Maze',
          laneCount: 2,
          length: 1200,
@@ -606,7 +606,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L26: Timing Challenge ────────────────────────────────────────
      {
          id: 'level_26',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Timing Challenge',
          laneCount: 1,
          length: 1300,
@@ -629,7 +629,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L27: Split Decision ──────────────────────────────────────────
      {
          id: 'level_27',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Split Decision',
          laneCount: 2,
          length: 1300,
@@ -657,7 +657,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L28: Obstacle Course ───────────────────────────────────────
      {
          id: 'level_28',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Obstacle Course',
          laneCount: 2,
          length: 1400,
@@ -683,7 +683,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L29: Scarecrow Field ───────────────────────────────────────
      {
          id: 'level_29',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Scarecrow Field',
          laneCount: 2,
          length: 1400,
@@ -707,7 +707,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L30: Hay Bale Barrage ──────────────────────────────────────
      {
          id: 'level_30',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Hay Bale Barrage',
          laneCount: 2,
          length: 1500,
@@ -737,7 +737,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L31: Fort Knox ───────────────────────────────────────────────
      {
          id: 'level_31',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Fort Knox',
          laneCount: 2,
          length: 1500,
@@ -759,7 +759,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L32: Iron Fortress ───────────────────────────────────────────
      {
          id: 'level_32',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Iron Fortress',
          laneCount: 2,
          length: 1600,
@@ -781,7 +781,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L33: Bastion ───────────────────────────────────────────────
      {
          id: 'level_33',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Bastion',
          laneCount: 2,
          length: 1600,
@@ -807,7 +807,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L34: The Gauntlet ───────────────────────────────────────────
      {
          id: 'level_34',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'The Gauntlet',
          laneCount: 3,
          length: 1700,
@@ -835,7 +835,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L35: Swarm Overload ────────────────────────────────────────
      {
          id: 'level_35',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Swarm Overload',
          laneCount: 3,
          length: 1800,
@@ -864,7 +864,7 @@ export const LEVELS: LevelDefinition[] = [
      // ─── L36: Final Siege ───────────────────────────────────────────
      {
          id: 'level_36',
-        worldId: "W2",
+        worldId: 'W2',
          name: 'Final Siege',
          laneCount: 3,
          length: 2000,

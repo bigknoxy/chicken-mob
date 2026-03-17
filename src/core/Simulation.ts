@@ -47,14 +47,19 @@ export function simulationTick(state: GameState, dt: number): void {
         if (!fox.alive || fox.count <= 0) continue;
         const rate = speedToPositionRate(fox.speed, state.level.length);
         fox.position -= rate * dt; // foxes move toward 0
-        if (fox.position < 0) {
+    }
+
+    // Check if ANY fox reached the cannon (instant loss)
+    const anyFoxReachedCannon = state.foxPacks.some(fox => fox.alive && fox.position <= 0);
+    if (anyFoxReachedCannon) {
+        for (const fox of state.foxPacks) {
             fox.alive = false;
-            state.levelComplete = true;
-            state.levelWon = false;
-            state.screenShake = 0.3;
-            state.levelSummary = generateLevelSummary(state);
-            return;
         }
+        state.levelComplete = true;
+        state.levelWon = false;
+        state.screenShake = 0.3;
+        state.levelSummary = generateLevelSummary(state);
+        return;
     }
 
     // ── 3. Gate pass-through ──

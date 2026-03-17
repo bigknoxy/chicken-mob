@@ -219,17 +219,16 @@ function onLevelEnd(): void {
             playerState.unlockedLevels = Math.max(playerState.unlockedLevels, currentIndex + 2);
         }
 
-        // Check for world completion - verify all levels in the world have been completed
+        // Check for world completion
         const currentLevelDef = getLevel(currentIndex);
         const currentWorldId = currentLevelDef.worldId;
-        const worldLevels = getLevelsForWorld(currentWorldId);
         
-        // Find global indices for levels in this world
-        const worldLevelIndices = worldLevels.map(wl => LEVELS.findIndex(l => l.id === wl.id));
         // Check if ALL levels in the world have at least 1 star (completed)
-        const allWorldLevelsCompleted = worldLevelIndices.every(
-            idx => playerState.levelStars[idx] !== undefined
-        );
+        const worldLevels = getLevelsForWorld(currentWorldId);
+        const allWorldLevelsCompleted = worldLevels.every((wl) => {
+            const idx = LEVELS.findIndex((l) => l.id === wl.id);
+            return playerState.levelStars[idx] !== undefined;
+        });
 
         if (allWorldLevelsCompleted && !playerState.worldsCompleted.includes(currentWorldId)) {
             playerState.worldsCompleted.push(currentWorldId);

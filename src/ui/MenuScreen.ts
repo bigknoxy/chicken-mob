@@ -56,6 +56,17 @@ export class MenuScreen {
 
     show(playerState: PlayerState): void {
         this.container.innerHTML = '';
+        
+        const bgLayer = document.createElement('div');
+        bgLayer.style.cssText = `
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, ${COLORS.bgDark} 0%, ${COLORS.bgMid} 50%, ${COLORS.bgLight} 100%);
+            z-index: -1;
+            pointer-events: none;
+        `;
+        this.container.appendChild(bgLayer);
+        
         this.container.style.display = 'flex';
 
         if (!this.selectedWorld || !playerState.worldsUnlocked.includes(this.selectedWorld)) {
@@ -157,14 +168,7 @@ export class MenuScreen {
             const isSelected = this.selectedWorld === world.id;
 
             const tab = document.createElement('button');
-            const borderColor = isCompleted ? COLORS.success : isSelected ? COLORS.accent : isUnlocked ? COLORS.secondary : '#374151';
-            const bgColor = isCompleted
-                ? 'rgba(34, 197, 94, 0.15)'
-                : isSelected
-                    ? `rgba(249, 115, 22, 0.2)`
-                    : isUnlocked
-                        ? 'rgba(139, 92, 246, 0.15)'
-                        : 'rgba(55, 65, 81, 0.3)';
+            const { border: borderColor, bg: bgColor } = this.getWorldTabColors(isCompleted, isSelected, isUnlocked);
 
             tab.style.cssText = `
                 flex: 1;
@@ -247,12 +251,7 @@ export class MenuScreen {
             const stars = playerState.levelStars[globalIndex];
 
             const btn = document.createElement('button');
-            const borderColor = stars ? COLORS.success : unlocked ? COLORS.secondary : '#374151';
-            const bgColor = stars
-                ? 'rgba(34, 197, 94, 0.12)'
-                : unlocked
-                    ? 'rgba(139, 92, 246, 0.12)'
-                    : 'rgba(55, 65, 81, 0.25)';
+            const { border: borderColor, bg: bgColor } = this.getLevelButtonColors(!!stars, unlocked);
 
             btn.style.cssText = `
                 min-height: 72px;
@@ -358,6 +357,17 @@ export class MenuScreen {
             cursor: pointer;
             transition: all ${TRANSITIONS.fast};
         `;
+        
+        this.attachButtonHandlers(btn, onClick, COLORS.secondary, 'rgba(139, 92, 246, 0.15)');
+        return btn;
+    }
+
+    private attachButtonHandlers(
+        btn: HTMLButtonElement,
+        onClick: () => void,
+        defaultBorder: string,
+        defaultBg: string,
+    ): void {
         btn.addEventListener('click', () => {
             btn.style.transform = 'scale(0.95)';
             setTimeout(() => {
@@ -370,13 +380,36 @@ export class MenuScreen {
             btn.style.background = 'rgba(249, 115, 22, 0.2)';
         });
         btn.addEventListener('mouseleave', () => {
-            btn.style.borderColor = COLORS.secondary;
-            btn.style.background = 'rgba(139, 92, 246, 0.15)';
+            btn.style.borderColor = defaultBorder;
+            btn.style.background = defaultBg;
         });
-        return btn;
     }
 
     destroy(): void {
         this.container.remove();
+    }
+
+    // ── Private Helpers ──
+    private getWorldTabColors(isCompleted: boolean, isSelected: boolean, isUnlocked: boolean): { border: string; bg: string } {
+        if (isCompleted) {
+            return { border: COLORS.success, bg: 'rgba(34, 197, 94, 0.15)' };
+        }
+        if (isSelected) {
+            return { border: COLORS.accent, bg: 'rgba(249, 115, 22, 0.2)' };
+        }
+        if (isUnlocked) {
+            return { border: COLORS.secondary, bg: 'rgba(139, 92, 246, 0.15)' };
+        }
+        return { border: '#374151', bg: 'rgba(55, 65, 81, 0.3)' };
+    }
+
+    private getLevelButtonColors(hasStars: boolean, isUnlocked: boolean): { border: string; bg: string } {
+        if (hasStars) {
+            return { border: COLORS.success, bg: 'rgba(34, 197, 94, 0.12)' };
+        }
+        if (isUnlocked) {
+            return { border: COLORS.secondary, bg: 'rgba(139, 92, 246, 0.12)' };
+        }
+        return { border: '#374151', bg: 'rgba(55, 65, 81, 0.25)' };
     }
 }

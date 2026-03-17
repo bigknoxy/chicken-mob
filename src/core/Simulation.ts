@@ -48,7 +48,12 @@ export function simulationTick(state: GameState, dt: number): void {
         const rate = speedToPositionRate(fox.speed, state.level.length);
         fox.position -= rate * dt; // foxes move toward 0
         if (fox.position < 0) {
-            fox.alive = false; // foxes that reach cannon end are lost
+            fox.alive = false;
+            state.levelComplete = true;
+            state.levelWon = false;
+            state.screenShake = 0.3;
+            state.levelSummary = generateLevelSummary(state);
+            return;
         }
     }
 

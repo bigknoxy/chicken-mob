@@ -20,6 +20,7 @@ function createTestState(overrides?: Partial<GameState>): GameState {
         level: {
             id: 'test_level',
             name: 'Test Level',
+            worldId: 'W1',
             laneCount: 2,
             length: 800,
             gates: [],
@@ -327,6 +328,88 @@ describe('Enemy Spawn Gates', () => {
             expect(state.foxPacks).toHaveLength(1);
             expect(state.foxPacks[0].foxTypeId).toBe('fox_scout');
             expect(state.foxPacks[0].count).toBe(3);
+        });
+    });
+
+    describe('Fox reaches cannon (instant loss)', () => {
+        it('triggers loss when fox reaches position 0', () => {
+            const state = createTestState({
+                foxPacks: [
+                    {
+                        id: 1,
+                        foxTypeId: 'fox_scout',
+                        count: 5,
+                        lane: 0,
+                        x: 0.5,
+                        position: 0.01,
+                        speed: 200,
+                        alive: true,
+                    },
+                ],
+            });
+
+            simulationTick(state, 0.1);
+
+            expect(state.levelComplete).toBe(true);
+            expect(state.levelWon).toBe(false);
+        });
+
+        it('stops simulation after fox reaches cannon', () => {
+            const state = createTestState({
+                foxPacks: [
+                    {
+                        id: 1,
+                        foxTypeId: 'fox_scout',
+                        count: 5,
+                        lane: 0,
+                        x: 0.5,
+                        position: 0.01,
+                        speed: 200,
+                        alive: true,
+                    },
+                ],
+                flocks: [
+                    {
+                        id: 2,
+                        chickenTypeId: 'clucky',
+                        count: 100,
+                        lane: 0,
+                        x: 0.5,
+                        position: 0.5,
+                        speed: 200,
+                        alive: true,
+                    },
+                ],
+            });
+
+            simulationTick(state, 0.1);
+            expect(state.levelComplete).toBe(true);
+
+            const flockPosAfterLoss = state.flocks[0].position;
+
+            simulationTick(state, 0.1);
+            expect(state.flocks[0].position).toBe(flockPosAfterLoss);
+        });
+
+        it('sets screen shake on fox breach', () => {
+            const state = createTestState({
+                foxPacks: [
+                    {
+                        id: 1,
+                        foxTypeId: 'fox_scout',
+                        count: 5,
+                        lane: 0,
+                        x: 0.5,
+                        position: 0.01,
+                        speed: 200,
+                        alive: true,
+                    },
+                ],
+            });
+
+            simulationTick(state, 0.1);
+
+            expect(state.screenShake).toBeGreaterThan(0);
         });
     });
 });

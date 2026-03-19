@@ -20,6 +20,7 @@ export const CHICKENS: ChickenType[] = [
         damagePerChicken: 2,
         size: 1.8,
         rarity: 'rare',
+        unlockRequirement: { type: 'level', value: 6 },
     },
     {
         id: 'rooster_bomber',
@@ -31,7 +32,8 @@ export const CHICKENS: ChickenType[] = [
         size: 1.0,
         rarity: 'epic',
         specialAbility: 'aoe_on_death',
-        specialValue: 5, // AoE damage on death
+        specialValue: 5,
+        unlockRequirement: { type: 'level', value: 12 },
     },
     {
         id: 'speed_chick',
@@ -42,6 +44,7 @@ export const CHICKENS: ChickenType[] = [
         damagePerChicken: 1,
         size: 0.7,
         rarity: 'rare',
+        unlockRequirement: { type: 'world', value: 'W2' },
     },
     {
         id: 'golden_goose',
@@ -53,7 +56,8 @@ export const CHICKENS: ChickenType[] = [
         size: 1.5,
         rarity: 'legendary',
         specialAbility: 'bonus_corn',
-        specialValue: 2, // ×2 corn reward for surviving units
+        specialValue: 2,
+        unlockRequirement: { type: 'level', value: 36 },
     },
 ];
 
@@ -61,4 +65,40 @@ export function getChicken(id: string): ChickenType {
     const c = CHICKENS.find(ch => ch.id === id);
     if (!c) throw new Error(`Unknown chicken type: ${id}`);
     return c;
+}
+
+export function isChickenUnlocked(
+    chicken: ChickenType,
+    playerState: { unlockedLevels: number; worldsUnlocked: string[] }
+): boolean {
+    if (!chicken.unlockRequirement) return true;
+    
+    const req = chicken.unlockRequirement;
+    switch (req.type) {
+        case 'level':
+            return playerState.unlockedLevels >= (req.value as number);
+        case 'world':
+            return playerState.worldsUnlocked.includes(req.value as string);
+        case 'stars':
+            return false;
+        default:
+            return false;
+    }
+}
+
+export function getUnlockDescription(chicken: ChickenType): string {
+    if (!chicken.unlockRequirement) return '';
+    
+    const req = chicken.unlockRequirement;
+    switch (req.type) {
+        case 'level':
+            return `Unlock at Level ${req.value}`;
+        case 'world':
+            const worldNames: Record<string, string> = { W1: 'World 1', W2: 'World 2' };
+            return `Unlock in ${worldNames[req.value as string] || req.value}`;
+        case 'stars':
+            return `Unlock with ${req.value} stars`;
+        default:
+            return '';
+    }
 }

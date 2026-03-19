@@ -1,10 +1,11 @@
 /**
- * UpgradeScreen — Tabbed upgrade barn UI.
+ * UpgradeScreen — Tabbed upgrade barn UI with chicken selection.
  */
 
 import type { PlayerState, UpgradeDefinition } from '@/data/types';
 import { UPGRADES, getUpgradeCost, getUpgradeValue } from '@/data/upgrades';
 import { purchaseUpgrade, canAffordUpgrade } from '@/systems/UpgradeSystem';
+import { CHICKENS, isChickenUnlocked, getUnlockDescription } from '@/data/chickens';
 import { audio } from '@/platform/Audio';
 import { COLORS, SPACING, RADIUS, SHADOWS, TRANSITIONS } from './styles';
 
@@ -112,8 +113,9 @@ export class UpgradeScreen {
         const tabs = document.createElement('div');
         tabs.style.cssText = `display: flex; gap: ${SPACING.sm}; margin-bottom: ${SPACING.lg};`;
         const tabNames = [
+            { key: 'chickens', label: 'Chickens' },
             { key: 'cannon', label: 'Cannons' },
-            { key: 'chicken', label: 'Chickens' },
+            { key: 'chicken', label: 'Stats' },
             { key: 'farm', label: 'Farm' },
         ];
         for (const t of tabNames) {
@@ -150,10 +152,14 @@ export class UpgradeScreen {
         }
         this.container.appendChild(tabs);
 
-        // Upgrade list
-        const upgrades = UPGRADES.filter(u => u.category === activeTab);
-        for (const upgrade of upgrades) {
-            this.container.appendChild(this.renderUpgradeRow(upgrade));
+        // Content based on active tab
+        if (activeTab === 'chickens') {
+            this.renderChickensSection();
+        } else {
+            const upgrades = UPGRADES.filter(u => u.category === activeTab);
+            for (const upgrade of upgrades) {
+                this.container.appendChild(this.renderUpgradeRow(upgrade));
+            }
         }
     }
 
@@ -258,6 +264,118 @@ export class UpgradeScreen {
         row.appendChild(info);
         row.appendChild(btn);
         return row;
+    }
+
+    private renderChickensSection(): void {
+        for (const chicken of CHICKENS) {
+            let isOwned = this.playerState.ownedChickens.includes(chicken.id);
+            const isEquipped = this.playerState.equippedChickenId === chicken.id;
+            const isUnlocked = isChickenUnlocked(chicken, this.playerState);
+            
+            // Defensive: auto-add unlocked chickens that should be owned
+            if (isUnlocked && !isOwned) {
+                this.playerState.ownedChickens.push(chicken.id);
+                isOwned = true;
+            }
+            
+            const row = document.createElement('div');
+            row.style.cssText = `
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: ${SPACING.md};
+                margin-bottom: ${SPACING.sm};
+                background: rgba(55,65,81,0.3);
+                border-radius: ${RADIUS.md}px;
+                border: 2px solid ${isEquipped ? COLORS.primary : isOwned ? COLORS.success : '#374151'};
+                box-shadow: ${SHADOWS.sm};
+            `;
+
+            const info = document.createElement('div');
+            
+            const rarityColors: Record<string, string> = {
+                common: '#9ca3af',
+                rare: '#3b82f6',
+                epic: '#a855f7',
+                legendary: '#fbbf24',
+            };
+            
+            const specialText = chicken.specialAbility 
+                ? (chicken.specialAbility === 'aoe_on_death' ? ' • AoE on death' : ' • 2× corn')
+                : '';
+            
+            info.innerHTML = `
+                <div style="font-weight: bold; font-size: 13px; color: ${rarityColors[chicken.rarity] || COLORS.uiText};">
+                    ${chicken.name}
+                    ${isEquipped ? '<span style="color: #fbbf24;"> ⚡</span>' : ''}
+                </div>
+                <div style="font-size: 11px; color: ${COLORS.uiMuted};">
+                    ${chicken.rarity}${specialText}
+                    ${!isOwned && !isUnlocked ? ` • ${getUnlockDescription(chicken)}` : ''}
+                </div>
+            `;
+
+            const btn = document.createElement('button');
+            
+            if (isEquipped) {
+                btn.textContent = 'EQUIPPED';
+                btn.style.cssText = `
+                    min-width: 44px;
+                    min-height: 44px;
+                    padding: 6px 14px;
+                    border: 1px solid ${COLORS.primary};
+                    border-radius: ${RADIUS.sm}px;
+                    background: rgba(251, 191, 36, 0.2);
+                    color: ${COLORS.primary};
+                    font-family: 'Nunito', sans-serif;
+                    font-size: 11px;
+                `;
+            } else if (isOwned) {
+                btn.textContent = 'SELECT';
+                btn.style.cssText = `
+                    min-width: 44px;
+                    min-height: 44px;
+                    padding: 6px 14px;
+                    border: 1px solid ${COLORS.success};
+                    border-radius: ${RADIUS.sm}px;
+                    background: rgba(34, 197, 94, 0.2);
+                    color: ${COLORS.success};
+                    font-family: 'Nunito', sans-serif;
+                    font-size: 11px;
+                    cursor: pointer;
+                    transition: transform ${TRANSITIONS.fast};
+                `;
+                btn.addEventListener('click', () => {
+                    this.playerState.equippedChickenId = chicken.id;
+                    audio.playUpgrade();
+                    this.renderContent('chickens');
+                });
+                btn.addEventListener('mouseenter', () => {
+                    btn.style.transform = 'scale(1.05)';
+                });
+                btn.addEventListener('mouseleave', () => {
+                    btn.style.transform = 'scale(1)';
+                });
+            } else {
+                btn.textContent = '🔒 LOCKED';
+                btn.style.cssText = `
+                    min-width: 44px;
+                    min-height: 44px;
+                    padding: 6px 14px;
+                    border: 1px solid #4b5563;
+                    border-radius: ${RADIUS.sm}px;
+                    background: rgba(75, 85, 99, 0.2);
+                    color: #6b7280;
+                    font-family: 'Nunito', sans-serif;
+                    font-size: 11px;
+                    cursor: default;
+                `;
+            }
+
+            row.appendChild(info);
+            row.appendChild(btn);
+            this.container.appendChild(row);
+        }
     }
 
     destroy(): void {

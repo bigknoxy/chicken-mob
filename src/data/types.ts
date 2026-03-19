@@ -13,6 +13,11 @@ export type CurrencyId = 'corn' | 'golden_feather';
 // ----- Chicken Types -----
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
+export interface ChickenUnlockRequirement {
+    type: 'level' | 'world' | 'stars';
+    value: number | string;
+}
+
 export interface ChickenType {
     id: string;
     name: string;
@@ -24,6 +29,7 @@ export interface ChickenType {
     rarity: Rarity;
     specialAbility?: 'aoe_on_death' | 'bonus_corn';
     specialValue?: number;   // e.g. AoE damage or reward multiplier
+    unlockRequirement?: ChickenUnlockRequirement;
 }
 
 // ----- Barn Cannons -----

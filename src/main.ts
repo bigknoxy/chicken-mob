@@ -7,6 +7,7 @@
 
 import type { GameState, LiveObstacle, LiveGate, LevelDefinition, StarRating } from '@/data/types';
 import { getLevel, TOTAL_LEVELS, WORLDS, getLevelsForWorld, LEVELS } from '@/data/levels';
+import { CHICKENS, isChickenUnlocked } from '@/data/chickens';
 import { GameLoop } from '@/core/GameLoop';
 import { simulationTick, calculateStars, generateLevelSummary } from '@/core/Simulation';
 import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
@@ -30,6 +31,22 @@ let currentScreen: AppScreen = 'menu';
 let playerState = loadPlayerState();
 let gameState: GameState | null = null;
 let laneGeo: LaneGeometry | null = null;
+
+/** Unlock any chickens that meet their requirements */
+function unlockChickens(): string[] {
+    const newlyUnlocked: string[] = [];
+    
+    for (const chicken of CHICKENS) {
+        if (playerState.ownedChickens.includes(chicken.id)) continue;
+        
+        if (isChickenUnlocked(chicken, playerState)) {
+            playerState.ownedChickens.push(chicken.id);
+            newlyUnlocked.push(chicken.name);
+        }
+    }
+    
+    return newlyUnlocked;
+}
 
 // ── DOM Elements ──
 const canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
@@ -242,6 +259,19 @@ function onLevelEnd(): void {
                     playerState.currentWorld = nextWorld.id;
                 }
             }
+        }
+
+        // Check for newly unlocked chickens
+        const newlyUnlockedChickens = unlockChickens();
+        if (newlyUnlockedChickens.length > 0) {
+            // Show unlock notification (will be displayed after level summary)
+            setTimeout(() => {
+                modal.show(
+                    '🐔 New Chicken Unlocked!',
+                    `You've unlocked: ${newlyUnlockedChickens.join(', ')}!\n\nVisit the Upgrade Barn to equip your new chicken.`,
+                    [{ text: 'Awesome!', onClick: () => {} }],
+                );
+            }, 1000);
         }
 
         audio.playWin();

@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-03-19
+
+### Added
+- **Gated chicken types** — Players now unlock chicken types as they progress
+  - Clucky: Available from start
+  - Hen Tank: Unlock at Level 6
+  - Rooster Bomber: Unlock at Level 12
+  - Speed Chick: Unlock with World 2 access
+  - Golden Goose: Unlock at Level 36 (endgame)
+- **Chickens tab** in Upgrade Barn for selecting equipped chicken
+- Unlock notification popup when new chicken is earned
+
+### Changed
+- SpawningSystem now uses player's equipped chicken (not cannon's default)
+- Added collection pressure and progression anticipation
+
+### Technical
+- `ChickenUnlockRequirement` type for defining unlock conditions
+- `isChickenUnlocked()` and `getUnlockDescription()` helper functions
+- Defensive check for unlocked-but-not-owned edge cases
+- 7 new unit tests for unlock logic (70 total)
+
 ## [0.4.1] - 2026-03-10
 
 ### Added

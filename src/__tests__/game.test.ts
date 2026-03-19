@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CHICKENS, getChicken } from '../data/chickens';
+import { CHICKENS, getChicken, isChickenUnlocked, getUnlockDescription } from '../data/chickens';
 import { FOXES, getFox } from '../data/foxes';
 import { CANNONS, getCannon } from '../data/cannons';
 import { getLevel, TOTAL_LEVELS, LEVELS } from '../data/levels';
@@ -573,5 +573,88 @@ describe('Aiming System', () => {
         const targetX = Math.max(0, Math.min(1, cannonX + angleSpread));
         expect(targetX).toBeGreaterThanOrEqual(0);
         expect(targetX).toBeLessThanOrEqual(1);
+    });
+});
+
+// ── Chicken Unlock System ──
+
+describe('Chicken Unlock System', () => {
+    it('clucky is unlocked by default (no requirement)', () => {
+        const clucky = getChicken('clucky');
+        expect(clucky.unlockRequirement).toBeUndefined();
+        
+        const newPlayer = { unlockedLevels: 0, worldsUnlocked: ['W1'] };
+        expect(isChickenUnlocked(clucky, newPlayer)).toBe(true);
+    });
+
+    it('hen_tank unlocks at level 6', () => {
+        const henTank = getChicken('hen_tank');
+        expect(henTank.unlockRequirement).toBeDefined();
+        expect(henTank.unlockRequirement?.type).toBe('level');
+        expect(henTank.unlockRequirement?.value).toBe(6);
+        
+        const playerBefore = { unlockedLevels: 5, worldsUnlocked: ['W1'] };
+        const playerAfter = { unlockedLevels: 6, worldsUnlocked: ['W1'] };
+        
+        expect(isChickenUnlocked(henTank, playerBefore)).toBe(false);
+        expect(isChickenUnlocked(henTank, playerAfter)).toBe(true);
+    });
+
+    it('rooster_bomber unlocks at level 12', () => {
+        const rooster = getChicken('rooster_bomber');
+        expect(rooster.unlockRequirement?.type).toBe('level');
+        expect(rooster.unlockRequirement?.value).toBe(12);
+        
+        const playerBefore = { unlockedLevels: 11, worldsUnlocked: ['W1'] };
+        const playerAfter = { unlockedLevels: 12, worldsUnlocked: ['W1'] };
+        
+        expect(isChickenUnlocked(rooster, playerBefore)).toBe(false);
+        expect(isChickenUnlocked(rooster, playerAfter)).toBe(true);
+    });
+
+    it('speed_chick unlocks with World 2 access', () => {
+        const speedChick = getChicken('speed_chick');
+        expect(speedChick.unlockRequirement?.type).toBe('world');
+        expect(speedChick.unlockRequirement?.value).toBe('W2');
+        
+        const playerW1 = { unlockedLevels: 18, worldsUnlocked: ['W1'] };
+        const playerW2 = { unlockedLevels: 19, worldsUnlocked: ['W1', 'W2'] };
+        
+        expect(isChickenUnlocked(speedChick, playerW1)).toBe(false);
+        expect(isChickenUnlocked(speedChick, playerW2)).toBe(true);
+    });
+
+    it('golden_goose unlocks at level 36 (endgame)', () => {
+        const goldenGoose = getChicken('golden_goose');
+        expect(goldenGoose.unlockRequirement?.type).toBe('level');
+        expect(goldenGoose.unlockRequirement?.value).toBe(36);
+        
+        const playerBefore = { unlockedLevels: 35, worldsUnlocked: ['W1', 'W2'] };
+        const playerAfter = { unlockedLevels: 36, worldsUnlocked: ['W1', 'W2'] };
+        
+        expect(isChickenUnlocked(goldenGoose, playerBefore)).toBe(false);
+        expect(isChickenUnlocked(goldenGoose, playerAfter)).toBe(true);
+    });
+
+    it('getUnlockDescription returns correct text', () => {
+        const henTank = getChicken('hen_tank');
+        const speedChick = getChicken('speed_chick');
+        const clucky = getChicken('clucky');
+        
+        expect(getUnlockDescription(henTank)).toBe('Unlock at Level 6');
+        expect(getUnlockDescription(speedChick)).toBe('Unlock in World 2');
+        expect(getUnlockDescription(clucky)).toBe('');
+    });
+
+    it('all chicken types have valid unlock requirements or are unlocked by default', () => {
+        for (const chicken of CHICKENS) {
+            if (chicken.unlockRequirement) {
+                expect(['level', 'world', 'stars']).toContain(chicken.unlockRequirement.type);
+                if (chicken.unlockRequirement.type === 'level') {
+                    expect(chicken.unlockRequirement.value).toBeGreaterThanOrEqual(1);
+                    expect(chicken.unlockRequirement.value).toBeLessThanOrEqual(TOTAL_LEVELS);
+                }
+            }
+        }
     });
 });

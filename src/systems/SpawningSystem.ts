@@ -4,7 +4,6 @@
 
 import type { GameState, Flock, PlayerState } from '@/data/types';
 import { getChicken } from '@/data/chickens';
-import { getCannon } from '@/data/cannons';
 import { getUpgrade, getUpgradeValue } from '@/data/upgrades';
 
 function fireRateValue(level: number): number {
@@ -37,14 +36,14 @@ export function getEffectiveChickenSpeed(playerState: PlayerState): number {
 
 /** Fire a flock from the cannon at the given aim angle (radians).
  *  Angle: 0 = straight up, positive = right, negative = left
+ *  Uses playerState.equippedChickenId to determine which chicken type to fire.
  */
 export function fireChickens(
     state: GameState,
     playerState: PlayerState,
     aimAngle: number,
 ): void {
-    const cannon = getCannon(playerState.equippedCannonId);
-    const chickenType = getChicken(cannon.unitTypeId);
+    const chickenType = getChicken(playerState.equippedChickenId);
 
     const burstSize = getEffectiveBurstSize(playerState);
     const speed = getEffectiveChickenSpeed(playerState);
@@ -52,14 +51,10 @@ export function fireChickens(
 
     if (state.cannonCooldown > 0) return;
 
-    // Calculate target X position based on aim angle
-    // tan(angle) gives the X offset relative to the vertical distance
-    // We use a simplified model: X offset = sin(angle) * spread factor
     const cannonX = state.cannonX ?? 0.5;
-    const angleSpread = Math.sin(aimAngle) * 0.4; // Max 40% horizontal spread at max angle
+    const angleSpread = Math.sin(aimAngle) * 0.4;
     const targetX = Math.max(0, Math.min(1, cannonX + angleSpread));
 
-    // Derive lane for visual purposes
     const lane = Math.floor(targetX * state.level.laneCount);
 
     const flock: Flock = {
@@ -68,7 +63,7 @@ export function fireChickens(
         count: burstSize,
         lane,
         x: targetX,
-        position: 0.0, // start at cannon
+        position: 0.0,
         speed,
         alive: true,
     };
@@ -76,6 +71,5 @@ export function fireChickens(
     state.flocks.push(flock);
     state.cannonCooldown = 1.0 / fireRate;
 
-    // Track total chickens fired for star calculation
     state.totalChickensFired += burstSize;
 }

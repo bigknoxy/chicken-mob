@@ -178,6 +178,7 @@ export interface PlayerState {
     totalCornEarned: number;
     totalLevelsCompleted: number;
     levelStars: Record<number, StarRating>; // level index → star rating
+    endlessHighScore: number;        // highest wave reached in endless mode
 }
 
 // ============================================================

@@ -11,6 +11,7 @@ import { COLORS, SPACING, RADIUS, SHADOWS, TRANSITIONS } from './styles';
 
 export type MenuAction =
     | { type: 'play_level'; levelIndex: number }
+    | { type: 'play_endless' }
     | { type: 'open_upgrades' }
     | { type: 'open_coop' };
 
@@ -115,7 +116,7 @@ export class MenuScreen {
         actionRow.style.cssText = `
             display: flex;
             gap: ${SPACING.sm}px;
-            margin-bottom: ${SPACING.lg}px;
+            margin-bottom: ${SPACING.md}px;
             width: 100%;
             max-width: 360px;
         `;
@@ -131,6 +132,41 @@ export class MenuScreen {
         actionRow.appendChild(upgradeBtn);
         actionRow.appendChild(coopBtn);
         this.container.appendChild(actionRow);
+
+        const endlessBtn = document.createElement('button');
+        const highScore = playerState.endlessHighScore ?? 0;
+        endlessBtn.innerHTML = `
+            <div style="font-size: 16px;">♾️ Endless Mode</div>
+            <div style="font-size: 11px; color: ${COLORS.uiMuted}; margin-top: 2px;">
+                ${highScore > 0 ? `Best: Wave ${highScore}` : 'Infinite waves!'}
+            </div>
+        `;
+        endlessBtn.style.cssText = `
+            width: 100%;
+            max-width: 360px;
+            min-height: 56px;
+            padding: ${SPACING.sm}px ${SPACING.md}px;
+            margin-bottom: ${SPACING.lg}px;
+            border: 2px solid ${COLORS.accent};
+            border-radius: ${RADIUS.lg}px;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.15));
+            color: ${COLORS.uiText};
+            font-family: 'Nunito', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all ${TRANSITIONS.fast};
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: ${SHADOWS.md};
+        `;
+        this.attachButtonHandlers(endlessBtn, () => {
+            audio.playClick();
+            this.onAction({ type: 'play_endless' });
+        }, COLORS.accent, 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.15))');
+        this.container.appendChild(endlessBtn);
 
         const worldCard = document.createElement('div');
         worldCard.style.cssText = `

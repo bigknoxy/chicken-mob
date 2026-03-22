@@ -251,8 +251,8 @@ function onLevelEnd(): void {
             playerState.totalCornEarned += corn;
             endlessCornEarned += corn;
 
-            endlessWave++;
             playerState.endlessHighScore = Math.max(playerState.endlessHighScore ?? 0, endlessWave);
+            endlessWave++;
             savePlayerState(playerState);
             
             audio.playWin();
@@ -261,7 +261,8 @@ function onLevelEnd(): void {
             gameState = null;
             startEndlessWave();
         } else {
-            playerState.endlessHighScore = Math.max(playerState.endlessHighScore ?? 0, endlessWave);
+            const wavesCompleted = Math.max(0, endlessWave - 1);
+            playerState.endlessHighScore = Math.max(playerState.endlessHighScore ?? 0, wavesCompleted);
             
             modal.show(
                 'Endless Mode Complete!',

@@ -13,6 +13,7 @@ import { simulationTick, calculateStars, generateLevelSummary } from '@/core/Sim
 import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
 import { fireChickens } from '@/systems/SpawningSystem';
 import { calculateOfflineEarnings, claimOfflineEarnings } from '@/systems/OfflineSystem';
+import { generateEndlessLevel } from '@/systems/ProceduralLevelGenerator';
 import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
 import { InputManager, hapticFeedback, HAPTIC } from '@/platform/Input';
 import { audio } from '@/platform/Audio';
@@ -31,6 +32,9 @@ let currentScreen: AppScreen = 'menu';
 let playerState = loadPlayerState();
 let gameState: GameState | null = null;
 let laneGeo: LaneGeometry | null = null;
+let isEndlessMode = false;
+let endlessWave = 0;
+let endlessCornEarned = 0;
 
 /** Unlock any chickens that meet their requirements */
 function unlockChickens(): string[] {
@@ -63,6 +67,9 @@ const menuScreen = new MenuScreen(overlay, (action) => {
     switch (action.type) {
         case 'play_level':
             startLevel(action.levelIndex);
+            break;
+        case 'play_endless':
+            startEndlessMode();
             break;
         case 'open_upgrades':
             currentScreen = 'upgrades';
@@ -161,6 +168,28 @@ function startLevel(index: number): void {
         levelDef.laneCount,
     );
     currentScreen = 'playing';
+    isEndlessMode = false;
+    menuScreen.hide();
+    upgradeScreen.hide();
+    audio.resume();
+}
+
+function startEndlessMode(): void {
+    isEndlessMode = true;
+    endlessWave = 1;
+    endlessCornEarned = 0;
+    startEndlessWave();
+}
+
+function startEndlessWave(): void {
+    const levelDef = generateEndlessLevel(endlessWave);
+    gameState = createGameState(levelDef);
+    laneGeo = createLaneGeometry(
+        renderer.getWidth(),
+        renderer.getHeight(),
+        levelDef.laneCount,
+    );
+    currentScreen = 'playing';
     menuScreen.hide();
     upgradeScreen.hide();
     audio.resume();
@@ -209,11 +238,53 @@ function createGameState(level: LevelDefinition): GameState {
 function onLevelEnd(): void {
     if (!gameState) return;
 
-    // Generate summary before clearing game state (show on both win and loss)
     gameState.levelSummary = generateLevelSummary(gameState);
 
+    if (isEndlessMode) {
+        if (gameState.levelWon) {
+            const cornMult = playerState.upgrades['farm_corn_mult']
+                ? 1.0 + 0.1 * playerState.upgrades['farm_corn_mult']
+                : 1.0;
+            const corn = Math.floor(gameState.level.rewardCorn * cornMult * gameState.level.fort.rewardMultiplier);
+            playerState.currencies.corn += corn;
+            playerState.currencies.golden_feather += gameState.level.rewardFeathers;
+            playerState.totalCornEarned += corn;
+            endlessCornEarned += corn;
+
+            playerState.endlessHighScore = Math.max(playerState.endlessHighScore ?? 0, endlessWave);
+            endlessWave++;
+            savePlayerState(playerState);
+            
+            audio.playWin();
+            hapticFeedback(HAPTIC.win);
+            
+            gameState = null;
+            startEndlessWave();
+        } else {
+            const wavesCompleted = Math.max(0, endlessWave - 1);
+            playerState.endlessHighScore = Math.max(playerState.endlessHighScore ?? 0, wavesCompleted);
+            
+            modal.show(
+                'Endless Mode Complete!',
+                `You reached Wave ${endlessWave}!\n\nCorn earned: ${endlessCornEarned}\nBest wave: ${playerState.endlessHighScore}`,
+                [{ text: 'Continue', onClick: () => {} }],
+            );
+            
+            audio.playLose();
+            hapticFeedback(HAPTIC.lose);
+            
+            playerState.lastSessionTimestamp = Date.now();
+            savePlayerState(playerState);
+            gameState = null;
+            laneGeo = null;
+            isEndlessMode = false;
+            currentScreen = 'menu';
+            menuScreen.show(playerState);
+        }
+        return;
+    }
+
     if (gameState.levelWon) {
-        // Award rewards
         const cornMult = playerState.upgrades['farm_corn_mult']
             ? 1.0 + 0.1 * playerState.upgrades['farm_corn_mult']
             : 1.0;
@@ -223,24 +294,20 @@ function onLevelEnd(): void {
         playerState.totalCornEarned += corn;
         playerState.totalLevelsCompleted++;
 
-        // Calculate and save stars
         const stars = calculateStars(gameState) as StarRating;
         const levelIndex = playerState.currentLevel;
         const existingStars = playerState.levelStars[levelIndex] ?? 1;
         playerState.levelStars[levelIndex] = Math.max(existingStars, stars) as StarRating;
 
-        // Unlock next level
         const currentIndex = playerState.currentLevel;
         if (currentIndex < TOTAL_LEVELS - 1) {
             playerState.currentLevel = currentIndex + 1;
             playerState.unlockedLevels = Math.max(playerState.unlockedLevels, currentIndex + 2);
         }
 
-        // Check for world completion
         const currentLevelDef = getLevel(currentIndex);
         const currentWorldId = currentLevelDef.worldId;
         
-        // Check if ALL levels in the world have at least 1 star (completed)
         const worldLevels = getLevelsForWorld(currentWorldId);
         const allWorldLevelsCompleted = worldLevels.every((wl) => {
             const idx = LEVELS.findIndex((l) => l.id === wl.id);
@@ -250,7 +317,6 @@ function onLevelEnd(): void {
         if (allWorldLevelsCompleted && !playerState.worldsCompleted.includes(currentWorldId)) {
             playerState.worldsCompleted.push(currentWorldId);
             
-            // Unlock next world
             const currentWorldIndex = WORLDS.findIndex(w => w.id === currentWorldId);
             if (currentWorldIndex < WORLDS.length - 1) {
                 const nextWorld = WORLDS[currentWorldIndex + 1];
@@ -261,10 +327,8 @@ function onLevelEnd(): void {
             }
         }
 
-        // Check for newly unlocked chickens
         const newlyUnlockedChickens = unlockChickens();
         if (newlyUnlockedChickens.length > 0) {
-            // Show unlock notification (will be displayed after level summary)
             setTimeout(() => {
                 modal.show(
                     '🐔 New Chicken Unlocked!',
@@ -281,7 +345,6 @@ function onLevelEnd(): void {
         hapticFeedback(HAPTIC.lose);
     }
 
-    // Save and return to menu
     playerState.lastSessionTimestamp = Date.now();
     savePlayerState(playerState);
     gameState = null;

@@ -28,6 +28,7 @@ export function createDefaultPlayerState(): PlayerState {
         totalCornEarned: 0,
         totalLevelsCompleted: 0,
         levelStars: {},
+        endlessHighScore: 0,
     };
 }
 

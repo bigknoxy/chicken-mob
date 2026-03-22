@@ -173,10 +173,11 @@ describe('Offline System', () => {
             worldsUnlocked: ['W1'],
             worldsCompleted: [],
             coop: { cornPerSecond: 2.0, offlineCapSeconds: 3600 },
-            lastSessionTimestamp: Date.now() - 1800_000, // 30 minutes ago
+            lastSessionTimestamp: Date.now() - 1800_000,
             totalCornEarned: 0,
             totalLevelsCompleted: 0,
             levelStars: {},
+            endlessHighScore: 0,
         };
 
         const earnings = calculateOfflineEarnings(playerState);
@@ -197,11 +198,12 @@ describe('Offline System', () => {
             unlockedLevels: 1,
             worldsUnlocked: ['W1'],
             worldsCompleted: [],
-            coop: { cornPerSecond: 1.0, offlineCapSeconds: 3600 }, // 1 hour cap
-            lastSessionTimestamp: Date.now() - 86400_000, // 24 hours ago
+            coop: { cornPerSecond: 1.0, offlineCapSeconds: 3600 },
+            lastSessionTimestamp: Date.now() - 86400_000,
             totalCornEarned: 0,
             totalLevelsCompleted: 0,
             levelStars: {},
+            endlessHighScore: 0,
         };
 
         const earnings = calculateOfflineEarnings(playerState);
@@ -227,6 +229,7 @@ describe('Offline System', () => {
             totalCornEarned: 0,
             totalLevelsCompleted: 0,
             levelStars: {},
+            endlessHighScore: 0,
         };
 
         const earnings = calculateOfflineEarnings(playerState);
@@ -656,5 +659,111 @@ describe('Chicken Unlock System', () => {
                 }
             }
         }
+    });
+});
+
+// ── Procedural Level Generator ──
+
+import { generateEndlessLevel, createDefaultEndlessState } from '../systems/ProceduralLevelGenerator';
+
+describe('ProceduralLevelGenerator', () => {
+    describe('generateEndlessLevel', () => {
+        it('generates valid level for wave 1', () => {
+            const level = generateEndlessLevel(1);
+            
+            expect(level.id).toBe('endless_1');
+            expect(level.name).toBe('Wave 1');
+            expect(level.worldId).toBe('endless');
+            expect(level.laneCount).toBe(1);
+            expect(level.gates.length).toBeGreaterThanOrEqual(1);
+            expect(level.fort.hp).toBeGreaterThan(0);
+            expect(level.rewardCorn).toBeGreaterThan(0);
+        });
+
+        it('scales difficulty with wave number', () => {
+            const level1 = generateEndlessLevel(1);
+            const level10 = generateEndlessLevel(10);
+            const level20 = generateEndlessLevel(20);
+            
+            expect(level10.fort.hp).toBeGreaterThan(level1.fort.hp);
+            expect(level20.fort.hp).toBeGreaterThan(level10.fort.hp);
+            
+            expect(level10.laneCount).toBeGreaterThanOrEqual(level1.laneCount);
+            
+            expect(level10.rewardCorn).toBeGreaterThan(level1.rewardCorn);
+        });
+
+        it('produces deterministic levels with same seed', () => {
+            const level1a = generateEndlessLevel(5, 12345);
+            const level1b = generateEndlessLevel(5, 12345);
+            
+            expect(level1a.gates.length).toBe(level1b.gates.length);
+            expect(level1a.gates[0]?.position).toBe(level1b.gates[0]?.position);
+            expect(level1a.gates[0]?.multiplier).toBe(level1b.gates[0]?.multiplier);
+        });
+
+        it('produces different levels with different seeds', () => {
+            const level1 = generateEndlessLevel(5, 111);
+            const level2 = generateEndlessLevel(5, 222);
+            
+            const different = 
+                level1.gates.length !== level2.gates.length ||
+                level1.gates.some((g, i) => 
+                    g.position !== level2.gates[i]?.position ||
+                    g.multiplier !== level2.gates[i]?.multiplier
+                );
+            
+            expect(different).toBe(true);
+        });
+
+        it('adds enemies starting from wave 2', () => {
+            const level1 = generateEndlessLevel(1);
+            const level2 = generateEndlessLevel(2);
+            
+            expect(level1.enemySpawns.length).toBe(0);
+            expect(level2.enemySpawns.length).toBeGreaterThan(0);
+        });
+
+        it('adds obstacles starting from wave 4', () => {
+            const level3 = generateEndlessLevel(3);
+            const level4 = generateEndlessLevel(4);
+            
+            expect(level3.obstacles.length).toBe(0);
+            expect(level4.obstacles.length).toBeGreaterThanOrEqual(0);
+        });
+
+        it('awards golden feathers starting from wave 5', () => {
+            const level4 = generateEndlessLevel(4);
+            const level5 = generateEndlessLevel(5);
+            
+            expect(level4.rewardFeathers).toBe(0);
+            expect(level5.rewardFeathers).toBeGreaterThanOrEqual(1);
+        });
+
+        it('limits lane count to 3', () => {
+            const level50 = generateEndlessLevel(50);
+            
+            expect(level50.laneCount).toBeLessThanOrEqual(3);
+        });
+
+        it('includes trap gates starting from wave 3', () => {
+            const levels = [];
+            for (let i = 0; i < 20; i++) {
+                levels.push(generateEndlessLevel(3, i));
+            }
+            
+            const hasTrap = levels.some(l => l.gates.some(g => !g.isPositive));
+            expect(hasTrap).toBe(true);
+        });
+    });
+
+    describe('createDefaultEndlessState', () => {
+        it('creates valid default state', () => {
+            const state = createDefaultEndlessState();
+            
+            expect(state.currentWave).toBe(1);
+            expect(state.highScore).toBe(0);
+            expect(state.totalCorn).toBe(0);
+        });
     });
 });

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-03-22
+
+### Fixed
+- **Star rating save bug** — Stars now save to the correct level when replaying earlier levels
+  - Previously, stars were saved to `currentLevel` (a progress pointer) instead of the actual level being played
+  - This caused stars to appear on wrong levels when replaying completed levels
+- **World 2 unlock** — Scorching Sands now correctly unlocks after completing all 18 Spring Valley levels
+
+## [0.7.0] - 2026-03-22
+
+### Added
+- **Endless mode** — Procedurally generated levels with increasing difficulty
+- Wave counter and high score tracking for endless mode
+- Endless mode accessible from main menu after completing Level 1
+
 ## [0.6.0] - 2026-03-19
 
 ### Added

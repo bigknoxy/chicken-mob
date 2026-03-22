@@ -4,6 +4,12 @@ This document provides essential context for AI coding agents working in the Chi
 
 ---
 
+## When Encountering Issues
+
+Review `tasks/lessons.md` for documented failure modes, detection signals, and prevention rules. Add new entries when you discover novel issues.
+
+---
+
 ## Project Overview
 
 Chicken Mob is a lane-based crowd game built with TypeScript, Vite, and Canvas 2D. Players launch chicken flocks from barn cannons through multiplier gates to overwhelm fox defenses.

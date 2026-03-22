@@ -295,17 +295,16 @@ function onLevelEnd(): void {
         playerState.totalLevelsCompleted++;
 
         const stars = calculateStars(gameState) as StarRating;
-        const levelIndex = playerState.currentLevel;
+        const levelIndex = LEVELS.findIndex(l => l.id === gameState!.level.id);
         const existingStars = playerState.levelStars[levelIndex] ?? 1;
         playerState.levelStars[levelIndex] = Math.max(existingStars, stars) as StarRating;
 
-        const currentIndex = playerState.currentLevel;
-        if (currentIndex < TOTAL_LEVELS - 1) {
-            playerState.currentLevel = currentIndex + 1;
-            playerState.unlockedLevels = Math.max(playerState.unlockedLevels, currentIndex + 2);
+        if (levelIndex === playerState.currentLevel && playerState.currentLevel < TOTAL_LEVELS - 1) {
+            playerState.currentLevel = levelIndex + 1;
+            playerState.unlockedLevels = Math.max(playerState.unlockedLevels, levelIndex + 2);
         }
 
-        const currentLevelDef = getLevel(currentIndex);
+        const currentLevelDef = getLevel(levelIndex);
         const currentWorldId = currentLevelDef.worldId;
         
         const worldLevels = getLevelsForWorld(currentWorldId);

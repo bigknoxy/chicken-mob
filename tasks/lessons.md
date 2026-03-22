@@ -20,24 +20,10 @@ Review this file when encountering issues. Each entry captures a failure mode, d
 
 **Context:** Browser automation (Playwright) can capture screenshots, but viewing them in a headless/CLI environment requires tools.
 
-**Tools:**
-- `chafa` — Converts images to terminal-compatible output (ASCII/block graphics). Works over SSH, in tmux, no X11 required.
-- `feh` — Lightweight X11 image viewer. Opens in a simple window, fast startup.
+**Skill:** Use the `visual-debug` skill (`~/.config/opencode/skills/visual-debug/SKILL.md`) which provides comprehensive guidance for viewing images in CLI environments.
 
-**Effective workflow:**
-1. Playwright captures screenshot to file
-2. `chafa screenshot.png` for quick terminal preview
-3. `feh screenshot.png &` for full-color detail when X11 available
-
-**Why effective:** Enables visual QA in CLI-first environments without context-switching to a browser or GUI file manager.
-
-**Usage:**
-```bash
-# Terminal preview (works everywhere)
-chafa --size=80x40 screenshot.png
-
-# Full window (requires X11/Wayland)
-feh screenshot.png
-```
+**Quick reference:**
+- `chafa screenshot.png` — Terminal preview (works everywhere, no X11)
+- `feh screenshot.png &` — Full-color window (requires X11/Wayland)
 
 **Pattern:** When automating UI testing in headless environments, ensure image viewing tools are available for debugging.

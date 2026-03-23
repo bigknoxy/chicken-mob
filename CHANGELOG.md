@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-03-22
+
+### Added
+- **Active chicken abilities** — Player-triggered abilities for strategic depth
+  - Rooster Bomber: AOE blast damages nearby foxes and obstacles (8s cooldown)
+  - Speed Chick: Rapid fire temporarily triples fire rate (12s cooldown, 5s duration)
+- **Ability button UI** — Circular button in HUD with cooldown indicator
+- **Ability visual effects** — Particle burst on AOE blast, screen shake
+
+### Changed
+- Rapid fire ability affects fire rate only (not burst size)
+
+### Technical
+- `ActiveAbility` type with `aoe_blast` and `rapid_fire` ability types
+- Ability state tracking in `GameState` (cooldown, active, duration)
+- `triggerAbility()` function in Simulation.ts
+- 6 new unit tests for ability system (88 total)
+
 ## [0.8.0] - 2026-03-22
 
 ### Fixed

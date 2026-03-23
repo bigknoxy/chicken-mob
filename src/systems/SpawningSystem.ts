@@ -48,6 +48,7 @@ export function fireChickens(
     const burstSize = getEffectiveBurstSize(playerState);
     const speed = getEffectiveChickenSpeed(playerState);
     const fireRate = getEffectiveFireRate(playerState);
+    const rapidFireMult = state.rapidFireMultiplier ?? 1;
 
     if (state.cannonCooldown > 0) return;
 
@@ -57,10 +58,11 @@ export function fireChickens(
 
     const lane = Math.floor(targetX * state.level.laneCount);
 
+    const count = burstSize * rapidFireMult;
     const flock: Flock = {
         id: state.nextEntityId++,
         chickenTypeId: chickenType.id,
-        count: burstSize,
+        count,
         lane,
         x: targetX,
         position: 0.0,
@@ -69,7 +71,7 @@ export function fireChickens(
     };
 
     state.flocks.push(flock);
-    state.cannonCooldown = 1.0 / fireRate;
+    state.cannonCooldown = 1.0 / (fireRate * rapidFireMult);
 
-    state.totalChickensFired += burstSize;
+    state.totalChickensFired += count;
 }

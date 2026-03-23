@@ -18,6 +18,16 @@ export interface ChickenUnlockRequirement {
     value: number | string;
 }
 
+export type ActiveAbilityType = 'aoe_blast' | 'rapid_fire';
+
+export interface ActiveAbility {
+    type: ActiveAbilityType;
+    cooldown: number;        // seconds between uses
+    damage?: number;         // for aoe_blast
+    duration?: number;       // for rapid_fire
+    multiplier?: number;     // for rapid_fire
+}
+
 export interface ChickenType {
     id: string;
     name: string;
@@ -29,6 +39,7 @@ export interface ChickenType {
     rarity: Rarity;
     specialAbility?: 'aoe_on_death' | 'bonus_corn';
     specialValue?: number;   // e.g. AoE damage or reward multiplier
+    activeAbility?: ActiveAbility;
     unlockRequirement?: ChickenUnlockRequirement;
 }
 
@@ -268,6 +279,10 @@ export interface GameState {
     totalChickensReachedFort: number; // chickens that successfully reached fort
     currentChickensOnField: number;  // chickens currently alive in lanes
     levelSummary?: LevelSummary;      // end-of-level statistics
+    abilityCooldown: number;   // seconds until ability is ready
+    abilityActive: boolean;    // is an ability currently active (e.g., rapid_fire)
+    abilityDurationRemaining: number; // seconds left on active ability
+    rapidFireMultiplier: number;      // current fire rate multiplier from ability
 }
 
 /** Simple particle for juice effects */

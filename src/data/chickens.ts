@@ -33,6 +33,11 @@ export const CHICKENS: ChickenType[] = [
         rarity: 'epic',
         specialAbility: 'aoe_on_death',
         specialValue: 5,
+        activeAbility: {
+            type: 'aoe_blast',
+            cooldown: 8,
+            damage: 15,
+        },
         unlockRequirement: { type: 'level', value: 12 },
     },
     {
@@ -44,6 +49,12 @@ export const CHICKENS: ChickenType[] = [
         damagePerChicken: 1,
         size: 0.7,
         rarity: 'rare',
+        activeAbility: {
+            type: 'rapid_fire',
+            cooldown: 12,
+            duration: 5,
+            multiplier: 3,
+        },
         unlockRequirement: { type: 'world', value: 'W2' },
     },
     {

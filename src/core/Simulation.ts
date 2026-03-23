@@ -12,7 +12,7 @@
  * 8. Check win/loss conditions
  */
 
-import type { GameState, FoxPack, Particle, LevelSummary } from '@/data/types';
+import type { GameState, FoxPack, Particle, LevelSummary, ActiveAbility, ChickenType } from '@/data/types';
 import { getChicken } from '@/data/chickens';
 import { getFox } from '@/data/foxes';
 import { resolveCombat } from '@/systems/CombatSystem';
@@ -237,6 +237,18 @@ export function simulationTick(state: GameState, dt: number): void {
         state.cannonCooldown -= dt;
     }
 
+    // ── 6b. Ability cooldown and duration ──
+    if (state.abilityCooldown > 0) {
+        state.abilityCooldown -= dt;
+    }
+    if (state.abilityDurationRemaining > 0) {
+        state.abilityDurationRemaining -= dt;
+        if (state.abilityDurationRemaining <= 0) {
+            state.abilityActive = false;
+            state.rapidFireMultiplier = 1;
+        }
+    }
+
     // ── 7. Update particles ──
     updateParticles(state.particles, dt);
 
@@ -456,4 +468,93 @@ export function generateLevelSummary(state: GameState): LevelSummary {
         stars: calculateStars(state),
         won: state.levelWon,
     };
+}
+
+export function triggerAbility(
+    state: GameState,
+    chickenType: ChickenType,
+): boolean {
+    if (state.abilityCooldown > 0) return false;
+    if (!chickenType.activeAbility) return false;
+
+    const ability = chickenType.activeAbility;
+    state.abilityCooldown = ability.cooldown;
+
+    switch (ability.type) {
+        case 'aoe_blast':
+            executeAoeBlast(state, ability);
+            break;
+        case 'rapid_fire':
+            executeRapidFire(state, ability);
+            break;
+    }
+
+    return true;
+}
+
+function executeAoeBlast(state: GameState, ability: ActiveAbility): void {
+    const damage = ability.damage ?? 10;
+    const cannonX = state.cannonX ?? 0.5;
+
+    for (const fox of state.foxPacks) {
+        if (!fox.alive || fox.count <= 0) continue;
+
+        const foxX = fox.x ?? ((fox.lane + 0.5) / state.level.laneCount);
+        const dist = Math.abs(foxX - cannonX);
+
+        if (dist < 0.4) {
+            const foxType = getFox(fox.foxTypeId);
+            const foxesKilled = Math.min(fox.count, Math.ceil(damage / foxType.hpPerFox));
+            fox.count -= foxesKilled;
+            if (fox.count <= 0) {
+                fox.count = 0;
+                fox.alive = false;
+            }
+        }
+    }
+
+    for (const obs of state.obstacles) {
+        if (!obs.alive || obs.currentHp === Infinity) continue;
+
+        const obsX = obs.definition.x ?? ((obs.definition.lane + 0.5) / state.level.laneCount);
+        const dist = Math.abs(obsX - cannonX);
+
+        if (dist < 0.4) {
+            obs.currentHp -= damage;
+            if (obs.currentHp <= 0) {
+                obs.alive = false;
+            }
+        }
+    }
+
+    state.screenShake = 0.25;
+    spawnAoeBlastParticles(state);
+    audio.playCombat();
+}
+
+function executeRapidFire(state: GameState, ability: ActiveAbility): void {
+    state.abilityActive = true;
+    state.abilityDurationRemaining = ability.duration ?? 5;
+    state.rapidFireMultiplier = ability.multiplier ?? 2;
+}
+
+function spawnAoeBlastParticles(state: GameState): void {
+    const cannonX = (state.cannonX ?? 0.5) * state.level.laneCount * 100;
+    const cannonY = state.level.length;
+    const colors = ['#fbbf24', '#f97316', '#ef4444', '#ffffff'];
+
+    for (let i = 0; i < 40; i++) {
+        const angle = (i / 40) * Math.PI * 2;
+        const speed = 150 + Math.random() * 200;
+        state.particles.push({
+            x: cannonX,
+            y: cannonY,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - 100,
+            life: 0.4 + Math.random() * 0.3,
+            maxLife: 0.7,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: 4 + Math.random() * 6,
+        });
+    }
 }

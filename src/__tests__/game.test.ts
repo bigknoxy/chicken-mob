@@ -7,7 +7,8 @@ import { UPGRADES, getUpgradeCost, getUpgradeValue } from '../data/upgrades';
 import { resolveCombat } from '../systems/CombatSystem';
 import { applyGateMultiplier } from '../systems/GateSystem';
 import { calculateOfflineEarnings } from '../systems/OfflineSystem';
-import type { PlayerState, GateDefinition, ObstacleType } from '../data/types';
+import { triggerAbility } from '../core/Simulation';
+import type { PlayerState, GateDefinition, ObstacleType, GameState } from '../data/types';
 
 // ── Data Integrity ──
 
@@ -767,3 +768,132 @@ describe('ProceduralLevelGenerator', () => {
         });
     });
 });
+
+// ── Active Abilities ──
+
+describe('Active Abilities', () => {
+    describe('Chicken ability definitions', () => {
+        it('Rooster Bomber has aoe_blast ability', () => {
+            const bomber = getChicken('rooster_bomber');
+            expect(bomber.activeAbility).toBeDefined();
+            expect(bomber.activeAbility?.type).toBe('aoe_blast');
+            expect(bomber.activeAbility?.cooldown).toBeGreaterThan(0);
+            expect(bomber.activeAbility?.damage).toBeGreaterThan(0);
+        });
+
+        it('Speed Chick has rapid_fire ability', () => {
+            const speedChick = getChicken('speed_chick');
+            expect(speedChick.activeAbility).toBeDefined();
+            expect(speedChick.activeAbility?.type).toBe('rapid_fire');
+            expect(speedChick.activeAbility?.cooldown).toBeGreaterThan(0);
+            expect(speedChick.activeAbility?.duration).toBeGreaterThan(0);
+            expect(speedChick.activeAbility?.multiplier).toBeGreaterThan(1);
+        });
+
+        it('Clucky has no active ability', () => {
+            const clucky = getChicken('clucky');
+            expect(clucky.activeAbility).toBeUndefined();
+        });
+    });
+
+    describe('triggerAbility', () => {
+        it('returns false when cooldown is active', () => {
+            const state = createTestGameState();
+            state.abilityCooldown = 5;
+            
+            const chickenType = getChicken('rooster_bomber');
+            const result = triggerAbility(state, chickenType);
+            
+            expect(result).toBe(false);
+        });
+
+        it('returns false when chicken has no ability', () => {
+            const state = createTestGameState();
+            
+            const chickenType = getChicken('clucky');
+            const result = triggerAbility(state, chickenType);
+            
+            expect(result).toBe(false);
+        });
+
+        it('sets cooldown after triggering aoe_blast', () => {
+            const state = createTestGameState();
+            
+            const chickenType = getChicken('rooster_bomber');
+            const result = triggerAbility(state, chickenType);
+            
+            expect(result).toBe(true);
+            expect(state.abilityCooldown).toBe(chickenType.activeAbility!.cooldown);
+        });
+
+        it('activates rapid_fire and sets multiplier', () => {
+            const state = createTestGameState();
+            
+            const chickenType = getChicken('speed_chick');
+            const result = triggerAbility(state, chickenType);
+            
+            expect(result).toBe(true);
+            expect(state.abilityActive).toBe(true);
+            expect(state.rapidFireMultiplier).toBe(chickenType.activeAbility!.multiplier);
+            expect(state.abilityDurationRemaining).toBe(chickenType.activeAbility!.duration);
+        });
+
+        it('aoe_blast damages nearby foxes', () => {
+            const state = createTestGameState();
+            state.foxPacks = [
+                { id: 1, foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.5, position: 0.3, speed: 180, alive: true },
+                { id: 2, foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.9, position: 0.3, speed: 180, alive: true },
+            ];
+            
+            const chickenType = getChicken('rooster_bomber');
+            triggerAbility(state, chickenType);
+            
+            // Fox at x=0.5 should be damaged (within range of cannon at 0.5)
+            // Fox at x=0.9 should be undamaged (out of range)
+            expect(state.foxPacks[0].count).toBeLessThan(10);
+            expect(state.foxPacks[1].count).toBe(10);
+        });
+    });
+});
+
+function createTestGameState(): import('../data/types').GameState {
+    return {
+        level: {
+            id: 'test',
+            name: 'Test',
+            worldId: 'W1',
+            laneCount: 3,
+            length: 800,
+            gates: [],
+            obstacles: [],
+            enemySpawns: [],
+            fort: { hp: 100, armorMultiplier: 1, rewardMultiplier: 1 },
+            rewardCorn: 100,
+            rewardFeathers: 0,
+        },
+        flocks: [],
+        foxPacks: [],
+        obstacles: [],
+        gates: [],
+        fort: { currentHp: 100, maxHp: 100, armorMultiplier: 1 },
+        elapsedTime: 0,
+        cannonX: 0.5,
+        cannonAngle: 0,
+        cannonCooldown: 0,
+        isFiring: false,
+        nextEntityId: 1,
+        levelComplete: false,
+        levelWon: false,
+        pendingSpawns: [],
+        particles: [],
+        screenShake: 0,
+        victoryFlash: 0,
+        totalChickensFired: 0,
+        totalChickensReachedFort: 0,
+        currentChickensOnField: 0,
+        abilityCooldown: 0,
+        abilityActive: false,
+        abilityDurationRemaining: 0,
+        rapidFireMultiplier: 1,
+    };
+}

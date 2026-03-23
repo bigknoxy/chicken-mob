@@ -7,9 +7,9 @@
 
 import type { GameState, LiveObstacle, LiveGate, LevelDefinition, StarRating } from '@/data/types';
 import { getLevel, TOTAL_LEVELS, WORLDS, getLevelsForWorld, LEVELS } from '@/data/levels';
-import { CHICKENS, isChickenUnlocked } from '@/data/chickens';
+import { CHICKENS, isChickenUnlocked, getChicken } from '@/data/chickens';
 import { GameLoop } from '@/core/GameLoop';
-import { simulationTick, calculateStars, generateLevelSummary } from '@/core/Simulation';
+import { simulationTick, calculateStars, generateLevelSummary, triggerAbility } from '@/core/Simulation';
 import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
 import { fireChickens } from '@/systems/SpawningSystem';
 import { calculateOfflineEarnings, claimOfflineEarnings } from '@/systems/OfflineSystem';
@@ -62,6 +62,10 @@ const input = new InputManager(canvas);
 const hud = new HUD(overlay);
 const offlinePopup = new OfflinePopup(overlay);
 const modal = new Modal();
+
+hud.setAbilityCallback(() => {
+    input.triggerAbility();
+});
 
 const menuScreen = new MenuScreen(overlay, (action) => {
     switch (action.type) {
@@ -131,6 +135,15 @@ const loop = new GameLoop(
             gameState.isFiring = false;
         }
 
+        // Handle ability button press
+        if (inputState.abilityPressed && gameState.abilityCooldown <= 0) {
+            const chickenType = getChicken(playerState.equippedChickenId);
+            if (chickenType.activeAbility) {
+                triggerAbility(gameState, chickenType);
+                hapticFeedback(HAPTIC.heavy);
+            }
+        }
+
         // Run simulation
         simulationTick(gameState, dt);
 
@@ -154,6 +167,7 @@ const loop = new GameLoop(
         if (currentScreen === 'playing' && gameState && laneGeo) {
             renderer.render(gameState, laneGeo);
             hud.update(playerState);
+            hud.updateAbilityUI(gameState, playerState);
         }
     },
 );
@@ -232,6 +246,10 @@ function createGameState(level: LevelDefinition): GameState {
         totalChickensFired: 0,
         totalChickensReachedFort: 0,
         currentChickensOnField: 0,
+        abilityCooldown: 0,
+        abilityActive: false,
+        abilityDurationRemaining: 0,
+        rapidFireMultiplier: 1,
     };
 }
 

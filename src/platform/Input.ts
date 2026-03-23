@@ -18,6 +18,8 @@ export interface InputState {
     justReleased: boolean;
     /** Aim angle in radians (0 = straight up, positive = right, negative = left) */
     aimAngle: number;
+    /** Was the ability button pressed this frame? */
+    abilityPressed: boolean;
 }
 
 /** Haptic feedback utility - safe guard if not supported */
@@ -45,6 +47,7 @@ export class InputManager {
         justPressed: false,
         justReleased: false,
         aimAngle: 0,
+        abilityPressed: false,
     };
 
     constructor(private readonly canvas: HTMLCanvasElement) {
@@ -59,6 +62,12 @@ export class InputManager {
     endFrame(): void {
         this.state.justPressed = false;
         this.state.justReleased = false;
+        this.state.abilityPressed = false;
+    }
+
+    /** Trigger ability button press (called from UI button) */
+    triggerAbility(): void {
+        this.state.abilityPressed = true;
     }
 
     private bindEvents(): void {

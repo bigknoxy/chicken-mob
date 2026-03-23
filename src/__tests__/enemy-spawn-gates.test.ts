@@ -50,6 +50,10 @@ function createTestState(overrides?: Partial<GameState>): GameState {
         totalChickensFired: 0,
         totalChickensReachedFort: 0,
         currentChickensOnField: 0,
+        abilityCooldown: 0,
+        abilityActive: false,
+        abilityDurationRemaining: 0,
+        rapidFireMultiplier: 1,
     };
 
     return { ...defaultState, ...overrides } as GameState;

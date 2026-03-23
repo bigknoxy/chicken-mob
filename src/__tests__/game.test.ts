@@ -8,7 +8,7 @@ import { resolveCombat } from '../systems/CombatSystem';
 import { applyGateMultiplier } from '../systems/GateSystem';
 import { calculateOfflineEarnings } from '../systems/OfflineSystem';
 import { triggerAbility } from '../core/Simulation';
-import type { PlayerState, GateDefinition, ObstacleType, GameState } from '../data/types';
+import type { PlayerState, GateDefinition, ObstacleType } from '../data/types';
 
 // ── Data Integrity ──
 

@@ -9,7 +9,7 @@ import type { GameState, LiveObstacle, LiveGate, LevelDefinition, StarRating } f
 import { getLevel, TOTAL_LEVELS, WORLDS, getLevelsForWorld, LEVELS } from '@/data/levels';
 import { CHICKENS, isChickenUnlocked, getChicken } from '@/data/chickens';
 import { GameLoop } from '@/core/GameLoop';
-import { simulationTick, calculateStars, generateLevelSummary, triggerAbility } from '@/core/Simulation';
+import { simulationTick, calculateStars, generateLevelSummary, triggerAbility, spawnLaunchParticles, triggerCannonRecoil } from '@/core/Simulation';
 import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
 import { fireChickens } from '@/systems/SpawningSystem';
 import { calculateOfflineEarnings, claimOfflineEarnings } from '@/systems/OfflineSystem';
@@ -24,6 +24,7 @@ import { HUD } from '@/ui/HUD';
 import { MenuScreen } from '@/ui/MenuScreen';
 import { UpgradeScreen } from '@/ui/UpgradeScreen';
 import { OfflinePopup } from '@/ui/OfflinePopup';
+import { TutorialOverlay } from '@/ui/TutorialOverlay';
 
 // ── App State ──
 type AppScreen = 'menu' | 'playing' | 'upgrades';
@@ -62,6 +63,9 @@ const input = new InputManager(canvas);
 const hud = new HUD(overlay);
 const offlinePopup = new OfflinePopup(overlay);
 const modal = new Modal();
+const tutorial = new TutorialOverlay(overlay, () => {
+    playerState.tutorialSeen = true;
+});
 
 hud.setAbilityCallback(() => {
     input.triggerAbility();
@@ -102,6 +106,12 @@ const loop = new GameLoop(
     (dt: number) => {
         if (currentScreen !== 'playing' || !gameState || !laneGeo) return;
 
+        // Skip simulation when paused
+        if (gameState.paused) {
+            input.endFrame();
+            return;
+        }
+
         // Handle input → cannon aiming and firing
         const inputState = input.getState();
 
@@ -121,7 +131,13 @@ const loop = new GameLoop(
             const rawAngle = Math.atan2(dx, dy);
             
             // Clamp angle to max range
+            const prevAngle = gameState.cannonAngle;
             gameState.cannonAngle = Math.max(-MAX_AIM_ANGLE, Math.min(MAX_AIM_ANGLE, rawAngle));
+            
+            // Tutorial: detect aim change
+            if (Math.abs(gameState.cannonAngle - prevAngle) > 0.1) {
+                tutorial.onAim();
+            }
             
             gameState.isFiring = true;
 
@@ -130,6 +146,11 @@ const loop = new GameLoop(
                 fireChickens(gameState, playerState, gameState.cannonAngle);
                 audio.playFire();
                 hapticFeedback(HAPTIC.fire);
+                triggerCannonRecoil(gameState);
+                const cannonX = (gameState.cannonX ?? 0.5) * renderer.getWidth();
+                const cannonY = renderer.getHeight() - (laneGeo?.bottomMargin ?? 60) / 2;
+                spawnLaunchParticles(gameState, cannonX, cannonY);
+                tutorial.onFire();
             }
         } else {
             gameState.isFiring = false;
@@ -146,6 +167,14 @@ const loop = new GameLoop(
 
         // Run simulation
         simulationTick(gameState, dt);
+
+        // Tutorial: detect gate pass (Level 1 has gate at position 0.5)
+        if (tutorial && gameState.level.id === 'level_01') {
+            const passedGate = gameState.flocks.some(f => f.alive && f.position > 0.5);
+            if (passedGate) {
+                tutorial.onGatePass();
+            }
+        }
 
         // Handle level complete
         if (gameState.levelComplete && inputState.justPressed) {
@@ -186,6 +215,13 @@ function startLevel(index: number): void {
     menuScreen.hide();
     upgradeScreen.hide();
     audio.resume();
+    
+    // Show tutorial on Level 1 for new players
+    if (index === 0 && !playerState.tutorialSeen) {
+        tutorial.show();
+    } else {
+        tutorial.hide();
+    }
 }
 
 function startEndlessMode(): void {
@@ -235,6 +271,7 @@ function createGameState(level: LevelDefinition): GameState {
         cannonX: 0.5,     // default to center (0.5)
         cannonAngle: 0,
         cannonCooldown: 0,
+        cannonRecoil: 0,
         isFiring: false,
         nextEntityId: 100,
         levelComplete: false,
@@ -250,6 +287,7 @@ function createGameState(level: LevelDefinition): GameState {
         abilityActive: false,
         abilityDurationRemaining: 0,
         rapidFireMultiplier: 1,
+        paused: false,
     };
 }
 
@@ -383,6 +421,24 @@ function showCoopInfo(): void {
 
 // ── Boot ──
 function boot(): void {
+    // Mobile lifecycle: pause on visibility change
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // App going to background - save and pause
+            if (gameState && currentScreen === 'playing') {
+                gameState.paused = true;
+            }
+            playerState.lastSessionTimestamp = Date.now();
+            savePlayerState(playerState);
+        } else {
+            // App coming to foreground - resume
+            if (gameState && currentScreen === 'playing') {
+                gameState.paused = false;
+            }
+            audio.resume();
+        }
+    });
+
     // Check offline earnings
     const earnings = calculateOfflineEarnings(playerState);
     if (earnings.corn > 0) {

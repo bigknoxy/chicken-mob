@@ -18,3 +18,12 @@ export const SCREEN_SHAKE_INTENSITY = 0.15;
 
 // Aiming constants
 export const MAX_AIM_ANGLE = Math.PI / 3; // 60 degrees left/right
+
+// ── Juice / Polish Constants ──
+export const CANNON_RECOIL_DURATION = 0.12;
+export const CANNON_RECOIL_DISTANCE = 8;
+export const GATE_BURST_PARTICLE_COUNT = 20;
+export const FORT_HIT_SHAKE_INTENSITY = 0.25;
+export const FORT_HIT_PARTICLE_COUNT = 30;
+export const MUZZLE_PARTICLE_COUNT = 8;
+export const SPAWN_POP_PARTICLE_COUNT = 6;

@@ -16,7 +16,7 @@ import type { GameState, FoxPack, Particle, LevelSummary, ActiveAbility, Chicken
 import { getChicken } from '@/data/chickens';
 import { getFox } from '@/data/foxes';
 import { resolveCombat } from '@/systems/CombatSystem';
-import { DEFAULT_ENTITY_WIDTH, DEFAULT_TIMEOUT, FLOCK_DEATH_THRESHOLD, MIN_FLOCK_COUNT, SCREEN_SHAKE_INTENSITY } from '@/constants/game';
+import { DEFAULT_ENTITY_WIDTH, DEFAULT_TIMEOUT, FLOCK_DEATH_THRESHOLD, MIN_FLOCK_COUNT, CANNON_RECOIL_DURATION, GATE_BURST_PARTICLE_COUNT, FORT_HIT_SHAKE_INTENSITY, FORT_HIT_PARTICLE_COUNT, SPAWN_POP_PARTICLE_COUNT } from '@/constants/game';
 import { audio } from '@/platform/Audio';
 import {
     detectFlockVsFox,
@@ -198,12 +198,15 @@ export function simulationTick(state: GameState, dt: number): void {
         // Track chickens that reached the fort (for star calculation)
         state.totalChickensReachedFort += flock.count;
 
+        // Spawn fort hit burst particles
+        spawnFortHitParticles(state, flock.count);
+
         // All chickens are consumed on fort impact
         flock.count = 0;
         flock.alive = false;
 
-        // Screen shake!
-        state.screenShake = Math.max(state.screenShake, SCREEN_SHAKE_INTENSITY);
+        // Enhanced screen shake!
+        state.screenShake = Math.max(state.screenShake, FORT_HIT_SHAKE_INTENSITY);
     }
 
     // ── 5. Enemy spawn schedule ──
@@ -235,6 +238,11 @@ export function simulationTick(state: GameState, dt: number): void {
     // ── 6. Cannon cooldown ──
     if (state.cannonCooldown > 0) {
         state.cannonCooldown -= dt;
+    }
+
+    // ── 6b. Cannon recoil decay ──
+    if (state.cannonRecoil > 0) {
+        state.cannonRecoil -= dt;
     }
 
     // ── 6b. Ability cooldown and duration ──
@@ -289,6 +297,54 @@ export function simulationTick(state: GameState, dt: number): void {
     }
 }
 
+/** Spawn fort hit burst particles */
+function spawnFortHitParticles(state: GameState, chickenCount: number): void {
+    const count = Math.min(FORT_HIT_PARTICLE_COUNT, chickenCount * 3);
+    const colors = ['#fbbf24', '#f97316', '#ef4444', '#dc2626', '#ffffff'];
+    const totalWidth = state.level.laneCount * 100;
+    
+    for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 150 + Math.random() * 250;
+        state.particles.push({
+            x: totalWidth * 0.5 + (Math.random() - 0.5) * totalWidth * 0.3,
+            y: 30 + Math.random() * 40,
+            vx: Math.cos(angle) * speed * 0.5,
+            vy: Math.sin(angle) * speed + 100,
+            life: 0.3 + Math.random() * 0.4,
+            maxLife: 0.7,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: 3 + Math.random() * 5,
+        });
+    }
+}
+
+/** Spawn pop particles when chickens are launched */
+export function spawnLaunchParticles(state: GameState, x: number, y: number): void {
+    const count = SPAWN_POP_PARTICLE_COUNT;
+    const colors = ['#fbbf24', '#fcd34d', '#fef3c7'];
+    
+    for (let i = 0; i < count; i++) {
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.2;
+        const speed = 80 + Math.random() * 120;
+        state.particles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life: 0.2 + Math.random() * 0.2,
+            maxLife: 0.4,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: 2 + Math.random() * 3,
+        });
+    }
+}
+
+/** Trigger cannon recoil animation */
+export function triggerCannonRecoil(state: GameState): void {
+    state.cannonRecoil = CANNON_RECOIL_DURATION;
+}
+
 /** Spawn particles at a gate position */
 function spawnGateParticles(
     state: GameState,
@@ -296,21 +352,24 @@ function spawnGateParticles(
     position: number,
     positive: boolean,
 ): void {
-    const count = positive ? 12 : 6;
-    const color = positive ? '#4ade80' : '#ef4444';
-    // Convert lane and position to game coordinates
-    const baseX = (lane + 0.5) * 100; // center of lane in pixels (assuming 100px per lane)
-    const baseY = position * state.level.length; // position along lane length
+    const count = positive ? GATE_BURST_PARTICLE_COUNT : 12;
+    const colors = positive 
+        ? ['#4ade80', '#22c55e', '#86efac', '#fbbf24'] 
+        : ['#ef4444', '#f87171', '#fca5a5'];
+    const baseX = (lane + 0.5) * 100;
+    const baseY = position * state.level.length;
     for (let i = 0; i < count; i++) {
+        const angle = (i / count) * Math.PI * 2;
+        const speed = 100 + Math.random() * 200;
         state.particles.push({
             x: baseX,
             y: baseY,
-            vx: (Math.random() - 0.5) * 200,
-            vy: (Math.random() - 0.5) * 200,
-            life: 0.5 + Math.random() * 0.3,
-            maxLife: 0.8,
-            color,
-            size: 3 + Math.random() * 4,
+            vx: Math.cos(angle) * speed + (Math.random() - 0.5) * 100,
+            vy: Math.sin(angle) * speed - (positive ? 100 : 50),
+            life: 0.4 + Math.random() * 0.3,
+            maxLife: 0.7,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            size: positive ? 4 + Math.random() * 5 : 3 + Math.random() * 3,
         });
     }
 }

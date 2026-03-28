@@ -190,6 +190,7 @@ export interface PlayerState {
     totalLevelsCompleted: number;
     levelStars: Record<number, StarRating>; // level index → star rating
     endlessHighScore: number;        // highest wave reached in endless mode
+    tutorialSeen?: boolean;          // has the player seen the tutorial
 }
 
 // ============================================================
@@ -267,6 +268,7 @@ export interface GameState {
     cannonX?: number;        // 0..1 normalized horizontal position (optional for backwards compat)
     cannonAngle: number;       // current aim angle in radians
     cannonCooldown: number;    // seconds until next shot allowed
+    cannonRecoil: number;      // seconds of recoil animation remaining
     isFiring: boolean;         // is the player holding fire?
     nextEntityId: number;      // auto-incrementing ID for flocks/packs
     levelComplete: boolean;
@@ -283,6 +285,7 @@ export interface GameState {
     abilityActive: boolean;    // is an ability currently active (e.g., rapid_fire)
     abilityDurationRemaining: number; // seconds left on active ability
     rapidFireMultiplier: number;      // current fire rate multiplier from ability
+    paused: boolean;           // game is paused (mobile lifecycle)
 }
 
 /** Simple particle for juice effects */

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-03-27
+
+### Added
+- **Visual polish and juice effects** — Enhanced game feel for Play Store readiness
+  - Cannon recoil animation on fire
+  - Multi-ring muzzle flash burst with gradient
+  - Radial gate impact particles with color variety
+  - Fort hit screen shake and particle burst
+  - Launch pop particles when chickens spawn
+- **Mobile lifecycle handling** — Pause on background, save on visibility change
+- **Tutorial overlay** — 3-step interactive tutorial for Level 1 (aim → fire → gate)
+- **Pause overlay** — Visual indicator when game is suspended
+
+### Fixed
+- Particle spawn positions now correctly aligned with game objects (was offset to left)
+- Tutorial state properly tracked with `tutorialSeen` field (not level counter hack)
+- Pause frame properly clears input flags before early return
+
+### Technical
+- Added `laneGeometry` to `GameState` for accurate particle positioning
+- Added `cannonRecoil` and `paused` to `GameState`
+- New `TutorialOverlay.ts` component
+- Constants for juice effects in `game.ts`
+
 ## [0.9.0] - 2026-03-22
 
 ### Added

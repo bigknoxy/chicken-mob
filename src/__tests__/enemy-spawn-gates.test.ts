@@ -39,6 +39,7 @@ function createTestState(overrides?: Partial<GameState>): GameState {
         elapsedTime: 0,
         cannonAngle: 0,
         cannonCooldown: 0,
+        cannonRecoil: 0,
         isFiring: false,
         nextEntityId: 1,
         levelComplete: false,
@@ -54,6 +55,7 @@ function createTestState(overrides?: Partial<GameState>): GameState {
         abilityActive: false,
         abilityDurationRemaining: 0,
         rapidFireMultiplier: 1,
+        paused: false,
     };
 
     return { ...defaultState, ...overrides } as GameState;

@@ -29,6 +29,7 @@ export function createDefaultPlayerState(): PlayerState {
         totalLevelsCompleted: 0,
         levelStars: {},
         endlessHighScore: 0,
+        tutorialSeen: false,
     };
 }
 

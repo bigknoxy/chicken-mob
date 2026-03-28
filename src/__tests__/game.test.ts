@@ -880,6 +880,7 @@ function createTestGameState(): import('../data/types').GameState {
         cannonX: 0.5,
         cannonAngle: 0,
         cannonCooldown: 0,
+        cannonRecoil: 0,
         isFiring: false,
         nextEntityId: 1,
         levelComplete: false,
@@ -895,5 +896,6 @@ function createTestGameState(): import('../data/types').GameState {
         abilityActive: false,
         abilityDurationRemaining: 0,
         rapidFireMultiplier: 1,
+        paused: false,
     };
 }

@@ -8,7 +8,7 @@
 
 import type { GameState, Flock, FoxPack, LiveObstacle, LiveGate, Particle } from '@/data/types';
 import { LaneGeometry, laneX, positionToY, laneWidth } from '@/core/Lane';
-import { MAX_VISIBLE_PER_FLOCK, SCREEN_SHAKE_MULTIPLIER, MUZZLE_FLASH_COOLDOWN } from '@/constants/game';
+import { MAX_VISIBLE_PER_FLOCK, SCREEN_SHAKE_MULTIPLIER, MUZZLE_FLASH_COOLDOWN, CANNON_RECOIL_DISTANCE } from '@/constants/game';
 import { formatNumber } from '@/utils/format';
 
 // ── Colors ──
@@ -150,6 +150,20 @@ export class Renderer {
         // ── End-of-level summary (drawn AFTER ctx.restore to avoid screen shake) ──
         if (state.levelComplete && state.levelSummary) {
             this.drawLevelSummary(state);
+        }
+
+        // ── Pause overlay ──
+        if (state.paused) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, this.width, this.height);
+            ctx.fillStyle = '#fbbf24';
+            ctx.font = 'bold 24px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('PAUSED', this.width / 2, this.height / 2);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '14px sans-serif';
+            ctx.fillText('Tap to resume', this.width / 2, this.height / 2 + 30);
         }
     }
 
@@ -459,13 +473,18 @@ export class Renderer {
     private drawCannon(state: GameState, geo: LaneGeometry): void {
         const ctx = this.ctx;
         const cx = (state.cannonX ?? 0.5) * this.width;
-        const cy = this.height - geo.bottomMargin / 2;
+        const baseCy = this.height - geo.bottomMargin / 2;
+        
+        // Apply recoil offset
+        const recoilProgress = state.cannonRecoil > 0 ? state.cannonRecoil / 0.12 : 0;
+        const recoilOffset = recoilProgress * CANNON_RECOIL_DISTANCE;
+        const cy = baseCy + recoilOffset;
         const r = 22;
 
-        // Cannon base
+        // Cannon base (slightly offset by recoil)
         ctx.fillStyle = COLORS.cannonBase;
         ctx.beginPath();
-        ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
+        ctx.arc(cx, baseCy, r + 6, 0, Math.PI * 2);
         ctx.fill();
 
         // Cannon body
@@ -478,19 +497,27 @@ export class Renderer {
         if (state.isFiring && state.cannonCooldown > MUZZLE_FLASH_COOLDOWN) {
             // Outer shockwave ring
             ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r + 18 + recoilProgress * 10, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Middle ring
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(cx, cy, r + 15, 0, Math.PI * 2);
+            ctx.arc(cx, cy, r + 12, 0, Math.PI * 2);
             ctx.stroke();
 
             // Inner flash burst
-            const flashGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r + 8);
-            flashGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-            flashGradient.addColorStop(0.3, 'rgba(251, 191, 36, 0.7)');
+            const flashGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r + 10);
+            flashGradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+            flashGradient.addColorStop(0.3, 'rgba(251, 191, 36, 0.8)');
+            flashGradient.addColorStop(0.7, 'rgba(249, 115, 22, 0.4)');
             flashGradient.addColorStop(1, 'rgba(251, 191, 36, 0)');
             ctx.fillStyle = flashGradient;
             ctx.beginPath();
-            ctx.arc(cx, cy, r + 8, 0, Math.PI * 2);
+            ctx.arc(cx, cy, r + 10, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -525,12 +552,12 @@ export class Renderer {
         ctx.textBaseline = 'middle';
         ctx.fillText('🏚️', cx, cy);
 
-        // Fire indicator
+        // Fire indicator ring
         if (state.isFiring) {
             ctx.strokeStyle = COLORS.chicken;
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.arc(cx, cy, r + 8, 0, Math.PI * 2);
+            ctx.arc(cx, cy, r + 10, 0, Math.PI * 2);
             ctx.stroke();
         }
     }

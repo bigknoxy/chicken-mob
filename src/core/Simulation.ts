@@ -18,6 +18,7 @@ import { getFox } from '@/data/foxes';
 import { resolveCombat } from '@/systems/CombatSystem';
 import { DEFAULT_ENTITY_WIDTH, DEFAULT_TIMEOUT, FLOCK_DEATH_THRESHOLD, MIN_FLOCK_COUNT, CANNON_RECOIL_DURATION, GATE_BURST_PARTICLE_COUNT, FORT_HIT_SHAKE_INTENSITY, FORT_HIT_PARTICLE_COUNT, SPAWN_POP_PARTICLE_COUNT } from '@/constants/game';
 import { audio } from '@/platform/Audio';
+import { laneX, positionToY } from '@/core/Lane';
 import {
     detectFlockVsFox,
     detectFlockVsFort,
@@ -301,14 +302,19 @@ export function simulationTick(state: GameState, dt: number): void {
 function spawnFortHitParticles(state: GameState, chickenCount: number): void {
     const count = Math.min(FORT_HIT_PARTICLE_COUNT, chickenCount * 3);
     const colors = ['#fbbf24', '#f97316', '#ef4444', '#dc2626', '#ffffff'];
-    const totalWidth = state.level.laneCount * 100;
+    
+    // Use lane geometry for correct positioning
+    const geo = state.laneGeometry;
+    const centerX = geo ? geo.canvasWidth / 2 : state.level.laneCount * 50;
+    const fortY = geo ? positionToY(geo, 1.0) : 30;
+    const spreadX = geo ? geo.canvasWidth * 0.3 : state.level.laneCount * 30;
     
     for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 150 + Math.random() * 250;
         state.particles.push({
-            x: totalWidth * 0.5 + (Math.random() - 0.5) * totalWidth * 0.3,
-            y: 30 + Math.random() * 40,
+            x: centerX + (Math.random() - 0.5) * spreadX,
+            y: fortY + Math.random() * 40,
             vx: Math.cos(angle) * speed * 0.5,
             vy: Math.sin(angle) * speed + 100,
             life: 0.3 + Math.random() * 0.4,
@@ -356,8 +362,12 @@ function spawnGateParticles(
     const colors = positive 
         ? ['#4ade80', '#22c55e', '#86efac', '#fbbf24'] 
         : ['#ef4444', '#f87171', '#fca5a5'];
-    const baseX = (lane + 0.5) * 100;
-    const baseY = position * state.level.length;
+    
+    // Use lane geometry if available for correct positioning
+    const geo = state.laneGeometry;
+    const baseX = geo ? laneX(geo, lane) : (lane + 0.5) * 100;
+    const baseY = geo ? positionToY(geo, position) : position * state.level.length;
+    
     for (let i = 0; i < count; i++) {
         const angle = (i / count) * Math.PI * 2;
         const speed = 100 + Math.random() * 200;

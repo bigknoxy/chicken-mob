@@ -2,6 +2,8 @@
 // Chicken Mob — Core Data Types
 // ============================================================
 
+import type { LaneGeometry } from '@/core/Lane';
+
 // ----- Helper Functions -----
 export function getLaneCenter(lane: number, laneCount: number): number {
     return (lane + 0.5) / laneCount;
@@ -286,6 +288,7 @@ export interface GameState {
     abilityDurationRemaining: number; // seconds left on active ability
     rapidFireMultiplier: number;      // current fire rate multiplier from ability
     paused: boolean;           // game is paused (mobile lifecycle)
+    laneGeometry?: LaneGeometry;  // cached lane geometry for particle positioning
 }
 
 /** Simple particle for juice effects */

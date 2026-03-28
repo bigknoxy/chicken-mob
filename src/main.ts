@@ -204,12 +204,12 @@ const loop = new GameLoop(
 // ── Level Management ──
 function startLevel(index: number): void {
     const levelDef = getLevel(index);
-    gameState = createGameState(levelDef);
     laneGeo = createLaneGeometry(
         renderer.getWidth(),
         renderer.getHeight(),
         levelDef.laneCount,
     );
+    gameState = createGameState(levelDef, laneGeo);
     currentScreen = 'playing';
     isEndlessMode = false;
     menuScreen.hide();
@@ -233,19 +233,19 @@ function startEndlessMode(): void {
 
 function startEndlessWave(): void {
     const levelDef = generateEndlessLevel(endlessWave);
-    gameState = createGameState(levelDef);
     laneGeo = createLaneGeometry(
         renderer.getWidth(),
         renderer.getHeight(),
         levelDef.laneCount,
     );
+    gameState = createGameState(levelDef, laneGeo);
     currentScreen = 'playing';
     menuScreen.hide();
     upgradeScreen.hide();
     audio.resume();
 }
 
-function createGameState(level: LevelDefinition): GameState {
+function createGameState(level: LevelDefinition, geo?: LaneGeometry): GameState {
     return {
         level,
         flocks: [],
@@ -288,6 +288,7 @@ function createGameState(level: LevelDefinition): GameState {
         abilityDurationRemaining: 0,
         rapidFireMultiplier: 1,
         paused: false,
+        laneGeometry: geo,
     };
 }
 

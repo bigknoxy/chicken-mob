@@ -171,6 +171,21 @@ export interface CoopState {
     offlineCapSeconds: number;
 }
 
+// ----- Daily Login -----
+export interface DailyLoginState {
+    lastLoginDate: string;           // ISO date string 'YYYY-MM-DD'
+    consecutiveDays: number;         // current streak (1-7, resets after claim)
+    totalDaysLoggedIn: number;       // lifetime stat
+    rewardsClaimedToday: boolean;    // prevent re-claiming on same day
+}
+
+// ----- Player Settings -----
+export interface PlayerSettings {
+    soundEnabled: boolean;
+    musicEnabled: boolean;
+    hapticsEnabled: boolean;
+}
+
 // ----- Player State -----
 export type StarRating = 1 | 2 | 3;
 
@@ -193,6 +208,8 @@ export interface PlayerState {
     levelStars: Record<number, StarRating>; // level index → star rating
     endlessHighScore: number;        // highest wave reached in endless mode
     tutorialSeen?: boolean;          // has the player seen the tutorial
+    dailyLogin?: DailyLoginState;    // daily login streak tracking
+    settings?: PlayerSettings;       // user preferences
 }
 
 // ============================================================

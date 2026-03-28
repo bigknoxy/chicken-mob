@@ -14,6 +14,7 @@ import { createLaneGeometry, LaneGeometry } from '@/core/Lane';
 import { fireChickens } from '@/systems/SpawningSystem';
 import { calculateOfflineEarnings, claimOfflineEarnings } from '@/systems/OfflineSystem';
 import { generateEndlessLevel } from '@/systems/ProceduralLevelGenerator';
+import { shouldShowDailyLogin, checkDailyLogin, claimDailyReward } from '@/systems/DailyLoginSystem';
 import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
 import { InputManager, hapticFeedback, HAPTIC } from '@/platform/Input';
 import { audio } from '@/platform/Audio';
@@ -25,6 +26,8 @@ import { MenuScreen } from '@/ui/MenuScreen';
 import { UpgradeScreen } from '@/ui/UpgradeScreen';
 import { OfflinePopup } from '@/ui/OfflinePopup';
 import { TutorialOverlay } from '@/ui/TutorialOverlay';
+import { SettingsScreen } from '@/ui/SettingsScreen';
+import { DailyLoginPopup } from '@/ui/DailyLoginPopup';
 
 // ── App State ──
 type AppScreen = 'menu' | 'playing' | 'upgrades';
@@ -62,6 +65,8 @@ const renderer = new Renderer(canvas);
 const input = new InputManager(canvas);
 const hud = new HUD(overlay);
 const offlinePopup = new OfflinePopup(overlay);
+const dailyLoginPopup = new DailyLoginPopup(overlay);
+const settingsScreen = new SettingsScreen(overlay);
 const modal = new Modal();
 const tutorial = new TutorialOverlay(overlay, () => {
     playerState.tutorialSeen = true;
@@ -70,6 +75,30 @@ const tutorial = new TutorialOverlay(overlay, () => {
 hud.setAbilityCallback(() => {
     input.triggerAbility();
 });
+
+hud.setSettingsCallback(() => {
+    if (gameState && currentScreen === 'playing') {
+        gameState.paused = true;
+    }
+    settingsScreen.show(playerState, () => {
+        savePlayerState(playerState);
+        if (gameState && currentScreen === 'playing') {
+            gameState.paused = false;
+        }
+    });
+});
+
+function playSound(soundFn: () => void): void {
+    if (playerState.settings?.soundEnabled !== false) {
+        soundFn();
+    }
+}
+
+function doHaptic(pattern: number | number[] | readonly number[]): void {
+    if (playerState.settings?.hapticsEnabled !== false) {
+        hapticFeedback(pattern as number | number[]);
+    }
+}
 
 const menuScreen = new MenuScreen(overlay, (action) => {
     switch (action.type) {
@@ -144,8 +173,8 @@ const loop = new GameLoop(
             // Auto-fire while holding
             if (gameState.cannonCooldown <= 0) {
                 fireChickens(gameState, playerState, gameState.cannonAngle);
-                audio.playFire();
-                hapticFeedback(HAPTIC.fire);
+                playSound(() => audio.playFire());
+                doHaptic(HAPTIC.fire);
                 triggerCannonRecoil(gameState);
                 const cannonX = (gameState.cannonX ?? 0.5) * renderer.getWidth();
                 const cannonY = renderer.getHeight() - (laneGeo?.bottomMargin ?? 60) / 2;
@@ -161,7 +190,7 @@ const loop = new GameLoop(
             const chickenType = getChicken(playerState.equippedChickenId);
             if (chickenType.activeAbility) {
                 triggerAbility(gameState, chickenType);
-                hapticFeedback(HAPTIC.heavy);
+                doHaptic(HAPTIC.heavy);
             }
         }
 
@@ -312,8 +341,8 @@ function onLevelEnd(): void {
             endlessWave++;
             savePlayerState(playerState);
             
-            audio.playWin();
-            hapticFeedback(HAPTIC.win);
+            playSound(() => audio.playWin());
+            doHaptic(HAPTIC.win);
             
             gameState = null;
             startEndlessWave();
@@ -327,8 +356,8 @@ function onLevelEnd(): void {
                 [{ text: 'Continue', onClick: () => {} }],
             );
             
-            audio.playLose();
-            hapticFeedback(HAPTIC.lose);
+            playSound(() => audio.playLose());
+            doHaptic(HAPTIC.lose);
             
             playerState.lastSessionTimestamp = Date.now();
             savePlayerState(playerState);
@@ -394,8 +423,8 @@ function onLevelEnd(): void {
             }, 1000);
         }
 
-        audio.playWin();
-        hapticFeedback(HAPTIC.win);
+        playSound(() => audio.playWin());
+        doHaptic(HAPTIC.win);
     } else {
         audio.playLose();
         hapticFeedback(HAPTIC.lose);
@@ -421,6 +450,9 @@ function showCoopInfo(): void {
 }
 
 // ── Boot ──
+// Capture offline earnings before any popup delays the calculation
+let cachedOfflineEarnings: ReturnType<typeof calculateOfflineEarnings> | null = null;
+
 function boot(): void {
     // Mobile lifecycle: pause on visibility change
     document.addEventListener('visibilitychange', () => {
@@ -440,8 +472,33 @@ function boot(): void {
         }
     });
 
-    // Check offline earnings
-    const earnings = calculateOfflineEarnings(playerState);
+    // Capture offline earnings BEFORE showing any popup (prevents time-inflation bug)
+    cachedOfflineEarnings = calculateOfflineEarnings(playerState);
+
+    // Check and show daily login reward
+    if (shouldShowDailyLogin(playerState)) {
+        const loginInfo = checkDailyLogin(playerState);
+        dailyLoginPopup.show(
+            loginInfo.consecutiveDays,
+            loginInfo.reward,
+            loginInfo.isStreakBroken,
+            () => {
+                claimDailyReward(playerState);
+                savePlayerState(playerState);
+                showOfflineEarnings();
+            },
+        );
+    } else {
+        showOfflineEarnings();
+    }
+
+    hud.update(playerState);
+    loop.start();
+}
+
+function showOfflineEarnings(): void {
+    const earnings = cachedOfflineEarnings ?? calculateOfflineEarnings(playerState);
+    cachedOfflineEarnings = null; // Clear cache after use
     if (earnings.corn > 0) {
         offlinePopup.show(earnings, () => {
             claimOfflineEarnings(playerState, earnings);
@@ -452,9 +509,6 @@ function boot(): void {
         playerState.lastSessionTimestamp = Date.now();
         menuScreen.show(playerState);
     }
-
-    hud.update(playerState);
-    loop.start();
 }
 
 boot();

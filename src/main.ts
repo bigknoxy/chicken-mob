@@ -77,8 +77,14 @@ hud.setAbilityCallback(() => {
 });
 
 hud.setSettingsCallback(() => {
+    if (gameState && currentScreen === 'playing') {
+        gameState.paused = true;
+    }
     settingsScreen.show(playerState, () => {
         savePlayerState(playerState);
+        if (gameState && currentScreen === 'playing') {
+            gameState.paused = false;
+        }
     });
 });
 
@@ -444,6 +450,9 @@ function showCoopInfo(): void {
 }
 
 // ── Boot ──
+// Capture offline earnings before any popup delays the calculation
+let cachedOfflineEarnings: ReturnType<typeof calculateOfflineEarnings> | null = null;
+
 function boot(): void {
     // Mobile lifecycle: pause on visibility change
     document.addEventListener('visibilitychange', () => {
@@ -462,6 +471,9 @@ function boot(): void {
             audio.resume();
         }
     });
+
+    // Capture offline earnings BEFORE showing any popup (prevents time-inflation bug)
+    cachedOfflineEarnings = calculateOfflineEarnings(playerState);
 
     // Check and show daily login reward
     if (shouldShowDailyLogin(playerState)) {
@@ -485,7 +497,8 @@ function boot(): void {
 }
 
 function showOfflineEarnings(): void {
-    const earnings = calculateOfflineEarnings(playerState);
+    const earnings = cachedOfflineEarnings ?? calculateOfflineEarnings(playerState);
+    cachedOfflineEarnings = null; // Clear cache after use
     if (earnings.corn > 0) {
         offlinePopup.show(earnings, () => {
             claimOfflineEarnings(playerState, earnings);

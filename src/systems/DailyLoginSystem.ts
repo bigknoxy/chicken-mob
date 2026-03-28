@@ -81,8 +81,9 @@ export function checkDailyLogin(playerState: PlayerState): DailyLoginInfo {
         // Same day, no change to streak
         isNewDay = false;
     } else if (login.lastLoginDate === yesterday) {
-        // Consecutive day - increment streak
-        consecutiveDays = Math.min(login.consecutiveDays + 1, MAX_STREAK_DAYS);
+        // Consecutive day - increment streak, reset after day 7
+        const nextDay = login.consecutiveDays + 1;
+        consecutiveDays = nextDay > MAX_STREAK_DAYS ? 1 : nextDay;
         isNewDay = true;
     } else {
         // Streak broken - reset to day 1

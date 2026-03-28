@@ -104,6 +104,25 @@ describe('DailyLoginSystem', () => {
             expect(info.reward.corn).toBe(1000);
             expect(info.reward.feathers).toBe(1);
         });
+
+        it('should reset to day 1 after day 7 (day 8 becomes day 1)', () => {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+            
+            const state = createMockPlayerState({
+                dailyLogin: {
+                    lastLoginDate: yesterdayStr,
+                    consecutiveDays: 7,
+                    totalDaysLoggedIn: 7,
+                    rewardsClaimedToday: false,
+                },
+            });
+            
+            const info = checkDailyLogin(state);
+            expect(info.consecutiveDays).toBe(1);
+            expect(info.reward.corn).toBe(100);
+        });
     });
 
     describe('claimDailyReward', () => {

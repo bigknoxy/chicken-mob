@@ -30,6 +30,17 @@ export function createDefaultPlayerState(): PlayerState {
         levelStars: {},
         endlessHighScore: 0,
         tutorialSeen: false,
+        dailyLogin: {
+            lastLoginDate: '',
+            consecutiveDays: 0,
+            totalDaysLoggedIn: 0,
+            rewardsClaimedToday: false,
+        },
+        settings: {
+            soundEnabled: true,
+            musicEnabled: true,
+            hapticsEnabled: true,
+        },
     };
 }
 

@@ -11,11 +11,14 @@ import { COLORS, RADIUS } from './styles';
 
 export class HUD {
     private container: HTMLDivElement;
+    private leftContainer: HTMLDivElement;
     private cornEl: HTMLSpanElement;
     private featherEl: HTMLSpanElement;
     private abilityBtn: HTMLButtonElement | null = null;
     private abilityCooldownEl: HTMLSpanElement | null = null;
     private onAbilityTrigger: (() => void) | null = null;
+    private settingsBtn: HTMLButtonElement | null = null;
+    private onSettingsClick: (() => void) | null = null;
 
     constructor(overlay: HTMLElement) {
         this.container = document.createElement('div');
@@ -23,31 +26,69 @@ export class HUD {
         this.container.style.cssText = `
       position: absolute;
       top: 0;
+      left: 0;
       right: 0;
       padding: 8px 14px;
       display: flex;
-      gap: 16px;
+      justify-content: space-between;
       align-items: center;
       font-family: 'Nunito', sans-serif;
       font-size: 14px;
       font-weight: bold;
       color: ${COLORS.uiText};
-      background: rgba(0,0,0,0.4);
-      border-radius: 0 0 0 ${RADIUS.md}px;
       pointer-events: none;
       z-index: 10;
     `;
 
+        this.leftContainer = document.createElement('div');
+        this.leftContainer.style.cssText = `
+            background: rgba(0,0,0,0.4);
+            border-radius: 0 0 ${RADIUS.md}px 0;
+            padding: 4px 10px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        `;
+
+        const rightContainer = document.createElement('div');
+        rightContainer.style.cssText = `
+            background: rgba(0,0,0,0.4);
+            border-radius: 0 0 0 ${RADIUS.md}px;
+            padding: 4px 10px;
+        `;
+
         this.cornEl = document.createElement('span');
         this.featherEl = document.createElement('span');
 
-        this.container.appendChild(this.cornEl);
-        this.container.appendChild(this.featherEl);
+        this.leftContainer.appendChild(this.cornEl);
+        this.leftContainer.appendChild(this.featherEl);
+
+        this.settingsBtn = document.createElement('button');
+        this.settingsBtn.textContent = '⚙️';
+        this.settingsBtn.style.cssText = `
+            pointer-events: auto;
+            border: none;
+            background: transparent;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+        `;
+        this.settingsBtn.addEventListener('click', () => {
+            if (this.onSettingsClick) this.onSettingsClick();
+        });
+        rightContainer.appendChild(this.settingsBtn);
+
+        this.container.appendChild(this.leftContainer);
+        this.container.appendChild(rightContainer);
         overlay.appendChild(this.container);
     }
 
     setAbilityCallback(callback: () => void): void {
         this.onAbilityTrigger = callback;
+    }
+
+    setSettingsCallback(callback: () => void): void {
+        this.onSettingsClick = callback;
     }
 
     update(playerState: PlayerState): void {

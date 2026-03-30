@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-03-29
+
+### Added
+- **108 levels** — Expanded from 36 to 108 levels using procedural generation
+- **4 new worlds** — Frozen Peaks, Volcanic Depths, Mystic Grove, Shadow Realm (18 levels each)
+- **3 new fox types** — Tank (high HP, slow), Swarm (fast, weak, spawns in groups), Bomber (high damage)
+- **Template-based level generation** — 6 level templates for procedural variety:
+  - Gauntlet: single lane, linear gates
+  - Split Decision: 2 lanes, asymmetric layout
+  - Swarm: 3 lanes, heavy enemy spawns
+  - Obstacle Course: heavy obstacles
+  - Sniper Nest: sniper-focused spawns
+  - Boss Wave: special every 9th level with increased difficulty
+- **Difficulty tier system** — 5 tiers with scaling parameters for procedural levels
+
+### Technical
+- New `CampaignLevelGenerator.ts` with template-based procedural generation
+- Difficulty tier constants in `game.ts` for scalable level design
+- Gate overlap detection in generator prevents invalid level layouts
+- Level data merged from hand-authored (L1-36) and generated (L37-108)
+- 101 unit tests (up from 88)
+
 ## [0.11.0] - 2026-03-28
 
 ### Added

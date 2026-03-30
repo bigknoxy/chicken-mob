@@ -22,6 +22,27 @@ export const FOXES: FoxMobType[] = [
         hpPerFox: 3,
         damagePerFox: 5,
     },
+    {
+        id: 'fox_tank',
+        name: 'Fox Tank',
+        moveSpeed: 60,
+        hpPerFox: 15,
+        damagePerFox: 2,
+    },
+    {
+        id: 'fox_swarm',
+        name: 'Fox Swarm',
+        moveSpeed: 220,
+        hpPerFox: 1,
+        damagePerFox: 1,
+    },
+    {
+        id: 'fox_bomber',
+        name: 'Fox Bomber',
+        moveSpeed: 120,
+        hpPerFox: 4,
+        damagePerFox: 6,
+    },
 ];
 
 export function getFox(id: string): FoxMobType {

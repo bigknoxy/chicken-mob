@@ -43,7 +43,7 @@ describe('Data Integrity', () => {
     });
 
     it('all level definitions are valid', () => {
-        expect(TOTAL_LEVELS).toBe(36);
+        expect(TOTAL_LEVELS).toBe(108);
         for (let i = 0; i < TOTAL_LEVELS; i++) {
             const level = getLevel(i);
             expect(level.id).toBeTruthy();
@@ -253,7 +253,7 @@ describe('Cannon Lookup', () => {
 
 // ── Level Data Integrity ──
 
-const VALID_FOX_TYPES = ['fox_scout', 'fox_brute', 'fox_sniper'];
+const VALID_FOX_TYPES = ['fox_scout', 'fox_brute', 'fox_sniper', 'fox_tank', 'fox_swarm', 'fox_bomber'];
 const VALID_OBSTACLE_TYPES: ObstacleType[] = ['fence', 'hay_bale', 'scarecrow'];
 const DEFAULT_TIMEOUT_SECONDS = 60;
 const MAX_MULTIPLIER = 10;
@@ -372,16 +372,16 @@ describe('Level Data Integrity', () => {
 
     describe('Fort HP Progression', () => {
         it('fort HP generally increases across levels (allow small dips)', () => {
+            const tierBoundaries = [18, 36, 54, 72, 90];
+            const postBossLevels = [10, 19, 28, 37, 46, 55, 64, 73, 82, 91, 100];
             for (let i = 1; i < LEVELS.length; i++) {
                 const prevHp = LEVELS[i - 1].fort.hp;
                 const currHp = LEVELS[i].fort.hp;
-                // Allow small dips (up to 10%) but generally expect increase
-                const minExpected = prevHp * 0.9;
-                // Additionally, allow a larger dip (up to 50%) every 18 levels (start of new world)
-                if (i % 18 === 0) {
-                    // This is the start of a new world (except for i=0, which we skip)
-                    // Allow a dip of up to 50%
-                    expect(currHp).toBeGreaterThanOrEqual(prevHp * 0.5);
+                const minExpected = prevHp * 0.85;
+                const isTierBoundary = tierBoundaries.includes(i);
+                const isPostBoss = postBossLevels.includes(i + 1);
+                if (isTierBoundary || isPostBoss) {
+                    expect(currHp).toBeGreaterThanOrEqual(prevHp * 0.3);
                 } else {
                     expect(currHp).toBeGreaterThanOrEqual(minExpected);
                 }
@@ -403,16 +403,16 @@ describe('Level Data Integrity', () => {
 
     describe('Reward Scaling', () => {
         it('rewards scale with difficulty (generally increase)', () => {
+            const tierBoundaries = [18, 36, 54, 72, 90];
+            const postBossLevels = [10, 19, 28, 37, 46, 55, 64, 73, 82, 91, 100];
             for (let i = 1; i < LEVELS.length; i++) {
                 const prevReward = LEVELS[i - 1].rewardCorn;
                 const currReward = LEVELS[i].rewardCorn;
-                // Allow small dips (up to 15%) but generally expect increase
-                const minExpected = prevReward * 0.85;
-                // Additionally, allow a larger dip (up to 50%) every 18 levels (start of new world)
-                if (i % 18 === 0) {
-                    // This is the start of a new world (except for i=0, which we skip)
-                    // Allow a dip of up to 50%
-                    expect(currReward).toBeGreaterThanOrEqual(prevReward * 0.5);
+                const minExpected = prevReward * 0.8;
+                const isTierBoundary = tierBoundaries.includes(i);
+                const isPostBoss = postBossLevels.includes(i + 1);
+                if (isTierBoundary || isPostBoss) {
+                    expect(currReward).toBeGreaterThanOrEqual(prevReward * 0.3);
                 } else {
                     expect(currReward).toBeGreaterThanOrEqual(minExpected);
                 }

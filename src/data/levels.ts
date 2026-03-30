@@ -1,4 +1,5 @@
 import type { LevelDefinition, WorldDefinition } from './types';
+import { generateCampaignLevel } from '@/systems/CampaignLevelGenerator';
 
 /**
  * 18 hand-authored levels for Chicken Mob v2.
@@ -14,7 +15,7 @@ import type { LevelDefinition, WorldDefinition } from './types';
  * Note: Gate and obstacle widths are normalized (0-1) for collision detection.
  *       DO NOT use enemy_spawn gate type - use enemySpawns array instead.
  */
-export const LEVELS: LevelDefinition[] = [
+const HANDAUTHED_LEVELS: LevelDefinition[] = [
     // ═══════════════════════════════════════════════════════════════
     // TUTORIAL ARC (L1–3) — 90%+ win rate
     // ═══════════════════════════════════════════════════════════════
@@ -896,6 +897,13 @@ export const LEVELS: LevelDefinition[] = [
      },
  ];
 
+const GENERATED_LEVELS: LevelDefinition[] = [];
+for (let i = 36; i < 108; i++) {
+    GENERATED_LEVELS.push(generateCampaignLevel(i));
+}
+
+export const LEVELS: LevelDefinition[] = [...HANDAUTHED_LEVELS, ...GENERATED_LEVELS];
+
 export function getLevel(index: number): LevelDefinition {
     if (index < 0 || index >= LEVELS.length) {
         throw new Error(`Level index out of range: ${index}`);
@@ -904,8 +912,6 @@ export function getLevel(index: number): LevelDefinition {
 }
 
 export const TOTAL_LEVELS = LEVELS.length;
-
-// ─── Worlds ─────────────────────────────────────────────────────────────────
 
 export const WORLDS: WorldDefinition[] = [
     {
@@ -920,6 +926,34 @@ export const WORLDS: WorldDefinition[] = [
         name: 'Scorching Sands',
         levels: LEVELS.filter(l => l.worldId === 'W2').map(l => l.id),
         theme: 'desert',
+        unlocked: false,
+    },
+    {
+        id: 'W3',
+        name: 'Frozen Peaks',
+        levels: LEVELS.filter(l => l.worldId === 'W3').map(l => l.id),
+        theme: 'snow',
+        unlocked: false,
+    },
+    {
+        id: 'W4',
+        name: 'Volcanic Depths',
+        levels: LEVELS.filter(l => l.worldId === 'W4').map(l => l.id),
+        theme: 'lava',
+        unlocked: false,
+    },
+    {
+        id: 'W5',
+        name: 'Mystic Grove',
+        levels: LEVELS.filter(l => l.worldId === 'W5').map(l => l.id),
+        theme: 'grassland',
+        unlocked: false,
+    },
+    {
+        id: 'W6',
+        name: 'Shadow Realm',
+        levels: LEVELS.filter(l => l.worldId === 'W6').map(l => l.id),
+        theme: 'lava',
         unlocked: false,
     },
 ];

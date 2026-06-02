@@ -122,10 +122,30 @@ describe('Combat System', () => {
     it('tie eliminates both sides', () => {
         const chicken = getChicken('clucky');
         const fox = getFox('fox_scout');
-        // clucky does 1 dmg, fox_scout does 1 dmg; equal counts = tie
         const result = resolveCombat(5, chicken, 5, fox);
         expect(result.chickensSurviving).toBe(0);
         expect(result.foxesSurviving).toBe(0);
+    });
+
+    it('returns counter damage when foxes win', () => {
+        const chicken = getChicken('clucky');
+        const fox = getFox('fox_scout');
+        const result = resolveCombat(10, chicken, 15, fox);
+        expect(result.counterDamage).toBeGreaterThan(0);
+    });
+
+    it('returns no counter damage when chickens win', () => {
+        const chicken = getChicken('clucky');
+        const fox = getFox('fox_scout');
+        const result = resolveCombat(20, chicken, 5, fox);
+        expect(result.counterDamage).toBe(0);
+    });
+
+    it('counter damage is based on chicken hp', () => {
+        const chicken = getChicken('hen_tank');
+        const fox = getFox('fox_scout');
+        const result = resolveCombat(3, chicken, 10, fox);
+        expect(result.counterDamage).toBeGreaterThan(0);
     });
 });
 

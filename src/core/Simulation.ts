@@ -140,7 +140,6 @@ export function simulationTick(state: GameState, dt: number): void {
     // ── 4a. Flock vs Fox combat ──
     const foxCollisions = detectFlockVsFox(state.flocks, state.foxPacks);
     for (const { flock, foxPack } of foxCollisions) {
-        // Use shared combat resolver from CombatSystem
         const chickenType = getChicken(flock.chickenTypeId);
         const foxType = getFox(foxPack.foxTypeId);
         const result = resolveCombat(flock.count, chickenType, foxPack.count, foxType);
@@ -155,7 +154,17 @@ export function simulationTick(state: GameState, dt: number): void {
             foxPack.alive = false;
         }
 
-        // Play combat sound effect
+        if (result.counterDamage > 0) {
+            for (const otherFox of state.foxPacks) {
+                if (otherFox.id !== foxPack.id && otherFox.alive) {
+                    const damage = Math.min(result.counterDamage, otherFox.count * foxType.damagePerFox * 0.3);
+                    const foxesLost = Math.ceil(damage / foxType.hpPerFox);
+                    otherFox.count = Math.max(0, otherFox.count - foxesLost);
+                    if (otherFox.count <= 0) otherFox.alive = false;
+                }
+            }
+        }
+
         audio.playCombat();
     }
 

@@ -10,7 +10,14 @@ export interface CombatResult {
     counterDamage: number;
 }
 
-/** Resolve a combat between a chicken flock and a fox pack */
+const COUNTER_DAMAGE_WIN_FACTOR = 0.5;
+const COUNTER_DAMAGE_TIE_FACTOR = 0.3;
+const MIN_COUNTER_DAMAGE = 1;
+
+function computeCounterDamage(chickenCount: number, hpPerChicken: number, factor: number): number {
+    return Math.max(MIN_COUNTER_DAMAGE, Math.floor(chickenCount * hpPerChicken * factor));
+}
+
 export function resolveCombat(
     chickenCount: number,
     chickenType: ChickenType,
@@ -26,16 +33,14 @@ export function resolveCombat(
             foxesSurviving: 0,
             counterDamage: 0,
         };
-    } else if (foxPower > chickenPower) {
-        const foxesSurviving = Math.max(1, Math.floor((foxPower - chickenPower) / foxType.damagePerFox));
-        const counterDamage = Math.max(1, Math.floor(chickenCount * chickenType.hpPerChicken * 0.5));
-        return {
-            chickensSurviving: 0,
-            foxesSurviving,
-            counterDamage,
-        };
-    } else {
-        const counterDamage = Math.max(1, Math.floor(chickenCount * chickenType.hpPerChicken * 0.3));
-        return { chickensSurviving: 0, foxesSurviving: 0, counterDamage };
     }
+
+    const foxesSurviving = foxPower > chickenPower
+        ? Math.max(1, Math.floor((foxPower - chickenPower) / foxType.damagePerFox))
+        : 0;
+
+    const factor = foxPower > chickenPower ? COUNTER_DAMAGE_WIN_FACTOR : COUNTER_DAMAGE_TIE_FACTOR;
+    const counterDamage = computeCounterDamage(chickenCount, chickenType.hpPerChicken, factor);
+
+    return { chickensSurviving: 0, foxesSurviving, counterDamage };
 }

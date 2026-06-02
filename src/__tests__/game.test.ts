@@ -149,6 +149,31 @@ describe('Combat System', () => {
     });
 });
 
+// ── Combat Integration ──
+
+describe('Combat Integration', () => {
+    it('fox packs take damage from counter-attack when flock is destroyed', () => {
+        const simulation = createTestGameState();
+        
+        const clucky = getChicken('clucky');
+        const foxScout = getFox('fox_scout');
+        const foxBrute = getFox('fox_brute');
+
+        simulation.flocks = [
+            { id: 1, chickenTypeId: 'clucky', count: 5, lane: 0, x: 0.5, position: 0.3, velocity: 0, alive: true },
+        ];
+        simulation.foxPacks = [
+            { id: 'winning-fox', foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.2, position: 0.2, speed: 180, alive: true },
+            { id: 'other-fox', foxTypeId: 'fox_brute', count: 10, lane: 0, x: 0.8, position: 0.2, speed: 180, alive: true },
+        ];
+
+        const result = resolveCombat(5, clucky, 10, foxScout);
+        expect(result.chickensSurviving).toBe(0);
+        expect(result.foxesSurviving).toBeGreaterThan(0);
+        expect(result.counterDamage).toBeGreaterThan(0);
+    });
+});
+
 // ── Gate System ──
 
 describe('Gate System', () => {

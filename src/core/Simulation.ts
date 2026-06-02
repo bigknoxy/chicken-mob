@@ -157,8 +157,9 @@ export function simulationTick(state: GameState, dt: number): void {
         if (result.counterDamage > 0) {
             for (const otherFox of state.foxPacks) {
                 if (otherFox.id !== foxPack.id && otherFox.alive) {
-                    const damage = Math.min(result.counterDamage, otherFox.count * foxType.damagePerFox * 0.3);
-                    const foxesLost = Math.ceil(damage / foxType.hpPerFox);
+                    const otherFoxType = getFox(otherFox.foxTypeId);
+                    const damage = Math.min(result.counterDamage, otherFox.count * otherFoxType.hpPerFox * 0.3);
+                    const foxesLost = Math.ceil(damage / otherFoxType.hpPerFox);
                     otherFox.count = Math.max(0, otherFox.count - foxesLost);
                     if (otherFox.count <= 0) otherFox.alive = false;
                 }

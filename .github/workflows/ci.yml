@@ -35,3 +35,29 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+
+     # Runs as a separate job so it stays visible while stabilizing. Promote to
+     # a required check (alongside 'Build & Test') once the suite is green in CI
+     # for a sustained window.
+    steps:
+       - name: Checkout
+        uses: actions/checkout@v4
+
+       - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+       - name: Install dependencies
+        run: npm ci
+
+       - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+       - name: Run E2E
+        run: npx playwright test

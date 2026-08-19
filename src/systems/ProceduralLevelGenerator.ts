@@ -43,7 +43,6 @@ export function generateEndlessLevel(wave: number, seed?: number): LevelDefiniti
             width: 0.08,
             multiplier: isTrap ? 0.5 : multiplier,
             isPositive: !isTrap,
-            type: 'multiply',
         });
     }
     

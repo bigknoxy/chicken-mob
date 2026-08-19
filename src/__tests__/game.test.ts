@@ -157,14 +157,13 @@ describe('Combat Integration', () => {
         
         const clucky = getChicken('clucky');
         const foxScout = getFox('fox_scout');
-        const foxBrute = getFox('fox_brute');
 
         simulation.flocks = [
-            { id: 1, chickenTypeId: 'clucky', count: 5, lane: 0, x: 0.5, position: 0.3, velocity: 0, alive: true },
+            { id: 1, chickenTypeId: 'clucky', count: 5, lane: 0, x: 0.5, position: 0.3, speed: 0, alive: true },
         ];
         simulation.foxPacks = [
-            { id: 'winning-fox', foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.2, position: 0.2, speed: 180, alive: true },
-            { id: 'other-fox', foxTypeId: 'fox_brute', count: 10, lane: 0, x: 0.8, position: 0.2, speed: 180, alive: true },
+            { id: 1, foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.2, position: 0.2, speed: 180, alive: true },
+            { id: 2, foxTypeId: 'fox_brute', count: 10, lane: 0, x: 0.8, position: 0.2, speed: 180, alive: true },
         ];
 
         const result = resolveCombat(5, clucky, 10, foxScout);

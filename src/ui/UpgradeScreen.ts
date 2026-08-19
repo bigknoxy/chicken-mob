@@ -7,6 +7,7 @@ import { UPGRADES, getUpgradeCost, getUpgradeValue } from '@/data/upgrades';
 import { purchaseUpgrade, canAffordUpgrade } from '@/systems/UpgradeSystem';
 import { CHICKENS, isChickenUnlocked, getUnlockDescription } from '@/data/chickens';
 import { audio } from '@/platform/Audio';
+import { analytics } from '@/platform/Analytics';
 import { COLORS, SPACING, RADIUS, SHADOWS, TRANSITIONS } from './styles';
 
 export class UpgradeScreen {
@@ -235,6 +236,7 @@ export class UpgradeScreen {
                     const success = purchaseUpgrade(this.playerState, def.id);
                     if (success) {
                         audio.playUpgrade();
+                        analytics.track('upgrade_purchased', { upgrade: def.id, level: this.playerState.upgrades[def.id] });
                         this.renderContent(def.category);
                     }
                 });

@@ -946,14 +946,14 @@ export const WORLDS: WorldDefinition[] = [
         id: 'W5',
         name: 'Mystic Grove',
         levels: LEVELS.filter(l => l.worldId === 'W5').map(l => l.id),
-        theme: 'grassland',
+        theme: 'meadow_night',
         unlocked: false,
     },
     {
         id: 'W6',
         name: 'Shadow Realm',
         levels: LEVELS.filter(l => l.worldId === 'W6').map(l => l.id),
-        theme: 'lava',
+        theme: 'magma_cave',
         unlocked: false,
     },
 ];

@@ -162,8 +162,8 @@ describe('Combat Integration', () => {
             { id: 1, chickenTypeId: 'clucky', count: 5, lane: 0, x: 0.5, position: 0.3, speed: 0, alive: true },
         ];
         simulation.foxPacks = [
-            { id: 1, foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.2, position: 0.2, speed: 180, alive: true },
-            { id: 2, foxTypeId: 'fox_brute', count: 10, lane: 0, x: 0.8, position: 0.2, speed: 180, alive: true },
+            { id: 100, foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.2, position: 0.2, speed: 180, alive: true },
+            { id: 101, foxTypeId: 'fox_brute', count: 10, lane: 0, x: 0.8, position: 0.2, speed: 180, alive: true },
         ];
 
         const result = resolveCombat(5, clucky, 10, foxScout);
@@ -885,7 +885,7 @@ describe('Active Abilities', () => {
         it('aoe_blast damages nearby foxes', () => {
             const state = createTestGameState();
             state.foxPacks = [
-                { id: 1, foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.5, position: 0.3, speed: 180, alive: true },
+                { id: 100, foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.5, position: 0.3, speed: 180, alive: true },
                 { id: 2, foxTypeId: 'fox_scout', count: 10, lane: 0, x: 0.9, position: 0.3, speed: 180, alive: true },
             ];
             

@@ -1,4 +1,6 @@
 // Centralized game constants
+import type { WorldTheme } from '@/data/types';
+
 export const COLLISION_THRESHOLD = 0.03;
 export const DEFAULT_ENTITY_WIDTH = 0.06;
 export const FORT_ZONE = 0.02;
@@ -178,7 +180,7 @@ export interface ThemePalette {
     fog: string;
 }
 
-export const WORLD_THEMES: Record<string, ThemePalette> = {
+export const WORLD_THEMES: Record<WorldTheme, ThemePalette> = {
     grassland: { bg: '#1a1a2e', bgAccent: '#2f4a2f', lane: '#2a3a2a', laneBorder: '#3f5e3f', fog: 'rgba(46, 74, 46, 0.08)' },
     desert: { bg: '#2e1f10', bgAccent: '#5a3d1f', lane: '#3a2a15', laneBorder: '#6b4e2a', fog: 'rgba(122, 84, 19, 0.10)' },
     snow: { bg: '#12233a', bgAccent: '#2f4e6b', lane: '#1f3350', laneBorder: '#3f6080', fog: 'rgba(148, 197, 231, 0.10)' },
@@ -188,5 +190,5 @@ export const WORLD_THEMES: Record<string, ThemePalette> = {
 };
 
 export function getThemePalette(theme: string): ThemePalette {
-    return WORLD_THEMES[theme] ?? WORLD_THEMES.grassland;
+    return WORLD_THEMES[theme as WorldTheme] ?? WORLD_THEMES.grassland;
 }

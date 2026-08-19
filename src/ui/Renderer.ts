@@ -182,7 +182,7 @@ export class Renderer {
         ctx.fillRect(0, 0, this.width, this.height);
      }
 
-    private drawLanes(geo: LaneGeometry, palette: ThemePalette = getThemePalette('grassland')): void {
+    private drawLanes(geo: LaneGeometry, palette: ThemePalette): void {
         const ctx = this.ctx;
         const w = laneWidth(geo);
 

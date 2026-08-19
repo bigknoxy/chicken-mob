@@ -18,6 +18,7 @@ import { shouldShowDailyLogin, checkDailyLogin, claimDailyReward } from '@/syste
 import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
 import { InputManager, hapticFeedback, HAPTIC } from '@/platform/Input';
 import { audio } from '@/platform/Audio';
+import { analytics, installCrashReporting } from '@/platform/Analytics';
 import { AUTOSAVE_INTERVAL_MS, MAX_AIM_ANGLE } from '@/constants/game';
 import { Modal } from '@/ui/Modal';
 import { Renderer } from '@/ui/Renderer';
@@ -240,6 +241,7 @@ function startLevel(index: number): void {
     );
     gameState = createGameState(levelDef, laneGeo);
     currentScreen = 'playing';
+    analytics.track('level_start', { level: levelDef.id, world: levelDef.worldId, mode: 'campaign' });
     isEndlessMode = false;
     menuScreen.hide();
     upgradeScreen.hide();
@@ -269,6 +271,7 @@ function startEndlessWave(): void {
     );
     gameState = createGameState(levelDef, laneGeo);
     currentScreen = 'playing';
+    analytics.track('level_start', { level: 'endless', mode: 'endless', wave: endlessWave });
     menuScreen.hide();
     upgradeScreen.hide();
     audio.resume();
@@ -325,6 +328,18 @@ function onLevelEnd(): void {
     if (!gameState) return;
 
     gameState.levelSummary = generateLevelSummary(gameState);
+    const levelResult = gameState.levelSummary;
+    if (levelResult) {
+        analytics.track('level_result', {
+            level: gameState.level.id,
+            world: isEndlessMode ? 'endless' : gameState.level.worldId,
+            outcome: levelResult.won ? 'win' : 'lose',
+            stars: levelResult.stars,
+            reachedFort: levelResult.reachedFort,
+            efficiency: Math.round(levelResult.efficiency * 100),
+            timeElapsedMs: Math.round(levelResult.timeElapsed * 1000),
+           });
+      }
 
     if (isEndlessMode) {
         if (gameState.levelWon) {
@@ -454,6 +469,10 @@ function showCoopInfo(): void {
 let cachedOfflineEarnings: ReturnType<typeof calculateOfflineEarnings> | null = null;
 
 function boot(): void {
+     // Session lifecycle + crash reporting (P0-3)
+    analytics.startSession();
+    installCrashReporting();
+    window.addEventListener('pagehide', () => analytics.endSession());
     // Mobile lifecycle: pause on visibility change
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {

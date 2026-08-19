@@ -179,7 +179,7 @@ describe('Gate System', () => {
     it('positive gate multiplies flock count', () => {
         const gate: GateDefinition = {
             id: 'test', position: 0.5, lane: 0, width: 60,
-            multiplier: 3, isPositive: true, type: 'multiply',
+            multiplier: 3, isPositive: true,
         };
         expect(applyGateMultiplier(5, gate)).toBe(15);
     });
@@ -187,7 +187,7 @@ describe('Gate System', () => {
     it('negative gate reduces flock count', () => {
         const gate: GateDefinition = {
             id: 'test', position: 0.5, lane: 0, width: 60,
-            multiplier: 0.5, isPositive: false, type: 'multiply',
+            multiplier: 0.5, isPositive: false,
         };
         expect(applyGateMultiplier(10, gate)).toBe(5);
     });
@@ -195,7 +195,7 @@ describe('Gate System', () => {
     it('kill gate eliminates entire flock', () => {
         const gate: GateDefinition = {
             id: 'test', position: 0.5, lane: 0, width: 60,
-            multiplier: 0, isPositive: false, type: 'multiply',
+            multiplier: 0, isPositive: false,
         };
         expect(applyGateMultiplier(20, gate)).toBe(0);
     });

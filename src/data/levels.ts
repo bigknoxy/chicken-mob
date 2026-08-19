@@ -13,7 +13,7 @@ import { generateCampaignLevel } from '@/systems/CampaignLevelGenerator';
  *   16–18 Boss Wave (heavy defenses, swarm mechanics)            ~40% win rate
  *
  * Note: Gate and obstacle widths are normalized (0-1) for collision detection.
- *       DO NOT use enemy_spawn gate type - use enemySpawns array instead.
+ *       Gates only multiply/kill flocks. Enemies enter solely via the level's `enemySpawns` array.
  */
 const HANDAUTHED_LEVELS: LevelDefinition[] = [
     // ═══════════════════════════════════════════════════════════════
@@ -28,7 +28,7 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 800,
         gates: [
-            { id: 'g1', position: 0.5, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.5, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [],
@@ -45,8 +45,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 800,
         gates: [
-            { id: 'g1', position: 0.35, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.65, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.35, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.65, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [],
@@ -63,7 +63,7 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 800,
         gates: [
-            { id: 'g1', position: 0.5, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.5, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [],
@@ -84,8 +84,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 800,
         gates: [
-            { id: 'g1', position: 0.45, lane: 0, x: 0.25, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.45, lane: 1, x: 0.75, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.45, lane: 0, x: 0.25, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.45, lane: 1, x: 0.75, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [],
@@ -102,8 +102,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.3, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.6, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.3, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g2', position: 0.6, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [
@@ -122,8 +122,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.4, lane: 0, x: 0.25, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.4, lane: 1, x: 0.75, width: 0.08, multiplier: 0.5, isPositive: false, type: 'multiply' },
+            { id: 'g1', position: 0.4, lane: 0, x: 0.25, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g2', position: 0.4, lane: 1, x: 0.75, width: 0.08, multiplier: 0.5, isPositive: false },
         ],
         obstacles: [],
         enemySpawns: [],
@@ -144,8 +144,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.3, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.6, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.3, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g2', position: 0.6, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [
@@ -164,9 +164,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.25, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.55, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-            { id: 'g3', position: 0.8, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.25, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.55, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true },
+            { id: 'g3', position: 0.8, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [
             { id: 'o1', type: 'hay_bale', lane: 0, x: 0.5, width: 0.08, position: 0.4, hp: 10, movementPattern: 'static' },
@@ -188,7 +188,7 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 900,
         gates: [
-            { id: 'g1', position: 0.4, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.4, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true },
         ],
         obstacles: [
             // Scarecrow at edge - skilled players can dodge
@@ -214,9 +214,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 3,
         length: 1000,
         gates: [
-            { id: 'g1', position: 0.4, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.4, lane: 1, x: 0.5, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-            { id: 'g3', position: 0.4, lane: 2, x: 5/6, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.4, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.4, lane: 1, x: 0.5, width: 0.08, multiplier: 4, isPositive: true },
+            { id: 'g3', position: 0.4, lane: 2, x: 5/6, width: 0.08, multiplier: 3, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [
@@ -235,9 +235,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 1000,
         gates: [
-            { id: 'g1', position: 0.25, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.25, lane: 1, x: 0.7, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
-            { id: 'g3', position: 0.55, lane: 0, x: 0.3, width: 0.08, multiplier: 0.5, isPositive: false, type: 'multiply' },
+            { id: 'g1', position: 0.25, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.25, lane: 1, x: 0.7, width: 0.08, multiplier: 5, isPositive: true },
+            { id: 'g3', position: 0.55, lane: 0, x: 0.3, width: 0.08, multiplier: 0.5, isPositive: false },
         ],
         obstacles: [],
         enemySpawns: [
@@ -257,9 +257,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 1100,
         gates: [
-            { id: 'g1', position: 0.2, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.45, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-            { id: 'g3', position: 0.7, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.2, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.45, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g3', position: 0.7, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [
             { id: 'o1', type: 'fence', lane: 0, x: 0.5, width: 0.08, position: 0.35, hp: 12, movementPattern: 'static' },
@@ -285,8 +285,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 1100,
         gates: [
-            { id: 'g1', position: 0.35, lane: 0, x: 0.25, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.35, lane: 1, x: 0.75, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.35, lane: 0, x: 0.25, width: 0.08, multiplier: 5, isPositive: true },
+            { id: 'g2', position: 0.35, lane: 1, x: 0.75, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [
@@ -305,9 +305,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 1100,
         gates: [
-            { id: 'g1', position: 0.3, lane: 0, x: 0.3, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.5, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g3', position: 0.4, lane: 1, x: 0.7, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.3, lane: 0, x: 0.3, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g2', position: 0.5, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g3', position: 0.4, lane: 1, x: 0.7, width: 0.08, multiplier: 4, isPositive: true },
         ],
         obstacles: [
             { id: 'o1', type: 'fence', lane: 0, x: 0.3, width: 0.08, position: 0.4, hp: 18, movementPattern: 'static' },
@@ -331,9 +331,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 1,
         length: 1200,
         gates: [
-            { id: 'g1', position: 0.2, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.45, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-            { id: 'g3', position: 0.7, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.2, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.45, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g3', position: 0.7, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [
@@ -357,9 +357,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 2,
         length: 1200,
         gates: [
-            { id: 'g1', position: 0.25, lane: 0, x: 0.3, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.25, lane: 1, x: 0.7, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-            { id: 'g3', position: 0.55, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.25, lane: 0, x: 0.3, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g2', position: 0.25, lane: 1, x: 0.7, width: 0.08, multiplier: 4, isPositive: true },
+            { id: 'g3', position: 0.55, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [
             { id: 'o1', type: 'fence', lane: 0, x: 0.3, width: 0.08, position: 0.4, hp: 25, movementPattern: 'static' },
@@ -382,10 +382,10 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 3,
         length: 1300,
         gates: [
-            { id: 'g1', position: 0.3, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.3, lane: 1, x: 0.5, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
-            { id: 'g3', position: 0.3, lane: 2, x: 5/6, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-            { id: 'g4', position: 0.55, lane: 1, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.3, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.3, lane: 1, x: 0.5, width: 0.08, multiplier: 5, isPositive: true },
+            { id: 'g3', position: 0.3, lane: 2, x: 5/6, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g4', position: 0.55, lane: 1, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [],
         enemySpawns: [
@@ -409,11 +409,11 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
         laneCount: 3,
         length: 1400,
         gates: [
-            { id: 'g1', position: 0.2, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-            { id: 'g2', position: 0.2, lane: 1, x: 0.5, width: 0.08, multiplier: 10, isPositive: true, type: 'multiply' },
-            { id: 'g3', position: 0.45, lane: 1, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-            { id: 'g4', position: 0.45, lane: 0, x: 1/6, width: 0.08, multiplier: 0.5, isPositive: false, type: 'multiply' },
-            { id: 'g5', position: 0.45, lane: 2, x: 5/6, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+            { id: 'g1', position: 0.2, lane: 0, x: 1/6, width: 0.08, multiplier: 2, isPositive: true },
+            { id: 'g2', position: 0.2, lane: 1, x: 0.5, width: 0.08, multiplier: 10, isPositive: true },
+            { id: 'g3', position: 0.45, lane: 1, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
+            { id: 'g4', position: 0.45, lane: 0, x: 1/6, width: 0.08, multiplier: 0.5, isPositive: false },
+            { id: 'g5', position: 0.45, lane: 2, x: 5/6, width: 0.08, multiplier: 2, isPositive: true },
         ],
         obstacles: [
             { id: 'o1', type: 'scarecrow', lane: 0, x: 1/6, width: 0.08, position: 0.35, hp: Infinity, movementPattern: 'rotate' },
@@ -443,8 +443,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 900,
          gates: [
-             { id: 'g1', position: 0.3, lane: 0, x: 0.25, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.3, lane: 1, x: 0.75, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.3, lane: 0, x: 0.25, width: 0.08, multiplier: 3, isPositive: true },
+             { id: 'g2', position: 0.3, lane: 1, x: 0.75, width: 0.08, multiplier: 4, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -465,8 +465,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 1,
          length: 1000,
          gates: [
-             { id: 'g1', position: 0.4, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.6, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.4, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g2', position: 0.6, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -487,9 +487,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1000,
          gates: [
-             { id: 'g1', position: 0.35, lane: 0, x: 0.3, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.35, lane: 1, x: 0.7, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g3', position: 0.6, lane: 0, x: 0.3, width: 0.08, multiplier: 0.5, isPositive: false, type: 'multiply' },
+             { id: 'g1', position: 0.35, lane: 0, x: 0.3, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g2', position: 0.35, lane: 1, x: 0.7, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g3', position: 0.6, lane: 0, x: 0.3, width: 0.08, multiplier: 0.5, isPositive: false },
          ],
          obstacles: [],
          enemySpawns: [
@@ -515,8 +515,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1100,
          gates: [
-             { id: 'g1', position: 0.4, lane: 0, x: 0.25, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.4, lane: 1, x: 0.75, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.4, lane: 0, x: 0.25, width: 0.08, multiplier: 5, isPositive: true },
+             { id: 'g2', position: 0.4, lane: 1, x: 0.75, width: 0.08, multiplier: 2, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -536,9 +536,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1100,
          gates: [
-             { id: 'g1', position: 0.3, lane: 0, x: 0.3, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.5, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g3', position: 0.4, lane: 1, x: 0.7, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.3, lane: 0, x: 0.3, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g2', position: 0.5, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g3', position: 0.4, lane: 1, x: 0.7, width: 0.08, multiplier: 5, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -559,9 +559,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1200,
          gates: [
-             { id: 'g1', position: 0.25, lane: 0, x: 0.2, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.5, lane: 0, x: 0.2, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g3', position: 0.4, lane: 1, x: 0.8, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.25, lane: 0, x: 0.2, width: 0.08, multiplier: 3, isPositive: true },
+             { id: 'g2', position: 0.5, lane: 0, x: 0.2, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g3', position: 0.4, lane: 1, x: 0.8, width: 0.08, multiplier: 2, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -587,12 +587,12 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1200,
          gates: [
-             { id: 'g1', position: 0.2, lane: 0, x: 0.2, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.4, lane: 0, x: 0.2, width: 0.08, multiplier: 0.5, isPositive: false, type: 'multiply' },
-             { id: 'g3', position: 0.6, lane: 0, x: 0.2, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-             { id: 'g4', position: 0.3, lane: 1, x: 0.8, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g5', position: 0.5, lane: 1, x: 0.8, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g6', position: 0.7, lane: 1, x: 0.8, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.2, lane: 0, x: 0.2, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g2', position: 0.4, lane: 0, x: 0.2, width: 0.08, multiplier: 0.5, isPositive: false },
+             { id: 'g3', position: 0.6, lane: 0, x: 0.2, width: 0.08, multiplier: 3, isPositive: true },
+             { id: 'g4', position: 0.3, lane: 1, x: 0.8, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g5', position: 0.5, lane: 1, x: 0.8, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g6', position: 0.7, lane: 1, x: 0.8, width: 0.08, multiplier: 5, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -612,9 +612,9 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 1,
          length: 1300,
          gates: [
-             { id: 'g1', position: 0.3, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.5, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g3', position: 0.7, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.3, lane: 0, x: 0.5, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g2', position: 0.5, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g3', position: 0.7, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -635,10 +635,10 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1300,
          gates: [
-             { id: 'g1', position: 0.35, lane: 0, x: 0.25, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.35, lane: 1, x: 0.75, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g3', position: 0.6, lane: 0, x: 0.25, width: 0.08, multiplier: 0.5, isPositive: false, type: 'multiply' },
-             { id: 'g4', position: 0.6, lane: 1, x: 0.75, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.35, lane: 0, x: 0.25, width: 0.08, multiplier: 5, isPositive: true },
+             { id: 'g2', position: 0.35, lane: 1, x: 0.75, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g3', position: 0.6, lane: 0, x: 0.25, width: 0.08, multiplier: 0.5, isPositive: false },
+             { id: 'g4', position: 0.6, lane: 1, x: 0.75, width: 0.08, multiplier: 3, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -663,8 +663,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1400,
          gates: [
-             { id: 'g1', position: 0.3, lane: 0, x: 0.3, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.5, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.3, lane: 0, x: 0.3, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g2', position: 0.5, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true },
          ],
          obstacles: [
              { id: 'o1', type: 'fence', lane: 0, x: 0.3, width: 0.08, position: 0.25, hp: 15, movementPattern: 'static' },
@@ -689,8 +689,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1400,
          gates: [
-             { id: 'g1', position: 0.4, lane: 0, x: 0.2, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.6, lane: 0, x: 0.2, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.4, lane: 0, x: 0.2, width: 0.08, multiplier: 3, isPositive: true },
+             { id: 'g2', position: 0.6, lane: 0, x: 0.2, width: 0.08, multiplier: 5, isPositive: true },
          ],
          obstacles: [
              { id: 'o1', type: 'scarecrow', lane: 0, x: 0.3, width: 0.08, position: 0.4, hp: Infinity, movementPattern: 'rotate' },
@@ -713,8 +713,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1500,
          gates: [
-             { id: 'g1', position: 0.35, lane: 0, x: 0.4, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.35, lane: 1, x: 0.6, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.35, lane: 0, x: 0.4, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g2', position: 0.35, lane: 1, x: 0.6, width: 0.08, multiplier: 4, isPositive: true },
          ],
          obstacles: [
              { id: 'o1', type: 'hay_bale', lane: 0, x: 0.4, width: 0.08, position: 0.25, hp: 12, movementPattern: 'static' },
@@ -743,8 +743,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1500,
          gates: [
-             { id: 'g1', position: 0.4, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.6, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.4, lane: 0, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g2', position: 0.6, lane: 0, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -765,8 +765,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1600,
          gates: [
-             { id: 'g1', position: 0.3, lane: 0, x: 0.3, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.5, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.3, lane: 0, x: 0.3, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g2', position: 0.5, lane: 0, x: 0.3, width: 0.08, multiplier: 2, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -787,8 +787,8 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 2,
          length: 1600,
          gates: [
-             { id: 'g1', position: 0.35, lane: 0, x: 0.4, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.35, lane: 1, x: 0.6, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.35, lane: 0, x: 0.4, width: 0.08, multiplier: 3, isPositive: true },
+             { id: 'g2', position: 0.35, lane: 1, x: 0.6, width: 0.08, multiplier: 2, isPositive: true },
          ],
          obstacles: [],
          enemySpawns: [
@@ -813,10 +813,10 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 3,
          length: 1700,
          gates: [
-             { id: 'g1', position: 0.25, lane: 0, x: 1/6, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.25, lane: 1, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g3', position: 0.25, lane: 2, x: 5/6, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
-             { id: 'g4', position: 0.5, lane: 1, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.25, lane: 0, x: 1/6, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g2', position: 0.25, lane: 1, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g3', position: 0.25, lane: 2, x: 5/6, width: 0.08, multiplier: 5, isPositive: true },
+             { id: 'g4', position: 0.5, lane: 1, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
          ],
          obstacles: [
              { id: 'o1', type: 'fence', lane: 0, x: 1/6, width: 0.08, position: 0.2, hp: 25, movementPattern: 'static' },
@@ -841,10 +841,10 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 3,
          length: 1800,
          gates: [
-             { id: 'g1', position: 0.3, lane: 0, x: 1/6, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.3, lane: 1, x: 0.5, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
-             { id: 'g3', position: 0.3, lane: 2, x: 5/6, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g4', position: 0.55, lane: 1, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.3, lane: 0, x: 1/6, width: 0.08, multiplier: 5, isPositive: true },
+             { id: 'g2', position: 0.3, lane: 1, x: 0.5, width: 0.08, multiplier: 2, isPositive: true },
+             { id: 'g3', position: 0.3, lane: 2, x: 5/6, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g4', position: 0.55, lane: 1, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
          ],
          obstacles: [
              { id: 'o1', type: 'scarecrow', lane: 0, x: 1/6, width: 0.08, position: 0.3, hp: Infinity, movementPattern: 'rotate' },
@@ -870,12 +870,12 @@ const HANDAUTHED_LEVELS: LevelDefinition[] = [
          laneCount: 3,
          length: 2000,
          gates: [
-             { id: 'g1', position: 0.2, lane: 0, x: 1/6, width: 0.08, multiplier: 6, isPositive: true, type: 'multiply' },
-             { id: 'g2', position: 0.2, lane: 1, x: 0.5, width: 0.08, multiplier: 3, isPositive: true, type: 'multiply' },
-             { id: 'g3', position: 0.2, lane: 2, x: 5/6, width: 0.08, multiplier: 4, isPositive: true, type: 'multiply' },
-             { id: 'g4', position: 0.45, lane: 1, x: 0.5, width: 0.08, multiplier: 5, isPositive: true, type: 'multiply' },
-             { id: 'g5', position: 0.45, lane: 0, x: 1/6, width: 0.08, multiplier: 0.5, isPositive: false, type: 'multiply' },
-             { id: 'g6', position: 0.45, lane: 2, x: 5/6, width: 0.08, multiplier: 2, isPositive: true, type: 'multiply' },
+             { id: 'g1', position: 0.2, lane: 0, x: 1/6, width: 0.08, multiplier: 6, isPositive: true },
+             { id: 'g2', position: 0.2, lane: 1, x: 0.5, width: 0.08, multiplier: 3, isPositive: true },
+             { id: 'g3', position: 0.2, lane: 2, x: 5/6, width: 0.08, multiplier: 4, isPositive: true },
+             { id: 'g4', position: 0.45, lane: 1, x: 0.5, width: 0.08, multiplier: 5, isPositive: true },
+             { id: 'g5', position: 0.45, lane: 0, x: 1/6, width: 0.08, multiplier: 0.5, isPositive: false },
+             { id: 'g6', position: 0.45, lane: 2, x: 5/6, width: 0.08, multiplier: 2, isPositive: true },
          ],
          obstacles: [
              { id: 'o1', type: 'fence', lane: 0, x: 1/6, width: 0.08, position: 0.2, hp: 30, movementPattern: 'static' },

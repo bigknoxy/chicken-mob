@@ -167,3 +167,26 @@ export const LEVEL_TEMPLATES: Record<LevelTemplateId, LevelTemplate> = {
         enemyDensity: 'heavy',
     },
 };
+
+// ── World Theme Palettes ──
+// Exactly one palette per world so progression is visually distinct (issue P0-4).
+export interface ThemePalette {
+    bg: string;
+    bgAccent: string;
+    lane: string;
+    laneBorder: string;
+    fog: string;
+}
+
+export const WORLD_THEMES: Record<string, ThemePalette> = {
+    grassland: { bg: '#1a1a2e', bgAccent: '#2f4a2f', lane: '#2a3a2a', laneBorder: '#3f5e3f', fog: 'rgba(46, 74, 46, 0.08)' },
+    desert: { bg: '#2e1f10', bgAccent: '#5a3d1f', lane: '#3a2a15', laneBorder: '#6b4e2a', fog: 'rgba(122, 84, 19, 0.10)' },
+    snow: { bg: '#12233a', bgAccent: '#2f4e6b', lane: '#1f3350', laneBorder: '#3f6080', fog: 'rgba(148, 197, 231, 0.10)' },
+    lava: { bg: '#2e1010', bgAccent: '#5a1a1a', lane: '#3a1515', laneBorder: '#6b2a2a', fog: 'rgba(201, 70, 33, 0.10)' },
+    meadow_night: { bg: '#0d1b2a', bgAccent: '#1b3a4b', lane: '#15303f', laneBorder: '#2f5e6e', fog: 'rgba(29, 78, 91, 0.14)' },
+    magma_cave: { bg: '#1a0d1a', bgAccent: '#3a1030', lane: '#2a1428', laneBorder: '#5e2a50', fog: 'rgba(123, 31, 86, 0.14)' },
+};
+
+export function getThemePalette(theme: string): ThemePalette {
+    return WORLD_THEMES[theme] ?? WORLD_THEMES.grassland;
+}

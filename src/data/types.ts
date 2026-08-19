@@ -113,7 +113,7 @@ export interface FoxFortDefinition {
 }
 
 // ----- Worlds -----
-export type WorldTheme = 'grassland' | 'desert' | 'snow' | 'lava';
+export type WorldTheme = 'grassland' | 'desert' | 'snow' | 'lava' | 'meadow_night' | 'magma_cave';
 
 export interface WorldDefinition {
     id: string;              // e.g., 'W1', 'W2'

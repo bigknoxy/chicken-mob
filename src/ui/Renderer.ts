@@ -8,7 +8,8 @@
 
 import type { GameState, Flock, FoxPack, LiveObstacle, LiveGate, Particle } from '@/data/types';
 import { LaneGeometry, laneX, positionToY, laneWidth } from '@/core/Lane';
-import { MAX_VISIBLE_PER_FLOCK, SCREEN_SHAKE_MULTIPLIER, MUZZLE_FLASH_COOLDOWN, CANNON_RECOIL_DISTANCE } from '@/constants/game';
+import { MAX_VISIBLE_PER_FLOCK, SCREEN_SHAKE_MULTIPLIER, MUZZLE_FLASH_COOLDOWN, CANNON_RECOIL_DISTANCE, getThemePalette, type ThemePalette } from '@/constants/game';
+import { getWorld } from '@/data/levels';
 import { formatNumber } from '@/utils/format';
 
 // ── Colors ──
@@ -89,12 +90,12 @@ export class Renderer {
             );
         }
 
-        // ── Background ──
-        ctx.fillStyle = COLORS.bg;
-        ctx.fillRect(0, 0, this.width, this.height);
+        // ── Background (per-world theme) ──
+        const palette = getThemePalette(getWorld(state.level.worldId)?.theme ?? 'grassland');
+        this.drawBackground(palette);
 
         // ── Lanes ──
-        this.drawLanes(geo);
+        this.drawLanes(geo, palette);
 
         // ── Gates ──
         for (const gate of state.gates) {
@@ -167,7 +168,21 @@ export class Renderer {
         }
     }
 
-    private drawLanes(geo: LaneGeometry): void {
+    private drawBackground(palette: ThemePalette): void {
+        const ctx = this.ctx;
+         // Base fill
+        ctx.fillStyle = palette.bg;
+        ctx.fillRect(0, 0, this.width, this.height);
+         // Horizon accent band signalling the world theme
+        const bandH = this.height * 0.35;
+        ctx.fillStyle = palette.bgAccent;
+        ctx.fillRect(0, 0, this.width, bandH);
+         // Ambient fog overlay tinting the whole scene toward the theme
+        ctx.fillStyle = palette.fog;
+        ctx.fillRect(0, 0, this.width, this.height);
+     }
+
+    private drawLanes(geo: LaneGeometry, palette: ThemePalette = getThemePalette('grassland')): void {
         const ctx = this.ctx;
         const w = laneWidth(geo);
 
@@ -177,11 +192,11 @@ export class Renderer {
             const h = this.height - geo.topMargin - geo.bottomMargin;
 
             // Lane fill
-            ctx.fillStyle = COLORS.lane;
+            ctx.fillStyle = palette.lane;
             ctx.fillRect(x + 4, y, w - 8, h);
 
             // Lane borders
-            ctx.strokeStyle = COLORS.laneBorder;
+            ctx.strokeStyle = palette.laneBorder;
             ctx.lineWidth = 2;
             ctx.strokeRect(x + 4, y, w - 8, h);
         }

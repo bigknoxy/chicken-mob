@@ -30,14 +30,15 @@ export const MAX_CHALLENGE_STREAK = 7;
 export const DEFAULT_CHALLENGE_LEVEL_POOL = 36;
 
 /** Legal modifier pool with per-type difficulty weight and default value. */
-const MODIFIER_TABLE: Record<ChallengeModifierType, { weight: number; value: number }> = {
-    double_enemies: { weight: 2, value: 2 },
-    stunted_chickens: { weight: 2, value: 0.5 },
-    no_upgrades: { weight: 1.5, value: 1 },
-    fast_enemies: { weight: 1.5, value: 1.5 },
-    blind_gates: { weight: 1, value: 1 },
-    single_lane: { weight: 1, value: 0 },
-    precision_mode: { weight: 1, value: 0.5 },
+const MODIFIER_TABLE: Record<ChallengeModifierType, number> = {
+     // value is the modifier's effect magnitude (see ChallengeModifier.value in types.ts)
+    double_enemies: 2,
+    stunted_chickens: 0.5,
+    no_upgrades: 1,
+    fast_enemies: 1.5,
+    blind_gates: 1,
+    single_lane: 0,
+    precision_mode: 0.5,
 };
 
 export const MODIFIER_POOL = Object.keys(MODIFIER_TABLE) as ChallengeModifierType[];
@@ -109,7 +110,7 @@ function selectModifiers(rng: () => number): ChallengeModifier[] {
     const modifiers: ChallengeModifier[] = [];
     for (let i = 0; i < count; i++) {
          const type = available[i];
-         modifiers.push({ type, value: MODIFIER_TABLE[type].value });
+         modifiers.push({ type, value: MODIFIER_TABLE[type] });
       }
     return modifiers;
 }

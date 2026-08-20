@@ -146,10 +146,22 @@ function selectModifiers(rng: () => number): ChallengeModifier[] {
     return modifiers;
 }
 
-/** Pick a 0-based flat level index within `[1, poolSize)`, always in range. */
+/** Pick a 0-based flat level index within `[1, poolSize)`, always in range.
+ *  (Index 0 is the intro/tutorial level, intentionally excluded from the pool.) */
 function selectLevelIndex(rng: () => number, levelPoolSize: number): number {
     const pool = Math.max(2, Math.floor(levelPoolSize));
     return 1 + Math.floor(rng() * (pool - 1));
+}
+
+/** Parse a `?cmForceLevel=<n>` dev/test override into a valid 0-based level
+ * index, or `null` when the value is not a finite, in-range integer. Guards
+ * the boot hook so an out-of-range or non-numeric override is ignored instead
+ * of crashing `getLevel()` (which throws for out-of-range indices). */
+export function parseForceLevel(raw: string, totalLevels: number): number | null {
+    const n = Number.parseInt(raw.trim(), 10);
+    if (Number.isNaN(n)) return null;
+    if (n < 0 || n >= totalLevels) return null;
+    return n;
 }
 
 /** Base reward by difficulty tier. */

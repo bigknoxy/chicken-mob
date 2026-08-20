@@ -5,7 +5,7 @@
  * and UI screens into a cohesive game application.
  */
 
-import type { GameState, LiveObstacle, LiveGate, LevelDefinition, StarRating } from '@/data/types';
+import type { GameState, LiveObstacle, LiveGate, LevelDefinition, StarRating, DailyChallenge } from '@/data/types';
 import { getLevel, TOTAL_LEVELS, WORLDS, getLevelsForWorld, LEVELS } from '@/data/levels';
 import { CHICKENS, isChickenUnlocked, getChicken } from '@/data/chickens';
 import { GameLoop } from '@/core/GameLoop';
@@ -19,7 +19,7 @@ import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
 import { InputManager, hapticFeedback, HAPTIC } from '@/platform/Input';
 import { audio } from '@/platform/Audio';
 import { analytics, installCrashReporting } from '@/platform/Analytics';
-import { getCurrentChallenge } from '@/systems/ChallengeSystem';
+import { getCurrentChallenge, applyChallengeModifiers, completeChallenge, isChallengeFreshToday } from '@/systems/ChallengeSystem';
 import { AUTOSAVE_INTERVAL_MS, MAX_AIM_ANGLE } from '@/constants/game';
 import { Modal } from '@/ui/Modal';
 import { Renderer } from '@/ui/Renderer';
@@ -41,6 +41,13 @@ let laneGeo: LaneGeometry | null = null;
 let isEndlessMode = false;
 let endlessWave = 0;
 let endlessCornEarned = 0;
+   // ── Daily challenge (P1-1b) ──
+let currentChallenge: DailyChallenge | null = null;
+let challengeMode = false;
+   // Dev/test hook: ?cmForceLevel=N forces the challenge onto a known-winnable
+   // level so browser automation can drive a guaranteed completion. No effect
+   // unless the URL query is present, so production play is unaffected.
+let challengeForceLevel: number | null = null;
 
 /** Unlock any chickens that meet their requirements */
 function unlockChickens(): string[] {
@@ -114,6 +121,9 @@ const menuScreen = new MenuScreen(overlay, (action) => {
             currentScreen = 'upgrades';
             menuScreen.hide();
             upgradeScreen.show(playerState);
+            break;
+        case 'play_challenge':
+            startChallenge();
             break;
         case 'open_coop':
             // Show coop as a simple alert-style popup for v1
@@ -256,6 +266,45 @@ function startLevel(index: number): void {
     }
 }
 
+function startChallenge(): void {
+      // Always use today's deterministic challenge (handles day boundaries).
+    currentChallenge = getCurrentChallenge();
+    if (!isChallengeFreshToday(playerState)) {
+        modal.show(
+               'Daily Challenge',
+               'You’ve already completed today’s challenge!\nCome back tomorrow for a new one.',
+               [{ text: 'OK', onClick: () => {} }],
+             );
+        return;
+       }
+
+    isEndlessMode = false;
+    challengeMode = true;
+
+       // Apply today's modifiers to the level definition (pure, sim-safe).
+       // A dev/test override can swap in a known-winnable level for automation.
+    const levelIndex = challengeForceLevel ?? currentChallenge.levelIndex;
+    const base = getLevel(levelIndex);
+    const levelDef = applyChallengeModifiers(base, currentChallenge.modifiers);
+    laneGeo = createLaneGeometry(
+          renderer.getWidth(),
+          renderer.getHeight(),
+          levelDef.laneCount,
+         );
+    gameState = createGameState(levelDef, laneGeo);
+    currentScreen = 'playing';
+    analytics.track('challenge_start', {
+          id: currentChallenge.id,
+         level: levelDef.id,
+          modifiers: currentChallenge.modifiers.map((m) => m.type).join(','),
+         });
+       // Expose the applied modifiers for E2E verification in a real browser
+    document.body.dataset.cmApplied = JSON.stringify(currentChallenge.modifiers.map((m) => m.type));
+    menuScreen.hide();
+    upgradeScreen.hide();
+    audio.resume();
+    tutorial.hide();
+}
 function startEndlessMode(): void {
     isEndlessMode = true;
     endlessWave = 1;
@@ -446,13 +495,31 @@ function onLevelEnd(): void {
         hapticFeedback(HAPTIC.lose);
     }
 
-    playerState.lastSessionTimestamp = Date.now();
-    savePlayerState(playerState);
-    gameState = null;
-    laneGeo = null;
-    currentScreen = 'menu';
-    menuScreen.show(playerState);
+        // ── Daily challenge completion (P1-1b) ──
+        // Award the streak bonus exactly once via the idempotent engine.
+        // A loss does not complete the challenge, so the player may retry within the day.
+        if (challengeMode && currentChallenge && gameState.levelWon) {
+            const result = completeChallenge(playerState, currentChallenge);
+            if (result) {
+                analytics.track('challenge_result', { id: currentChallenge.id, outcome: 'win', streak: result.newStreak });
+                modal.show(
+                     '🎉 Daily Challenge Complete!',
+                     `+${result.reward.corn} corn${result.reward.goldenFeather ? ' + 🪶 golden feather' : ''}\nStreak: 🔥 ${result.newStreak} days`,
+                     [{ text: 'Awesome!', onClick: () => {} }],
+                   );
+                doHaptic(HAPTIC.win);
+              }
+         }
+        challengeMode = false;
+
+        playerState.lastSessionTimestamp = Date.now();
+        savePlayerState(playerState);
+        gameState = null;
+        laneGeo = null;
+        currentScreen = 'menu';
+        menuScreen.show(playerState);
 }
+
 
 function showCoopInfo(): void {
     const coop = playerState.coop;
@@ -476,7 +543,15 @@ function boot(): void {
     window.addEventListener('pagehide', () => analytics.endSession());
     // Daily challenge live this session (P1-1) — surfaces to analytics so the
     // retention hook is observable ahead of the visible UI (P1-1b).
-    analytics.track('challenge_available', { id: getCurrentChallenge().id });
+    currentChallenge = getCurrentChallenge();
+    analytics.track('challenge_available', { id: currentChallenge.id });
+      // Dev/test hook: ?cmForceLevel=N forces a known-winnable challenge level
+    const _q = new URLSearchParams(window.location.search);
+    const _forced = _q.get('cmForceLevel');
+    if (_forced !== null) {
+        const n = parseInt(_forced, 10);
+        if (!Number.isNaN(n)) challengeForceLevel = n;
+       }
     // Mobile lifecycle: pause on visibility change
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {

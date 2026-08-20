@@ -133,7 +133,8 @@ export interface LevelDefinition {
     fort: FoxFortDefinition;
     rewardCorn: number;
     rewardFeathers: number;
-    timeout?: number;        // seconds before level fails (optional, defaults to 60)
+    timeout?: number;          // seconds before level fails (optional, defaults to 60)
+    enemySpeedMultiplier?: number;  // daily-challenge modifier: per-level fox speed scale (1 = normal)
 }
 
 // ----- Upgrades -----

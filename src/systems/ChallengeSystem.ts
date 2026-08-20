@@ -10,8 +10,10 @@
  * Mirrors the proven DailyLoginSystem idiom: pure functions, UTC day-keys,
  * streak capping/wrapping, and idempotent per-day completion.
  *
- * Deferred to P1-1b: applying modifiers to the live simulation and the visible
- * ChallengeScreen UI. This module ships the tested engine + a seam.
+ * Deferred to P1-1c: the full modifier set (fast_enemies needs a level-threaded
+ * speed scale; stunted_chickens/no_upgrades/blind_gates/precision_mode need
+ * player/render hooks). P1-1b ships the honored subset (double_enemies,
+ * single_lane, fast_enemies) as pure LevelDefinition transforms applied live.
  */
 
 import type {
@@ -21,6 +23,7 @@ import type {
     ChallengeModifierType,
     ChallengeReward,
     ChallengeProgress,
+    LevelDefinition,
 } from '@/data/types';
 
 export const MAX_CHALLENGE_STREAK = 7;
@@ -42,6 +45,33 @@ const MODIFIER_TABLE: Record<ChallengeModifierType, number> = {
 };
 
 export const MODIFIER_POOL = Object.keys(MODIFIER_TABLE) as ChallengeModifierType[];
+
+/** The P1-1b "honored" modifier set — the only modifiers the generator can
+ *  emit, because each is a pure transform on an existing LevelDefinition field
+ *  (no sim/player/render plumbing). Keeps the UI honest: a shown modifier
+ *  always has a real in-game effect. The wider MODIFIER_TABLE is kept for the
+ *  planned P1-1c modifiers that need extra plumbing. */
+export const HONORED_MODIFIERS: ChallengeModifierType[] = [
+     'double_enemies',
+    'single_lane',
+    'fast_enemies',
+];
+
+/** Human-readable copy for the challenge UI (labels + short description). */
+export const MODIFIER_DESCRIPTOR: Record<ChallengeModifierType, { label: string; blurb: string }> = {
+    double_enemies:   { label: '🐺 Double Foxes', blurb: 'Every wave has twice the foxes' },
+    stunted_chickens: { label: '🔻 Stunted Flock', blurb: 'Smaller flocks per launch' },
+    no_upgrades:      { label: '🚫 No Upgrades', blurb: 'Barn upgrades disabled this run' },
+    fast_enemies:     { label: '⚡ Fast Foxes', blurb: 'Foxes move quicker — more pressure' },
+    blind_gates:      { label: '❓ Blind Gates', blurb: 'Gate multipliers hidden' },
+    single_lane:      { label: '📏 Single Lane', blurb: 'One lane — foxes funnel together' },
+    precision_mode:   { label: '🎯 Precision', blurb: 'Smaller gate hitboxes' },
+};
+
+/** Display a modifier as the short label shown on the challenge card. */
+export function describeModifier(mod: ChallengeModifier): string {
+    return MODIFIER_DESCRIPTOR[mod.type]?.label ?? mod.type;
+}
 
 // ── Seeded RNG (Mulberry32) — deterministic, no Math.random in the hot path ──
 
@@ -96,7 +126,8 @@ function endOfDayMs(dayKey: string): number {
 // ── Generation ──
 
 function selectModifiers(rng: () => number): ChallengeModifier[] {
-    const available = [...MODIFIER_POOL];
+      // Only generate HONORED modifiers — every shown modifier has a live effect
+    const available = [...HONORED_MODIFIERS];
      // Fisher–Yates shuffle with the seeded RNG (deterministic)
      for (let i = available.length - 1; i > 0; i--) {
          const j = Math.floor(rng() * (i + 1));
@@ -160,6 +191,63 @@ export function generateDailyChallenge(dayKey: string, opts: GenerateOptions = {
 /** The challenge for "now" (a thin, injectable wrapper for boot wiring). */
 export function getCurrentChallenge(nowMs: number = Date.now()): DailyChallenge {
     return generateDailyChallenge(todayUtdKey(nowMs));
+}
+
+// ── Live modifier application (P1-1b) ──
+
+/**
+ * Apply a challenge's modifiers to a level definition, returning a NEW level
+ * (pure — the original is not mutated). Each honored modifier maps onto an
+ * existing LevelDefinition field, so application is sim-safe and has no effect
+ * on the fixed-timestep loop. Un-honored modifier types are skipped safely
+ * (defensive: the generator only emits honored ones).
+ *
+ * Honored (P1-1b):
+ *   - double_enemies: every enemy spawn's count is multiplied by the value
+ *   - single_lane:    laneCount is forced to 1 and all spawns funnel to lane 0
+ *   - fast_enemies:   a per-level enemySpeedMultiplier is threaded into spawns
+ */
+export function applyChallengeModifiers(
+    level: LevelDefinition,
+    modifiers: ChallengeModifier[],
+): LevelDefinition {
+    // Shallow-copy the level and clone the nested arrays we mutate, so the
+    // original level definition is never touched (purity).
+    let enemySpawns = level.enemySpawns.map((s) => ({ ...s }));
+    let laneCount = level.laneCount;
+    let enemySpeedMultiplier = level.enemySpeedMultiplier;
+
+    for (const mod of modifiers) {
+        switch (mod.type) {
+            case 'double_enemies':
+                enemySpawns = enemySpawns.map(
+                    (s) => ({ ...s, count: Math.ceil(s.count * (mod.value || 2)) }),
+                );
+                break;
+            case 'fast_enemies':
+                enemySpeedMultiplier = mod.value || 1.5;
+                break;
+            case 'single_lane':
+                laneCount = 1;
+                enemySpawns = enemySpawns.map((s) => ({ ...s, lane: 0 }));
+                break;
+            // stunted_chickens / no_upgrades / blind_gates / precision_mode are
+            // not applied yet (P1-1c) and are kept out of the generator pool,
+            // so this default is defensive rather than reachable.
+            default:
+                break;
+        }
+    }
+
+    const result: LevelDefinition = {
+        ...level,
+        laneCount,
+        enemySpawns,
+    };
+    if (enemySpeedMultiplier !== undefined) {
+        result.enemySpeedMultiplier = enemySpeedMultiplier;
+    }
+    return result;
 }
 
 // ── Streak / progress (mirrors DailyLoginSystem) ──

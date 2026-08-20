@@ -105,6 +105,8 @@ completion not persisting (so a returning player is asked to replay "their" chal
 - [x] AC-1 .. AC-10 implemented + green in `src/__tests__/challenge.test.ts` (16 tests)
 - [x] Boot seam consumes the engine (analytics `challenge_available`) so it is not dead code
 - [x] Teeth-proven: breaking determinism → AC-1 RED; disabling the idempotency guard → AC-5 RED
-- [ ] P1-1b tracked: live sim modifiers + `ChallengeScreen` UI + boot wiring
+- [x] **P1-1b landed**: pure `applyChallengeModifiers(level, mods)` (sim-safe — the 3 honored modifiers `double_enemies`/`single_lane`/`fast_enemies` map onto existing `LevelDefinition` fields) + visible Daily-Challenge menu card + PLAY → live game + completion wiring
+- [x] **P1-1b browser-verified** in `tests/challenge.spec.ts` (3 Playwright tests): card renders, PLAY starts a real game with the modifiers *actually applied* (`data-cm-applied`), deterministic across reloads — 8/8 E2E green
+- [ ] P1-1c tracked: remaining modifier set (`stunted_chickens`/`no_upgrades`/`blind_gates`/`precision_mode`) — needs player/render hooks + a forced-completion E2E
 
 *P0-3-style precedent: a tested engine + seamless NoOp default; the visible layer follows.*

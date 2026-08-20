@@ -8,12 +8,19 @@ import type { PlayerState } from '@/data/types';
 import { LEVELS, WORLDS, getLevelsForWorld } from '@/data/levels';
 import { audio } from '@/platform/Audio';
 import { COLORS, SPACING, RADIUS, SHADOWS, TRANSITIONS } from './styles';
+import {
+     getCurrentChallenge,
+    describeModifier,
+    getChallengeProgress,
+    isChallengeFreshToday,
+} from '@/systems/ChallengeSystem';
 
 export type MenuAction =
     | { type: 'play_level'; levelIndex: number }
     | { type: 'play_endless' }
     | { type: 'open_upgrades' }
-    | { type: 'open_coop' };
+    | { type: 'open_coop' }
+    | { type: 'play_challenge' };
 
 export class MenuScreen {
     private container: HTMLDivElement;
@@ -167,6 +174,9 @@ export class MenuScreen {
             this.onAction({ type: 'play_endless' });
         }, COLORS.accent, 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.15))');
         this.container.appendChild(endlessBtn);
+
+        // ── Daily Challenge (P1-1b): the retention hook ──
+        this.buildDailyChallengeCard(playerState);
 
         const worldCard = document.createElement('div');
         worldCard.style.cssText = `
@@ -447,5 +457,100 @@ export class MenuScreen {
             return { border: COLORS.secondary, bg: 'rgba(139, 92, 246, 0.12)' };
         }
         return { border: '#374151', bg: 'rgba(55, 65, 81, 0.25)' };
-    }
+     }
+
+      // ── Daily Challenge card (P1-1b) ──
+    // Renders today's deterministic challenge (modifiers + reward + streak) and
+     // a PLAY affordance. Exposes the challenge on document.body.dataset.cmToday
+      // so E2E/dev tooling can inspect it without starting a game.
+    private buildDailyChallengeCard(playerState: PlayerState): void {
+        const challenge = getCurrentChallenge();
+        const progress = getChallengeProgress(playerState);
+        const fresh = isChallengeFreshToday(playerState);
+
+        document.body.dataset.cmToday = JSON.stringify({
+             id: challenge.id,
+            modifiers: challenge.modifiers.map((m) => m.type),
+         });
+
+        const card = document.createElement('div');
+        card.id = 'daily-challenge-card';
+        card.style.cssText = `
+            background: ${COLORS.uiCard};
+            border: 1px solid ${COLORS.accent};
+            border-radius: ${RADIUS.lg}px;
+            padding: ${SPACING.md}px;
+            margin-bottom: ${SPACING.lg}px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: ${SHADOWS.card};
+            backdrop-filter: blur(8px);
+         `;
+
+        const title = document.createElement('div');
+        title.textContent = `\u23f3 DAILY CHALLENGE \u00b7 ${challenge.id}`;
+        title.style.cssText = `
+            font-size: 14px;
+            font-weight: 800;
+            color: ${COLORS.accent};
+            margin-bottom: ${SPACING.xs}px;
+         `;
+        card.appendChild(title);
+
+        const mods = document.createElement('div');
+        mods.id = 'daily-challenge-mods';
+        mods.textContent = challenge.modifiers.map((m) => describeModifier(m)).join(' \u00b7 ') || 'No modifiers';
+        mods.style.cssText = `
+            font-size: 12px;
+            color: ${COLORS.uiText};
+            margin-bottom: ${SPACING.xs}px;
+         `;
+        card.appendChild(mods);
+
+        const streak = document.createElement('div');
+        streak.textContent = `\u{1f525} Streak: ${progress.consecutiveCompletions} days \u00b7 Reward: \u{1f33d} ${challenge.reward.corn}`;
+        streak.style.cssText = `
+            font-size: 11px;
+            color: ${COLORS.uiMuted};
+            margin-bottom: ${SPACING.md}px;
+         `;
+        card.appendChild(streak);
+
+        const btn = document.createElement('button');
+        btn.id = 'daily-challenge-play';
+        btn.style.cssText = `
+            width: 100%;
+            min-height: 44px;
+            padding: ${SPACING.sm}px ${SPACING.md}px;
+            border: 2px solid ${COLORS.accent};
+            border-radius: ${RADIUS.md}px;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.15));
+            color: ${COLORS.uiText};
+            font-family: 'Nunito', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all ${TRANSITIONS.fast};
+         `;
+        if (fresh) {
+             btn.textContent = '\u25b6 Play Challenge';
+             btn.disabled = false;
+             btn.style.cursor = 'pointer';
+            this.attachButtonHandlers(
+                 btn,
+                 () => {
+                     audio.playClick();
+                     this.onAction({ type: 'play_challenge' });
+                 },
+                 COLORS.accent,
+                 'linear-gradient(135deg, rgba(249, 115, 22, 0.2), rgba(234, 88, 12, 0.15))',
+            );
+        } else {
+             btn.textContent = '\u2713 Completed Today';
+            btn.disabled = true;
+            btn.style.cursor = 'default';
+            btn.style.opacity = '0.6';
+        }
+        card.appendChild(btn);
+        this.container.appendChild(card);
+     }
 }

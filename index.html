@@ -16,6 +16,10 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
+     /* P1-5a — honor the OS reduced-motion signal before JS runs; the in-game toggle (accessibility module) is then authoritative. High-contrast/text-scale are P1-5b. */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+      }
       html, body {
         width: 100%;
         height: 100%;

@@ -15,23 +15,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+        - name: Checkout
+          uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: 20
+            cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+        - name: Install dependencies
+          run: npm ci
 
-      - name: Type check
-        run: npx tsc --noEmit
+        - name: Type check
+          run: npx tsc --noEmit
 
-      - name: Run tests
-        run: npm test
+        - name: Run tests
+          run: npm test
 
-      - name: Build
-        run: npm run build
+        - name: Build
+          run: npm run build
+
+  # E2E (Playwright) — runs as a SEPARATE, non-blocking job so it stays visible
+  # while stabilizing. Promote to a required check (alongside "Build & Test")
+  # once it is green in CI for a sustained window.
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: 20
+            cache: npm
+
+        - name: Install dependencies
+          run: npm ci
+
+        - name: Install Playwright browser
+          run: npx playwright install --with-deps chromium
+
+        - name: Run E2E
+          run: npx playwright test

@@ -9,10 +9,12 @@ import {
     MODIFIER_POOL,
      MAX_CHALLENGE_STREAK,
      DEFAULT_CHALLENGE_LEVEL_POOL,
+     applyChallengeModifiers,
+     HONORED_MODIFIERS,
 } from '@/systems/ChallengeSystem';
 import { getLevel } from '@/data/levels';
 import { createDefaultPlayerState } from '@/platform/Persistence';
-import type { PlayerState } from '@/data/types';
+import type { PlayerState, LevelDefinition, ChallengeModifier } from '@/data/types';
 
 /** Fixed UTC timestamps for deterministic, clock-free streak tests. */
 const DAY = 86_400_000;
@@ -236,4 +238,83 @@ describe('P1-1 Daily Challenges', () => {
             }
         });
     });
+
+describe('live modifier application (P1-1b)', () => {
+    const makeLevel = (): LevelDefinition => ({
+        id: 'test-lvl',
+        name: 'Test Level',
+        worldId: 'W1',
+        laneCount: 3,
+        length: 1000,
+        gates: [],
+        obstacles: [],
+        enemySpawns: [
+            { time: 1, lane: 0, foxTypeId: 'fox_red', count: 3 },
+            { time: 2, lane: 1, foxTypeId: 'fox_red', count: 4 },
+            { time: 3, lane: 2, foxTypeId: 'fox_blue', count: 5 },
+        ],
+        fort: { hp: 100, armorMultiplier: 1, rewardMultiplier: 1 },
+        rewardCorn: 10,
+        rewardFeathers: 1,
+     });
+
+     it('double_enemies multiplies every enemy spawn count', () => {
+        const level = makeLevel();
+        const mod: ChallengeModifier = { type: 'double_enemies', value: 2 };
+        const result = applyChallengeModifiers(level, [mod]);
+        expect(result.enemySpawns[0].count).toBe(6);
+        expect(result.enemySpawns[1].count).toBe(8);
+        expect(result.enemySpawns[2].count).toBe(10);
+     });
+
+     it('single_lane forces one lane and funnels all spawns to lane 0', () => {
+        const level = makeLevel();
+        const mod: ChallengeModifier = { type: 'single_lane', value: 0 };
+        const result = applyChallengeModifiers(level, [mod]);
+        expect(result.laneCount).toBe(1);
+        expect(result.enemySpawns.every((s) => s.lane === 0)).toBe(true);
+     });
+
+     it('fast_enemies threads a per-level enemy speed multiplier', () => {
+        const level = makeLevel();
+        const result = applyChallengeModifiers(level, [{ type: 'fast_enemies', value: 1.5 }]);
+        expect(result.enemySpeedMultiplier).toBe(1.5);
+     });
+
+     it('combined modifiers fold correctly and do not mutate the original', () => {
+        const level = makeLevel();
+        const before = JSON.parse(JSON.stringify(level));
+        const result = applyChallengeModifiers(level, [
+            { type: 'double_enemies', value: 2 },
+            { type: 'single_lane', value: 0 },
+            { type: 'fast_enemies', value: 1.5 },
+          ]);
+        expect(result.laneCount).toBe(1);
+        expect(result.enemySpawns.every((s) => s.lane === 0)).toBe(true);
+        expect(result.enemySpawns[0].count).toBe(6);      // 3 x 2
+        expect(result.enemySpeedMultiplier).toBe(1.5);
+
+         // purity: the original definition is untouched
+        expect(level).toEqual(before);
+        expect(level.laneCount).toBe(3);
+        expect(level.enemySpawns[1].count).toBe(4);
+        expect(level.enemySpeedMultiplier).toBeUndefined();
+     });
+
+     it('an un-honored modifier is a safe no-op', () => {
+        const level = makeLevel();
+        const result = applyChallengeModifiers(level, [{ type: 'precision_mode', value: 0.5 }]);
+        expect(result).toEqual(level);              // no field changed
+     });
+
+     it('the generator only ever emits honored modifiers', () => {
+        for (let i = 0; i < 300; i++) {
+            const c = generateDailyChallenge(`2027-${String((i % 12) + 1).padStart(2, '0')}-10`);
+            for (const m of c.modifiers) {
+                expect(HONORED_MODIFIERS).toContain(m.type);
+             }
+        }
+     });
+});
+
 });

@@ -207,7 +207,7 @@ export function simulationTick(state: GameState, dt: number): void {
             lane: spawn.lane,
             x: (spawn.lane + 0.5) / state.level.laneCount, // center of lane in 0-1 space
             position: 1.0, // spawn from fort end
-            speed: foxType.moveSpeed,
+            speed: foxType.moveSpeed * (state.level.enemySpeedMultiplier ?? 1),
             alive: true,
         };
         state.foxPacks.push(pack);

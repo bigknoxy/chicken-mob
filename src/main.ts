@@ -19,7 +19,7 @@ import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
 import { InputManager, hapticFeedback, HAPTIC } from '@/platform/Input';
 import { audio } from '@/platform/Audio';
 import { analytics, installCrashReporting } from '@/platform/Analytics';
-import { getCurrentChallenge, applyChallengeModifiers, completeChallenge, isChallengeFreshToday } from '@/systems/ChallengeSystem';
+import { getCurrentChallenge, applyChallengeModifiers, completeChallenge, isChallengeFreshToday, parseForceLevel } from '@/systems/ChallengeSystem';
 import { AUTOSAVE_INTERVAL_MS, MAX_AIM_ANGLE } from '@/constants/game';
 import { Modal } from '@/ui/Modal';
 import { Renderer } from '@/ui/Renderer';
@@ -545,14 +545,14 @@ function boot(): void {
     // retention hook is observable ahead of the visible UI (P1-1b).
     currentChallenge = getCurrentChallenge();
     analytics.track('challenge_available', { id: currentChallenge.id });
-      // Dev/test hook: ?cmForceLevel=N forces a known-winnable challenge level
-    const _q = new URLSearchParams(window.location.search);
-    const _forced = _q.get('cmForceLevel');
-    if (_forced !== null) {
-        const n = parseInt(_forced, 10);
-        if (!Number.isNaN(n)) challengeForceLevel = n;
-       }
-    // Mobile lifecycle: pause on visibility change
+        // Dev/test hook: ?cmForceLevel=N forces a known-winnable challenge level for
+        // browser automation. Out-of-range / non-numeric values are ignored (no crash).
+    const params = new URLSearchParams(window.location.search);
+    const forced = params.get('cmForceLevel');
+    if (forced !== null) {
+        challengeForceLevel = parseForceLevel(forced, TOTAL_LEVELS);
+        if (challengeForceLevel === null) console.warn(`[challenge] ignoring ?cmForceLevel=${forced}`);
+    }
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             // App going to background - save and pause

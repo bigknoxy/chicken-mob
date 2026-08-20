@@ -11,8 +11,9 @@ import {
      DEFAULT_CHALLENGE_LEVEL_POOL,
      applyChallengeModifiers,
      HONORED_MODIFIERS,
+     parseForceLevel,
 } from '@/systems/ChallengeSystem';
-import { getLevel } from '@/data/levels';
+import { getLevel, TOTAL_LEVELS } from '@/data/levels';
 import { createDefaultPlayerState } from '@/platform/Persistence';
 import type { PlayerState, LevelDefinition, ChallengeModifier } from '@/data/types';
 
@@ -316,5 +317,33 @@ describe('live modifier application (P1-1b)', () => {
         }
      });
 });
+
+});
+
+
+describe('P1-1b review fix — parseForceLevel guards the ?cmForceLevel dev hook (#25 F1)', () => {
+        // An out-of-range or non-numeric override must be ignored (return null),
+        // not crash getLevel() at boot. The fix makes this explicit + testable.
+    it('accepts a valid in-range index', () => {
+        expect(parseForceLevel('0', TOTAL_LEVELS)).toBe(0);
+        expect(parseForceLevel('42', TOTAL_LEVELS)).toBe(42);
+        expect(parseForceLevel(String(TOTAL_LEVELS - 1), TOTAL_LEVELS)).toBe(TOTAL_LEVELS - 1);
+      });
+
+    it('rejects out-of-range indices', () => {
+        expect(parseForceLevel(String(TOTAL_LEVELS), TOTAL_LEVELS)).toBeNull();
+        expect(parseForceLevel(String(TOTAL_LEVELS + 100), TOTAL_LEVELS)).toBeNull();
+        expect(parseForceLevel('-1', TOTAL_LEVELS)).toBeNull();
+      });
+
+    it('rejects non-numeric / empty / whitespace input', () => {
+        expect(parseForceLevel('', TOTAL_LEVELS)).toBeNull();
+        expect(parseForceLevel('     ', TOTAL_LEVELS)).toBeNull();
+        expect(parseForceLevel('abc', TOTAL_LEVELS)).toBeNull();
+      });
+
+    it('tolerates surrounding whitespace but is otherwise strict', () => {
+        expect(parseForceLevel(' 7 ', TOTAL_LEVELS)).toBe(7);
+      });
 
 });

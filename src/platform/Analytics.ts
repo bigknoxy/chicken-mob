@@ -34,6 +34,7 @@ export type AnalyticsEvent =
     | 'daily_login_claim'
     | 'challenge_start'
     | 'challenge_result'
+    | 'challenge_available'   // a daily challenge is live for the player
     | 'ad_show'      // forward-compat for P0-1 (monetization)
     | 'ad_reward'    // forward-compat for P0-1 (monetization);
 ;

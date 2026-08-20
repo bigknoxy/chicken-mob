@@ -36,6 +36,13 @@ export function createDefaultPlayerState(): PlayerState {
             totalDaysLoggedIn: 0,
             rewardsClaimedToday: false,
         },
+        challengeProgress: {
+            lastCompletedDate: null,
+            consecutiveCompletions: 0,
+            longestStreak: 0,
+            totalCompleted: 0,
+            completedToday: false,
+        },
         settings: {
             soundEnabled: true,
             musicEnabled: true,

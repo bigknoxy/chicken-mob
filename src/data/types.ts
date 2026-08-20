@@ -176,6 +176,48 @@ export interface DailyLoginState {
     rewardsClaimedToday: boolean;    // prevent re-claiming on same day
 }
 
+// ----- Daily Challenge -----
+/** A gameplay modifier applied to a challenge run. */
+export type ChallengeModifierType =
+      | 'double_enemies'    // enemy counts x value (2)
+      | 'stunted_chickens' // deployed chicken counts x value (0.5)
+      | 'no_upgrades'       // upgrade effects disabled
+      | 'fast_enemies'      // enemy speed x value (1.5)
+      | 'blind_gates'       // gate multipliers hidden
+      | 'single_lane'       // only one lane active
+      | 'precision_mode';   // smaller gate hitboxes
+
+export interface ChallengeModifier {
+    type: ChallengeModifierType;
+    value: number;
+}
+
+/** Reward for completing a challenge (base, pre-streak-multiplier). */
+export interface ChallengeReward {
+    corn: number;
+    goldenFeather: number;
+}
+
+/** A deterministic daily challenge. All fields derive from its `id` (UTC day). */
+export interface DailyChallenge {
+    id: string;                  // UTC date string 'YYYY-MM-DD' (also the seed key)
+    seed: number;                // deterministic seed (hash of `id`)
+    levelIndex: number;          // 0-based flat index into LEVELS (validated by caller)
+    difficultyTier: number;      // 1..3
+    modifiers: ChallengeModifier[];
+    reward: ChallengeReward;     // base reward by tier (streak bonus applied on completion)
+    expiresAtMs: number;         // end of the UTC day, epoch ms
+}
+
+/** Persisted daily-challenge streak tracking (mirrors DailyLoginState). */
+export interface ChallengeProgress {
+    lastCompletedDate: string | null;   // UTC date string of last completion
+    consecutiveCompletions: number;     // current streak (1..7, wraps)
+    longestStreak: number;              // lifetime stat
+    totalCompleted: number;             // lifetime stat
+    completedToday: boolean;            // prevent re-completing the same day
+}
+
 // ----- Player Settings -----
 export interface PlayerSettings {
     soundEnabled: boolean;
@@ -206,6 +248,7 @@ export interface PlayerState {
     endlessHighScore: number;        // highest wave reached in endless mode
     tutorialSeen?: boolean;          // has the player seen the tutorial
     dailyLogin?: DailyLoginState;    // daily login streak tracking
+    challengeProgress?: ChallengeProgress;     // daily challenge streak tracking
     settings?: PlayerSettings;       // user preferences
 }
 

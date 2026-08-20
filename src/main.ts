@@ -19,6 +19,7 @@ import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
 import { InputManager, hapticFeedback, HAPTIC } from '@/platform/Input';
 import { audio } from '@/platform/Audio';
 import { analytics, installCrashReporting } from '@/platform/Analytics';
+import { getCurrentChallenge } from '@/systems/ChallengeSystem';
 import { AUTOSAVE_INTERVAL_MS, MAX_AIM_ANGLE } from '@/constants/game';
 import { Modal } from '@/ui/Modal';
 import { Renderer } from '@/ui/Renderer';
@@ -473,6 +474,9 @@ function boot(): void {
     analytics.startSession();
     installCrashReporting();
     window.addEventListener('pagehide', () => analytics.endSession());
+    // Daily challenge live this session (P1-1) — surfaces to analytics so the
+    // retention hook is observable ahead of the visible UI (P1-1b).
+    analytics.track('challenge_available', { id: getCurrentChallenge().id });
     // Mobile lifecycle: pause on visibility change
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {

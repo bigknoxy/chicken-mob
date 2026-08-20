@@ -3,6 +3,8 @@
  */
 
 import type { PlayerState, PlayerSettings } from '@/data/types';
+import { savePlayerState } from '@/platform/Persistence';
+import { accessibility } from '@/platform/Accessibility';
 import { COLORS, RADIUS, SPACING, SHADOWS } from './styles';
 
 export class SettingsScreen {
@@ -114,7 +116,14 @@ export class SettingsScreen {
                 if (key === 'soundEnabled') settings.soundEnabled = !settings.soundEnabled;
                 else if (key === 'musicEnabled') settings.musicEnabled = !settings.musicEnabled;
                 else if (key === 'hapticsEnabled') settings.hapticsEnabled = !settings.hapticsEnabled;
+                // `=== true` keeps the toggle a 3-state -> on/off: first tap enables,
+                // a second tap from ON -> OFF. (undefined renders OFF by the boot seed.)
+                else if (key === 'reducedMotion') settings.reducedMotion = !(settings.reducedMotion === true);
                 const newValue = settings[key];
+                // P1-5a: apply immediately + persist. Fixes a latent gap where none
+                // of the toggles were previously saved.
+                if (key === 'reducedMotion') accessibility.applyReducedMotion(settings.reducedMotion === true);
+                savePlayerState(this.playerState);
                 toggle.style.background = newValue ? COLORS.success : COLORS.uiBorder;
                 knob.style.left = newValue ? '24px' : '2px';
             });
@@ -127,6 +136,8 @@ export class SettingsScreen {
         card.appendChild(toggleRow('Sound Effects', 'soundEnabled', '🔊'));
         card.appendChild(toggleRow('Music', 'musicEnabled', '🎵'));
         card.appendChild(toggleRow('Haptic Feedback', 'hapticsEnabled', '📳'));
+        // P1-5a — reduced-motion toggle (see boot seam for the OS seed).
+        card.appendChild(toggleRow('Reduced Motion', 'reducedMotion', '🎬'));
 
         const spacer = document.createElement('div');
         spacer.style.height = `${SPACING.lg}px`;

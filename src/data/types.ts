@@ -224,6 +224,9 @@ export interface PlayerSettings {
     soundEnabled: boolean;
     musicEnabled: boolean;
     hapticsEnabled: boolean;
+     // P1-5a accessibility. `undefined` on old saves = "defer to the OS
+     // `prefers-reduced-motion` signal"; boot seeds it from that signal.
+    reducedMotion?: boolean;
 }
 
 // ----- Player State -----

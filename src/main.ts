@@ -19,6 +19,7 @@ import { loadPlayerState, savePlayerState } from '@/platform/Persistence';
 import { InputManager, hapticFeedback, HAPTIC } from '@/platform/Input';
 import { audio } from '@/platform/Audio';
 import { analytics, installCrashReporting } from '@/platform/Analytics';
+import { accessibility } from '@/platform/Accessibility';
 import { getCurrentChallenge, applyChallengeModifiers, completeChallenge, isChallengeFreshToday, parseForceLevel } from '@/systems/ChallengeSystem';
 import { AUTOSAVE_INTERVAL_MS, MAX_AIM_ANGLE } from '@/constants/game';
 import { Modal } from '@/ui/Modal';
@@ -553,6 +554,17 @@ function boot(): void {
         challengeForceLevel = parseForceLevel(forced, TOTAL_LEVELS);
         if (challengeForceLevel === null) console.warn(`[challenge] ignoring ?cmForceLevel=${forced}`);
     }
+
+        // Accessibility — reduced motion (P1-5a). Seed the persisted setting from the OS
+        // signal when a save predates the field, then apply the player's choice. The in-game
+        // toggle governs #cm-reduced-motion; the index.html @media rule is a load-window safety
+        // FLOOR for vestibular users. KNOWN v1 LIMITATION: OS-reduced users cannot fully turn
+        // motion ON via the toggle (the @media rule still applies). Tracked for P1-5b.
+    if (!playerState.settings) playerState.settings = { soundEnabled: true, musicEnabled: true, hapticsEnabled: true };
+    if (playerState.settings.reducedMotion === undefined) {
+        playerState.settings.reducedMotion = accessibility.prefersReducedMotion();
+        }
+    accessibility.applyReducedMotion(playerState.settings.reducedMotion);
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             // App going to background - save and pause

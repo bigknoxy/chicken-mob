@@ -1,10 +1,13 @@
 name: Audit Security Additions
 
-# Additive security gates that don't conflict with the existing
-# CI/security workflows in this repo:
-#   - osv-scanner:  dependency vulnerabilities across all manifests
-#   - actionlint:  workflow syntax validation
-#   - scorecards:  supply-chain risk on third-party actions (weekly)
+# Additive security gates not covered by the org's reusable security
+# workflow (security.yml):
+#   - actionlint: workflow syntax validation
+#   - scorecards: supply-chain risk on third-party actions (weekly)
+#
+# osv-scanner was removed here: bigknoxy/.github's security-reusable.yml
+# now runs gitleaks, codeql, dependency-review, and npm audit (dep-audit)
+# via security.yml, which covers dependency vulnerability scanning.
 
 on:
   pull_request:
@@ -20,30 +23,6 @@ permissions:
   id-token: write
 
 jobs:
-  osv-scanner:
-    name: osv-scanner
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Install + run OSV-Scanner
-        run: |
-          set -euo pipefail
-          curl -fsSL -o /usr/local/bin/osv-scanner \
-            https://github.com/google/osv-scanner/releases/download/v2.5.1/osv-scanner_linux_amd64
-          chmod +x /usr/local/bin/osv-scanner
-          if osv-scanner --recursive --format sarif --output osv-results.sarif . 2>osv-stderr.log; then
-            echo "OSV-Scanner: no vulnerabilities found"
-          else
-            echo "OSV-Scanner: scan complete (see SARIF)"
-            cat osv-stderr.log || true
-          fi
-      - name: Upload SARIF
-        if: always()
-        uses: github/codeql-action/upload-sarif@486fec2a3ea2626afcd8c7e9208b4f515078dd7e # codeql-bundle-v2.26.4
-        with:
-          sarif_file: osv-results.sarif
-
   actionlint:
     name: actionlint
     runs-on: ubuntu-latest
